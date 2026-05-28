@@ -52,10 +52,10 @@ export default function Footer() {
         {/* Main grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
 
-          {/* Left â€” Brand */}
-          <div className="flex flex-col justify-center">
+          {/* Left – Brand */}
+          <div className="flex flex-col justify-center items-start md:items-start">
             <Link href="/" className="inline-block hover:opacity-80 transition-opacity duration-200">
-              <Image src="/assets/images/pneuma-studio-logo.png" alt="Pneuma Studio" width={240} height={160} className="object-contain" />
+              <Image src="/assets/images/pneuma-studio-logo.png" alt="Pneuma Studio" width={240} height={160} className="object-contain w-40 md:w-60" />
             </Link>
           </div>
 
