@@ -86,10 +86,9 @@ export default function FeaturedPortfolioSection() {
           {caseStudies?.map((cs, i) => (
             <ScrollAnimator key={i} delay={i * 100}>
               <div
-                className="rounded-2xl overflow-hidden group hover:border-primary/40 transition-all duration-300 h-full flex flex-col"
+                className="rounded-2xl overflow-hidden h-full flex flex-col service-card"
                 style={{
                   background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
                   backdropFilter: 'blur(12px)',
                 }}
               >

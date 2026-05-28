@@ -34,27 +34,75 @@ const ESTADO_COLORS: Record<string, { bg: string; text: string }> = {
   Cancelado: { bg: 'rgba(107,114,128,0.15)', text: '#6B7280' },
 };
 
+// ─── Sparkline ────────────────────────────────────────────────────────────────
+
+function Sparkline({ data, color }: { data: number[]; color: string }) {
+  if (data.length < 2) return null;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const W = 72, H = 24;
+  const pts = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * W;
+    const y = H - ((v - min) / range) * (H - 2) - 1;
+    return [x, y] as [number, number];
+  });
+  const linePath = pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'} ${x} ${y}`).join(' ');
+  const areaPath = `${linePath} L ${W} ${H} L 0 ${H} Z`;
+  const uid = color.replace('#', 'sg');
+  return (
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="overflow-visible">
+      <defs>
+        <linearGradient id={uid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={areaPath} fill={`url(#${uid})`} />
+      <path d={linePath} stroke={color} strokeWidth="1.5" fill="none" strokeLinejoin="round" />
+      <circle cx={pts[pts.length-1][0]} cy={pts[pts.length-1][1]} r="2" fill={color} />
+    </svg>
+  );
+}
+
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 
-function KPICard({ title, subtitle, value, value2, accent, icon }: {
-  title: string; subtitle: string; value: string; value2?: string; accent: string; icon: React.ReactNode;
+function KPICard({ title, subtitle, value, value2, accent, icon, sparkData }: {
+  title: string; subtitle: string; value: string; value2?: string;
+  accent: string; icon: React.ReactNode; sparkData?: number[];
 }) {
   return (
     <div
-      className="rounded-2xl p-5 flex flex-col gap-3"
-      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+      className="rounded-2xl p-5 flex flex-col gap-3 relative overflow-hidden"
+      style={{
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+      }}
     >
-      <div className="flex items-center justify-between">
+      {/* Inner top-right glow */}
+      <div
+        className="absolute -top-12 -right-12 w-32 h-32 rounded-full pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${accent}18 0%, transparent 70%)` }}
+      />
+
+      <div className="flex items-center justify-between relative z-10">
         <span className="text-sm font-medium" style={{ color: '#8A9BB5' }}>{title}</span>
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${accent}20`, color: accent }}>
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${accent}18`, color: accent }}>
           {icon}
         </div>
       </div>
-      <div>
+
+      <div className="relative z-10">
         <div className="text-2xl font-bold text-white">{value}</div>
         {value2 && <div className="text-sm mt-0.5" style={{ color: '#8A9BB5' }}>{value2}</div>}
       </div>
-      <div className="text-xs" style={{ color: '#8A9BB5' }}>{subtitle}</div>
+
+      <div className="flex items-end justify-between relative z-10">
+        <div className="text-xs" style={{ color: '#8A9BB5' }}>{subtitle}</div>
+        {sparkData && sparkData.length >= 2 && <Sparkline data={sparkData} color={accent} />}
+      </div>
     </div>
   );
 }
@@ -77,7 +125,11 @@ function MiniCalendar({ year, month, clientes }: { year: number; month: number; 
   return (
     <div
       className="rounded-2xl p-5"
-      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+      style={{
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        backdropFilter: 'blur(12px)',
+      }}
     >
       <div className="text-sm font-semibold text-white mb-4">
         {MESES[month - 1]} {year}
@@ -95,7 +147,7 @@ function MiniCalendar({ year, month, clientes }: { year: number; month: number; 
           return (
             <div
               key={day}
-              className="relative flex flex-col items-center justify-center rounded-lg py-1 text-xs cursor-default group"
+              className="relative flex flex-col items-center justify-center rounded-lg py-1 text-xs cursor-default"
               style={{
                 background: isToday ? 'rgba(0,196,160,0.2)' : 'transparent',
                 color: isToday ? '#00C4A0' : '#FFFFFF',
@@ -143,7 +195,6 @@ export default function DashboardClient({
 
   const mesNombre = MESES[currentMonth - 1];
 
-  // Build last-payment map
   const lastPaymentMap = useMemo(() => {
     const map: Record<string, Pago> = {};
     pagosThisMonth.forEach(p => {
@@ -154,12 +205,46 @@ export default function DashboardClient({
     return map;
   }, [pagosThisMonth]);
 
+  // Build sparkline data: daily cobrado for the month (7-day buckets)
+  const cobradoSpark = useMemo(() => {
+    const buckets = Array(7).fill(0);
+    const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+    const bucketSize = Math.ceil(daysInMonth / 7);
+    pagosThisMonth
+      .filter(p => p.estado === 'Pagado' && p.moneda === 'MXN')
+      .forEach(p => {
+        if (!p.fechaCobro) return;
+        const day = parseInt(p.fechaCobro.split('-')[2] || '1', 10);
+        const bucket = Math.min(Math.floor((day - 1) / bucketSize), 6);
+        buckets[bucket] += p.monto;
+      });
+    return buckets;
+  }, [pagosThisMonth, currentYear, currentMonth]);
+
+  const pendienteSpark = useMemo(() => {
+    const buckets = Array(7).fill(0);
+    const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+    const bucketSize = Math.ceil(daysInMonth / 7);
+    pagosThisMonth
+      .filter(p => p.estado === 'Pendiente' && p.moneda === 'MXN')
+      .forEach(p => {
+        if (!p.fechaCobro) return;
+        const day = parseInt(p.fechaCobro.split('-')[2] || '1', 10);
+        const bucket = Math.min(Math.floor((day - 1) / bucketSize), 6);
+        buckets[bucket] += p.monto;
+      });
+    return buckets;
+  }, [pagosThisMonth, currentYear, currentMonth]);
+
   const filtered = useMemo(() => {
     let list = [...clientes];
     if (filter === 'Activos') list = list.filter(c => c.estado === 'Activo');
     else if (filter === 'Morosos') list = list.filter(c => c.estado === 'Moroso');
     else if (filter === 'Pausados') list = list.filter(c => c.estado === 'Pausado');
-    if (search) list = list.filter(c => c.nombre.toLowerCase().includes(search.toLowerCase()) || c.empresa.toLowerCase().includes(search.toLowerCase()));
+    if (search) list = list.filter(c =>
+      c.nombre.toLowerCase().includes(search.toLowerCase()) ||
+      c.empresa.toLowerCase().includes(search.toLowerCase())
+    );
     list.sort((a, b) => {
       if (sortBy === 'nombre') return a.nombre.localeCompare(b.nombre);
       if (sortBy === 'mensualidad') return b.mensualidad - a.mensualidad;
@@ -190,8 +275,8 @@ export default function DashboardClient({
         </div>
         <Link
           href="/admin/clientes/nuevo"
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
-          style={{ background: '#00C4A0', color: '#050D1A' }}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+          style={{ background: '#00C4A0', color: '#050D1A', boxShadow: '0 0 20px rgba(0,196,160,0.3)' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -216,6 +301,7 @@ export default function DashboardClient({
           value={`$${fmt(cobradoMXN)} MXN`}
           value2={cobradoUSD > 0 ? `+ $${fmt(cobradoUSD)} USD` : undefined}
           accent="#22C55E"
+          sparkData={cobradoSpark}
           icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>}
         />
         <KPICard
@@ -224,11 +310,12 @@ export default function DashboardClient({
           value={`$${fmt(pendienteMXN)} MXN`}
           value2={pendienteUSD > 0 ? `+ $${fmt(pendienteUSD)} USD` : undefined}
           accent="#F59E0B"
+          sparkData={pendienteSpark}
           icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>}
         />
         <KPICard
           title="Clientes activos"
-          subtitle={`${enStripe} en Stripe · ${porTransferencia} por transferencia`}
+          subtitle={`${enStripe} Stripe · ${porTransferencia} SPEI`}
           value={String(activosCount)}
           accent="#3B82F6"
           icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>}
@@ -250,8 +337,14 @@ export default function DashboardClient({
                 placeholder="Buscar cliente..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-white outline-none"
-                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-white outline-none transition-all focus:ring-1"
+                style={{
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  outline: 'none',
+                }}
+                onFocus={e => e.currentTarget.style.borderColor = 'rgba(0,196,160,0.4)'}
+                onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
               />
             </div>
             <div className="flex gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
@@ -271,7 +364,7 @@ export default function DashboardClient({
             </div>
             <select
               value={sortBy}
-              onChange={e => setSortBy(e.target.value as any)}
+              onChange={e => setSortBy(e.target.value as typeof sortBy)}
               className="px-3 py-2.5 rounded-xl text-sm outline-none"
               style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#8A9BB5' }}
             >
@@ -305,26 +398,27 @@ export default function DashboardClient({
                 <table className="w-full text-sm">
                   <thead>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                      {['Cliente','Paquete','Mensualidad','Día cobro','Último pago','Próximo cobro','Estado','Método','Acciones'].map(h => (
+                      {['Cliente','Paquete','Mensualidad','Próximo cobro','Estado','Método','Acciones'].map(h => (
                         <th key={h} className="px-4 py-3 text-left text-xs font-medium" style={{ color: '#8A9BB5' }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {filtered.map((c, i) => {
-                      const lastPago = lastPaymentMap[c.id];
                       const estadoStyle = ESTADO_COLORS[c.estado] ?? { bg: 'rgba(107,114,128,0.15)', text: '#6B7280' };
                       const paqueteColor = PAQUETE_COLORS[c.paquete] ?? '#6B7280';
                       const nextDate = nextBillingDate(c);
                       return (
                         <tr
                           key={c.id}
-                          style={{ borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
-                          className="hover:bg-white/[0.02] transition-colors"
+                          className="table-row-hover group"
+                          style={{ borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', position: 'relative' }}
                         >
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
-                              {c.estado === 'Moroso' && <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#EF4444' }} />}
+                              {c.estado === 'Moroso' && (
+                                <div className="w-2 h-2 rounded-full flex-shrink-0 animate-pulse" style={{ background: '#EF4444' }} />
+                              )}
                               <div>
                                 <div className="font-medium text-white">{c.nombre}</div>
                                 {c.empresa && <div className="text-xs" style={{ color: '#8A9BB5' }}>{c.empresa}</div>}
@@ -338,15 +432,6 @@ export default function DashboardClient({
                           </td>
                           <td className="px-4 py-3 font-medium text-white">
                             ${fmt(c.mensualidad)} <span style={{ color: '#8A9BB5' }}>{c.moneda}</span>
-                          </td>
-                          <td className="px-4 py-3" style={{ color: '#8A9BB5' }}>Día {c.fechaCobro}</td>
-                          <td className="px-4 py-3">
-                            {lastPago ? (
-                              <div className="flex items-center gap-1.5">
-                                <div className="w-2 h-2 rounded-full" style={{ background: lastPago.estado === 'Pagado' ? '#22C55E' : lastPago.estado === 'Vencido' ? '#EF4444' : '#F59E0B' }} />
-                                <span className="text-xs" style={{ color: '#8A9BB5' }}>{fmtDate(lastPago.fechaCobro)}</span>
-                              </div>
-                            ) : <span style={{ color: '#8A9BB5' }}>—</span>}
                           </td>
                           <td className="px-4 py-3 text-xs" style={{ color: '#8A9BB5' }}>{fmtDate(nextDate)}</td>
                           <td className="px-4 py-3">
@@ -365,9 +450,9 @@ export default function DashboardClient({
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
-                              <Link href={`/admin/clientes/${c.id}`} className="text-xs font-medium transition-colors" style={{ color: '#00C4A0' }}>Ver</Link>
+                              <Link href={`/admin/clientes/${c.id}`} className="text-xs font-medium transition-colors hover:opacity-80" style={{ color: '#00C4A0' }}>Ver</Link>
                               <span style={{ color: '#8A9BB5' }}>·</span>
-                              <Link href={`/admin/clientes/${c.id}#pagos`} className="text-xs transition-colors" style={{ color: '#8A9BB5' }}>Pagos</Link>
+                              <Link href={`/admin/clientes/${c.id}#pagos`} className="text-xs transition-colors hover:text-white" style={{ color: '#8A9BB5' }}>Pagos</Link>
                             </div>
                           </td>
                         </tr>

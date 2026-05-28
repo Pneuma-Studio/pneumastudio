@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import CommandPalette from '@/components/admin/CommandPalette';
 
 interface NavItem {
   label: string;
@@ -81,6 +82,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen flex" style={{ background: '#050D1A', color: '#FFFFFF', fontFamily: "var(--font-inter, 'Inter', sans-serif)" }}>
+      {/* Ambient background orbs */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="admin-orb" style={{ width: 600, height: 600, background: 'radial-gradient(circle, rgba(0,196,160,0.07) 0%, transparent 65%)', top: -200, right: -100, animationName: 'orb-drift-1', animationDuration: '26s' }} />
+        <div className="admin-orb" style={{ width: 480, height: 480, background: 'radial-gradient(circle, rgba(30,64,175,0.09) 0%, transparent 65%)', bottom: 0, left: -120, animationName: 'orb-drift-2', animationDuration: '32s' }} />
+      </div>
+      <CommandPalette />
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -173,7 +180,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="relative z-10 flex-1 flex flex-col min-w-0">
+        {/* Top bar */}
+        <header
+          className="hidden lg:flex items-center justify-end px-6 py-2.5"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: 'rgba(5,13,26,0.6)', backdropFilter: 'blur(8px)' }}
+        >
+          <button
+            onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all hover:bg-white/[0.06]"
+            style={{ color: '#8A9BB5', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            Buscar
+            <kbd className="ml-1" style={{ background: 'rgba(255,255,255,0.06)', padding: '1px 5px', borderRadius: 4, fontFamily: 'monospace', color: '#6B7280' }}>⌘K</kbd>
+          </button>
+        </header>
+
         {/* Mobile header */}
         <header
           className="flex items-center justify-between px-4 py-3 lg:hidden"
