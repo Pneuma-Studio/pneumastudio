@@ -44,9 +44,10 @@ export default function CinematicStatement() {
 
           {/* Large quote */}
           <blockquote
-            className="text-3xl sm:text-4xl lg:text-5xl font-800 leading-tight mb-6"
+            className="text-3xl sm:text-4xl lg:text-5xl font-800 leading-snug mb-6"
             style={{
               letterSpacing: '-0.03em',
+              paddingBottom: '0.25em',
               background: 'linear-gradient(160deg, #FFFFFF 0%, rgba(255,255,255,0.75) 50%, #00C4A0 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -62,7 +63,7 @@ export default function CinematicStatement() {
           <div className="flex items-center justify-center gap-3 mt-8">
             <div className="h-px w-12" style={{ background: 'rgba(0,196,160,0.4)' }} />
             <span className="text-sm font-medium" style={{ color: '#8A9BB5' }}>
-              Pneuma Studio — Monterrey, MX
+              Pneuma Studio
             </span>
             <div className="h-px w-12" style={{ background: 'rgba(0,196,160,0.4)' }} />
           </div>

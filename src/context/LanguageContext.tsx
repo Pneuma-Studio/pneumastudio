@@ -24,7 +24,7 @@ const translations: Record<Language, Record<string, string>> = {
     'hero.label': 'PREMIUM DIGITAL COMMERCE STUDIO',
     'hero.h1.line1': 'Diseñamos sistemas.',
     'hero.h1.line2': 'Construimos el futuro.',
-    'hero.sub': 'Plataformas ecommerce de alto rendimiento, automatización WhatsApp y ecosistemas digitales comerciales — construidos para negocios que quieren escalar.',
+    'hero.sub': 'Plataformas ecommerce de alto rendimiento, automatización WhatsApp y ecosistemas digitales comerciales — para empresas establecidas en cualquier parte del mundo, listas para escalar.',
     'hero.cta.primary': 'Agendar una Llamada',
     'hero.cta.secondary': 'Ver Nuestro Trabajo',
     'hero.stat1.num': '12+',
@@ -68,7 +68,7 @@ const translations: Record<Language, Record<string, string>> = {
     'contact.form.success': 'Te contactaremos en menos de 24 horas.',
     // Footer
     'footer.tagline': 'Diseñamos sistemas. Construimos el futuro.',
-    'footer.rights': '© 2026 Pneuma Studio · Monterrey, México · Todos los derechos reservados.',
+    'footer.rights': '© 2026 Pneuma Studio · Todos los derechos reservados.',
   },
   en: {
     // Nav
@@ -83,7 +83,7 @@ const translations: Record<Language, Record<string, string>> = {
     'hero.label': 'PREMIUM DIGITAL COMMERCE STUDIO',
     'hero.h1.line1': 'We design systems.',
     'hero.h1.line2': 'We build the future.',
-    'hero.sub': 'High-performance ecommerce platforms, WhatsApp automation, and commercial digital ecosystems — built for businesses that want to scale.',
+    'hero.sub': 'High-performance ecommerce platforms, WhatsApp automation, and commercial digital ecosystems — for established businesses anywhere in the world, ready to scale.',
     'hero.cta.primary': 'Schedule a Call',
     'hero.cta.secondary': 'View Our Work',
     'hero.stat1.num': '12+',
@@ -127,7 +127,7 @@ const translations: Record<Language, Record<string, string>> = {
     'contact.form.success': "We'll be in touch within 24 hours.",
     // Footer
     'footer.tagline': 'We design systems. We build the future.',
-    'footer.rights': '© 2026 Pneuma Studio · Monterrey, México · All rights reserved.',
+    'footer.rights': '© 2026 Pneuma Studio · All rights reserved.',
   },
 };
 

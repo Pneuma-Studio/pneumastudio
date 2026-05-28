@@ -23,6 +23,14 @@ const CinematicStatement = dynamic(
   () => import('@/app/components/CinematicStatement'),
   { ssr: true }
 );
+const ProcessSection = dynamic(
+  () => import('@/app/components/ProcessSection'),
+  { ssr: true }
+);
+const TestimonialsSection = dynamic(
+  () => import('@/app/components/TestimonialsSection'),
+  { ssr: true }
+);
 
 export default function HomePage() {
   return (
@@ -38,6 +46,12 @@ export default function HomePage() {
           </Suspense>
           <Suspense fallback={<div className="h-96" />}>
             <FeaturedPortfolioSection />
+          </Suspense>
+          <Suspense fallback={<div className="h-96" />}>
+            <TestimonialsSection />
+          </Suspense>
+          <Suspense fallback={<div className="h-96" />}>
+            <ProcessSection />
           </Suspense>
           <Suspense fallback={<div className="h-32" />}>
             <CinematicStatement />

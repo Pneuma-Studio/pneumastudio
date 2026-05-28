@@ -53,7 +53,6 @@ export default function ContactMain() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    // Backend integration point — connect to email service here
     await new Promise((r) => setTimeout(r, 1200));
     setLoading(false);
     router.push(`/confirmation?source=contact&email=${encodeURIComponent(formData.email)}`);
@@ -67,89 +66,128 @@ export default function ContactMain() {
     ? ['Menos de $25k MXN', '$25k–$75k MXN', '$75k–$180k MXN', '$180k+ MXN / Custom USD']
     : ['Under $25k MXN', '$25k–$75k MXN', '$75k–$180k MXN', '$180k+ MXN / Custom USD'];
 
+  const contactCards = [
+    {
+      href: 'https://wa.me/528112803360?text=Hola%20Nazre%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20Pneuma%20Studio',
+      target: '_blank',
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+        </svg>
+      ),
+      iconBg: 'rgba(37,211,102,0.1)',
+      label: 'WhatsApp',
+      value: '+52 811 280 3360',
+    },
+    {
+      href: 'mailto:pneumastudiomx@gmail.com',
+      target: undefined,
+      icon: <EnvelopeIcon className="w-5 h-5" style={{ color: '#00C4A0' }} />,
+      iconBg: 'rgba(0,196,160,0.1)',
+      label: 'Email',
+      value: 'pneumastudiomx@gmail.com',
+    },
+    {
+      href: 'tel:+528112803360',
+      target: undefined,
+      icon: <PhoneIcon className="w-5 h-5" style={{ color: '#00C4A0' }} />,
+      iconBg: 'rgba(0,196,160,0.1)',
+      label: lang === 'es' ? 'Teléfono' : 'Phone',
+      value: '+52 811 280 3360',
+    },
+    {
+      href: 'https://instagram.com/pneumastudiomx',
+      target: '_blank',
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00C4A0" strokeWidth={1.5}>
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+          <circle cx="12" cy="12" r="4" />
+          <circle cx="17.5" cy="6.5" r="1" fill="#00C4A0" stroke="none" />
+        </svg>
+      ),
+      iconBg: 'rgba(0,196,160,0.1)',
+      label: 'Instagram',
+      value: '@pneumastudiomx',
+    },
+  ];
+
   return (
-    <section className="pt-4 pb-16 bg-background">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+    <section className="pt-4 pb-16 relative overflow-hidden" style={{ background: '#050D1A' }}>
+      {/* Ambient orbs */}
+      <div
+        className="absolute top-0 left-0 w-80 h-80 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(0,196,160,0.05) 0%, transparent 70%)', filter: 'blur(40px)' }}
+      />
+      <div
+        className="absolute bottom-0 right-0 w-96 h-96 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 70%)', filter: 'blur(40px)' }}
+      />
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Left — Contact info */}
           <ScrollAnimator>
-            <div className="flex flex-col gap-5">
-              <h2 className="text-xl font-800 mb-2">
-                {lang === 'es' ? 'Habla con nosotros' : 'Talk to us'}
-              </h2>
-
-              {/* WhatsApp */}
-              <a
-                href="https://wa.me/528112803360?text=Hola%20Nazre%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20Pneuma%20Studio"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="glass-card-hover rounded-xl p-5 flex items-center gap-4 group"
-              >
-                <div className="w-11 h-11 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366" aria-hidden="true">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="font-700 text-sm">WhatsApp</p>
-                  <p className="text-muted-foreground text-sm">+52 811 280 3360</p>
-                </div>
-              </a>
-
-              {/* Email */}
-              <a
-                href="mailto:pneumastudiomx@gmail.com"
-                className="glass-card-hover rounded-xl p-5 flex items-center gap-4"
-              >
-                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <EnvelopeIcon className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-700 text-sm">Email</p>
-                  <p className="text-muted-foreground text-sm">pneumastudiomx@gmail.com</p>
-                </div>
-              </a>
-
-              {/* Phone */}
-              <a
-                href="tel:+528112803360"
-                className="glass-card-hover rounded-xl p-5 flex items-center gap-4"
-              >
-                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <PhoneIcon className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-700 text-sm">{lang === 'es' ? 'Teléfono' : 'Phone'}</p>
-                  <p className="text-muted-foreground text-sm">+52 811 280 3360</p>
-                </div>
-              </a>
-
-              {/* Social */}
-              <div className="glass-card rounded-xl p-5">
-                <p className="font-700 text-sm mb-1">Instagram</p>
-                <a
-                  href="https://instagram.com/pneumastudiomx"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary text-sm hover:text-primary-light transition-colors"
-                >
-                  @pneumastudiomx
-                </a>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-1 h-5 rounded-full" style={{ background: '#00C4A0' }} />
+                <span className="label-tag text-primary">
+                  {lang === 'es' ? 'CONTACTO DIRECTO' : 'DIRECT CONTACT'}
+                </span>
               </div>
 
-              {/* Schedule a call */}
+              <h2
+                className="text-2xl font-800 text-white mb-4"
+                style={{ letterSpacing: '-0.02em' }}
+              >
+                {lang === 'es' ? 'Habla con nosotros.' : 'Talk to us.'}
+              </h2>
+
+              {/* Contact cards */}
+              {contactCards.map((card, i) => (
+                <a
+                  key={i}
+                  href={card.href}
+                  target={card.target}
+                  rel={card.target ? 'noopener noreferrer' : undefined}
+                  className="rounded-xl p-5 flex items-center gap-4 service-card"
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    backdropFilter: 'blur(12px)',
+                  }}
+                >
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: card.iconBg, border: '1px solid rgba(255,255,255,0.08)' }}
+                  >
+                    {card.icon}
+                  </div>
+                  <div>
+                    <p className="font-700 text-sm text-white">{card.label}</p>
+                    <p className="text-sm" style={{ color: '#8A9BB5' }}>{card.value}</p>
+                  </div>
+                  <div className="ml-auto">
+                    <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="#00C4A0" strokeWidth={1.5}>
+                      <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </a>
+              ))}
+
+              {/* CTA button */}
               <a
                 href="https://wa.me/528112803360?text=Hola%20Nazre%2C%20me%20gustar%C3%ADa%20agendar%20una%20llamada%20de%2030%20minutos%20con%20Pneuma%20Studio"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-primary w-full justify-center py-3.5"
+                className="btn-primary w-full justify-center py-3.5 mt-2 inline-flex items-center gap-2"
               >
-                📅 {lang === 'es' ? 'Agendar Llamada de 30 min' : 'Book a 30-min Call'}
+                <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                </svg>
+                {lang === 'es' ? 'Agendar Llamada de 30 min' : 'Book a 30-min Call'}
               </a>
 
-              {/* Response time note */}
-              <p className="text-xs text-muted-foreground text-center">
-                {lang === 'es' ?'✓ Respondemos en menos de 24 horas' :'✓ We respond within 24 hours'}
+              <p className="text-xs text-center" style={{ color: '#8A9BB5' }}>
+                {lang === 'es' ? '✓ Respondemos en menos de 24 horas' : '✓ We respond within 24 hours'}
               </p>
             </div>
           </ScrollAnimator>
@@ -157,26 +195,54 @@ export default function ContactMain() {
           {/* Right — Lead capture form */}
           <ScrollAnimator delay={100}>
             {submitted ? (
-              <div className="glass-card rounded-2xl p-10 flex flex-col items-center justify-center text-center min-h-[400px]">
-                <div className="w-16 h-16 rounded-full bg-primary/15 flex items-center justify-center mb-5">
-                  <span className="text-3xl">✓</span>
+              <div
+                className="rounded-2xl p-10 flex flex-col items-center justify-center text-center min-h-[400px]"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  backdropFilter: 'blur(12px)',
+                }}
+              >
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
+                  style={{
+                    background: 'rgba(0,196,160,0.1)',
+                    border: '1px solid rgba(0,196,160,0.3)',
+                    boxShadow: '0 0 30px rgba(0,196,160,0.15)',
+                  }}
+                >
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="#00C4A0" strokeWidth={2}>
+                    <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </div>
-                <h3 className="text-xl font-800 mb-3 text-primary">
+                <h3 className="text-xl font-800 mb-3" style={{ color: '#00C4A0' }}>
                   {lang === 'es' ? '¡Mensaje enviado!' : 'Message sent!'}
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-sm leading-relaxed" style={{ color: '#8A9BB5' }}>
                   {t('contact.form.success')}
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-6 sm:p-8 flex flex-col gap-4" noValidate>
-                <h3 className="font-800 text-lg mb-1">
+              <form
+                onSubmit={handleSubmit}
+                className="rounded-2xl p-6 sm:p-8 flex flex-col gap-4 relative overflow-hidden"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  backdropFilter: 'blur(12px)',
+                }}
+                noValidate
+              >
+                {/* Corner accent */}
+                <div className="absolute top-0 left-0 w-20 h-px" style={{ background: 'linear-gradient(90deg, #00C4A0, transparent)' }} />
+                <div className="absolute top-0 left-0 h-20 w-px" style={{ background: 'linear-gradient(180deg, #00C4A0, transparent)' }} />
+
+                <h3 className="font-800 text-lg text-white mb-1">
                   {lang === 'es' ? 'Cuéntanos tu proyecto' : 'Tell us about your project'}
                 </h3>
 
-                {/* Name */}
                 <div>
-                  <label className="label-tag text-muted-foreground block mb-1.5">
+                  <label className="label-tag block mb-1.5" style={{ color: '#8A9BB5' }}>
                     {t('contact.form.name')} *
                   </label>
                   <input
@@ -189,9 +255,8 @@ export default function ContactMain() {
                   {errors.name && <p className="text-xs text-red-400 mt-1">{errors.name}</p>}
                 </div>
 
-                {/* Company */}
                 <div>
-                  <label className="label-tag text-muted-foreground block mb-1.5">
+                  <label className="label-tag block mb-1.5" style={{ color: '#8A9BB5' }}>
                     {t('contact.form.company')}
                   </label>
                   <input
@@ -203,10 +268,9 @@ export default function ContactMain() {
                   />
                 </div>
 
-                {/* Email + Phone row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="label-tag text-muted-foreground block mb-1.5">
+                    <label className="label-tag block mb-1.5" style={{ color: '#8A9BB5' }}>
                       {t('contact.form.email')} *
                     </label>
                     <input
@@ -219,7 +283,7 @@ export default function ContactMain() {
                     {errors.email && <p className="text-xs text-red-400 mt-1">{errors.email}</p>}
                   </div>
                   <div>
-                    <label className="label-tag text-muted-foreground block mb-1.5">
+                    <label className="label-tag block mb-1.5" style={{ color: '#8A9BB5' }}>
                       {t('contact.form.phone')}
                     </label>
                     <input
@@ -232,9 +296,8 @@ export default function ContactMain() {
                   </div>
                 </div>
 
-                {/* Service interest */}
                 <div>
-                  <label className="label-tag text-muted-foreground block mb-1.5">
+                  <label className="label-tag block mb-1.5" style={{ color: '#8A9BB5' }}>
                     {t('contact.form.service')}
                   </label>
                   <select
@@ -249,9 +312,8 @@ export default function ContactMain() {
                   </select>
                 </div>
 
-                {/* Budget */}
                 <div>
-                  <label className="label-tag text-muted-foreground block mb-1.5">
+                  <label className="label-tag block mb-1.5" style={{ color: '#8A9BB5' }}>
                     {t('contact.form.budget')}
                   </label>
                   <select
@@ -266,16 +328,17 @@ export default function ContactMain() {
                   </select>
                 </div>
 
-                {/* Message */}
                 <div>
-                  <label className="label-tag text-muted-foreground block mb-1.5">
+                  <label className="label-tag block mb-1.5" style={{ color: '#8A9BB5' }}>
                     {t('contact.form.message')} *
                   </label>
                   <textarea
                     className={`input-field resize-none ${errors.message ? 'border-red-500/60' : ''}`}
                     rows={4}
                     placeholder={
-                      lang === 'es' ?'Describe brevemente tu negocio y lo que necesitas...' :'Briefly describe your business and what you need...'
+                      lang === 'es'
+                        ? 'Describe brevemente tu negocio y lo que necesitas...'
+                        : 'Briefly describe your business and what you need...'
                     }
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -283,15 +346,12 @@ export default function ContactMain() {
                   {errors.message && <p className="text-xs text-red-400 mt-1">{errors.message}</p>}
                 </div>
 
-                {/* Submit */}
                 <button
                   type="submit"
                   disabled={loading}
                   className="btn-primary w-full justify-center py-3.5 mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {loading
-                    ? (lang === 'es' ? 'Enviando...' : 'Sending...')
-                    : t('contact.form.submit')}
+                  {loading ? (lang === 'es' ? 'Enviando...' : 'Sending...') : t('contact.form.submit')}
                 </button>
               </form>
             )}
