@@ -1,15 +1,60 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import ScrollAnimator from '@/components/ScrollAnimator';
+import { createClient } from '@/lib/supabase/client';
 
-const TOTAL_SLOTS = 5;
-const TAKEN_SLOTS = 3; // Update this number each month
+interface SlotData {
+  total_slots: number;
+  taken_slots: number;
+  month_label: string;
+}
 
 export default function AvailabilitySection() {
   const { lang } = useLanguage();
+  const [slotData, setSlotData] = useState<SlotData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    async function fetchSlot() {
+      const { data } = await supabase
+        .from('availability_slots')
+        .select('total_slots, taken_slots, month_label')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (data) {
+        setSlotData(data);
+      }
+      setLoading(false);
+    }
+
+    fetchSlot();
+
+    // Real-time subscription
+    const channel = supabase
+      .channel('availability_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'availability_slots' }, () => {
+        fetchSlot();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Fallback to static values while loading or if no data
+  const TOTAL_SLOTS = slotData?.total_slots ?? 5;
+  const TAKEN_SLOTS = slotData?.taken_slots ?? 3;
+  const MONTH_LABEL = slotData?.month_label ?? (lang === 'es' ? 'Junio 2026' : 'June 2026');
+
   const available = TOTAL_SLOTS - TAKEN_SLOTS;
   const isCritical = available <= 1;
   const isLow = available <= 2;
@@ -131,9 +176,11 @@ export default function AvailabilitySection() {
                     className="text-sm font-600"
                     style={{ color: isCritical ? '#ef4444' : '#00C4A0' }}
                   >
-                    {lang === 'es'
-                      ? `${available} lugar${available !== 1 ? 'es' : ''} disponible${available !== 1 ? 's' : ''} — Junio 2026`
-                      : `${available} slot${available !== 1 ? 's' : ''} available — June 2026`}
+                    {loading
+                      ? (lang === 'es' ? 'Cargando...' : 'Loading...')
+                      : lang === 'es'
+                      ? `${available} lugar${available !== 1 ? 'es' : ''} disponible${available !== 1 ? 's' : ''} — ${MONTH_LABEL}`
+                      : `${available} slot${available !== 1 ? 's' : ''} available — ${MONTH_LABEL}`}
                   </span>
                 </div>
 
