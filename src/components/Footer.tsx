@@ -53,8 +53,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
 
           {/* Left – Brand */}
-          <div className="flex flex-col items-start">
-            <Link href="/" className="inline-block hover:opacity-80 transition-opacity duration-200">
+          <div className="flex flex-col">
+            <Link href="/" className="inline-block hover:opacity-80 transition-opacity duration-200 self-start">
               <Image src="/assets/images/pneuma-studio-logo.png" alt="Pneuma Studio" width={240} height={160} className="object-contain w-40 md:w-60" />
             </Link>
           </div>
