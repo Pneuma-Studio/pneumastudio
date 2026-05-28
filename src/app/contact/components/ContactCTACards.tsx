@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
+
 import { useLanguage } from '@/context/LanguageContext';
 import ScrollAnimator from '@/components/ScrollAnimator';
 
@@ -32,55 +32,6 @@ export default function ContactCTACards() {
   return (
     <section className="pb-20" style={{ background: '#050D1A' }}>
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        {/* 3 CTA cards — matching final slide layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-14">
-          {cards?.map((card, i) => (
-            <ScrollAnimator key={i} delay={i * 80}>
-              {card?.external ? (
-                <a
-                  href={card?.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-2xl p-8 flex flex-col items-center gap-4 text-center group service-card cursor-pointer"
-                  style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    backdropFilter: 'blur(12px)',
-                  }}
-                >
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors"
-                    style={{ background: 'rgba(0,196,160,0.12)' }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="#00C4A0" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={card?.iconPath} />
-                    </svg>
-                  </div>
-                  <h3 className="font-700 text-base text-white">{card?.title}</h3>
-                </a>
-              ) : (
-                <Link
-                  href={card?.href}
-                  className="rounded-2xl p-8 flex flex-col items-center gap-4 text-center group service-card cursor-pointer"
-                  style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    backdropFilter: 'blur(12px)',
-                  }}
-                >
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors"
-                    style={{ background: 'rgba(0,196,160,0.12)' }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="#00C4A0" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={card?.iconPath} />
-                    </svg>
-                  </div>
-                  <h3 className="font-700 text-base text-white">{card?.title}</h3>
-                </Link>
-              )}
-            </ScrollAnimator>
-          ))}
-        </div>
-
         {/* Contact info centered — matching final slide */}
         <ScrollAnimator delay={200}>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center py-8 border-t border-white/5">
