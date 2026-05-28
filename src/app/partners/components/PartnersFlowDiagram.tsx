@@ -148,9 +148,7 @@ export default function PartnersFlowDiagram() {
                       {lang === 'es' ? node.tagEs : node.tag}
                     </p>
                     {node.isCenter ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <img src="/assets/images/pneuma-studio-wordmark.png?v=2" alt="Pneuma Studio" style={{ height: 80, width: 'auto', objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
-                      </div>
+                      <img src="/assets/images/pneuma-studio-wordmark.png?v=2" alt="Pneuma Studio" className="mx-auto mb-2" style={{ height: 54, width: 'auto', objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
                     ) : (
                       <h3 className="text-xl font-800 text-white mb-2">
                         {lang === 'es' ? node.titleEs : node.title}
