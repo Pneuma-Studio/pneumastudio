@@ -55,7 +55,7 @@ export default function Footer() {
           {/* Left â€” Brand */}
           <div className="flex flex-col justify-center">
             <Link href="/" className="inline-block hover:opacity-80 transition-opacity duration-200">
-              <Image src="/assets/images/pneuma-studio-logo.png" alt="Pneuma Studio" width={150} height={100} className="object-contain" />
+              <Image src="/assets/images/pneuma-studio-logo.png" alt="Pneuma Studio" width={240} height={160} className="object-contain" />
             </Link>
           </div>
 
