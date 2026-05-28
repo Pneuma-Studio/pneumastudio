@@ -15,6 +15,7 @@ export default function Footer() {
     { href: '/partners', label: t('nav.partners') },
     { href: '/about', label: t('nav.about') },
     { href: '/contact', label: t('nav.contact') },
+    { href: '/contact#faq', label: lang === 'es' ? 'FAQ' : 'FAQ' },
   ];
 
   return (
@@ -24,7 +25,6 @@ export default function Footer() {
         className="h-px w-full"
         style={{ background: 'linear-gradient(to right, transparent, rgba(0,196,160,0.4), transparent)' }}
       />
-
       {/* Ambient orb */}
       <div
         className="absolute pointer-events-none"
@@ -48,7 +48,6 @@ export default function Footer() {
           filter: 'blur(50px)',
         }}
       />
-
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-10">
         {/* Main grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
@@ -69,16 +68,16 @@ export default function Footer() {
               {lang === 'es' ? 'NAVEGACIÓN' : 'NAVIGATION'}
             </p>
             <div className="flex flex-col gap-2.5">
-              {navLinks.map((link) => (
+              {navLinks?.map((link) => (
                 <Link
-                  key={link.href}
-                  href={link.href}
+                  key={link?.href}
+                  href={link?.href}
                   className="text-sm font-500 transition-colors duration-200 w-fit"
                   style={{ color: '#8A9BB5' }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#00C4A0')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = '#8A9BB5')}
                 >
-                  {link.label}
+                  {link?.label}
                 </Link>
               ))}
             </div>

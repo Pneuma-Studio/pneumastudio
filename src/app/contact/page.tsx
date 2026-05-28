@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic';
 
 const ContactMain = dynamic(() => import('@/app/contact/components/ContactMain'), { ssr: true });
 const ContactCTACards = dynamic(() => import('@/app/contact/components/ContactCTACards'), { ssr: true });
+const FAQSection = dynamic(() => import('@/app/components/FAQSection'), { ssr: true });
 
 export const metadata = {
   title: 'Contacto — Pneuma Studio',
@@ -23,6 +24,9 @@ export default function ContactPage() {
           <ContactHero />
           <Suspense fallback={<div className="h-96" />}>
             <ContactMain />
+          </Suspense>
+          <Suspense fallback={<div className="h-96" />}>
+            <FAQSection />
           </Suspense>
           <Suspense fallback={<div className="h-48" />}>
             <ContactCTACards />

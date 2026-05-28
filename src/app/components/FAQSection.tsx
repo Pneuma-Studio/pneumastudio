@@ -64,6 +64,7 @@ export default function FAQSection() {
 
   return (
     <section
+      id="faq"
       className="section-padding relative overflow-hidden"
       style={{ background: '#050D1A' }}
     >

@@ -23,20 +23,8 @@ const CinematicStatement = dynamic(
   () => import('@/app/components/CinematicStatement'),
   { ssr: true }
 );
-const ProcessSection = dynamic(
-  () => import('@/app/components/ProcessSection'),
-  { ssr: true }
-);
-const TestimonialsSection = dynamic(
-  () => import('@/app/components/TestimonialsSection'),
-  { ssr: true }
-);
 const GuaranteesSection = dynamic(
   () => import('@/app/components/GuaranteesSection'),
-  { ssr: true }
-);
-const FAQSection = dynamic(
-  () => import('@/app/components/FAQSection'),
   { ssr: true }
 );
 const AvailabilitySection = dynamic(
@@ -53,6 +41,7 @@ export default function HomePage() {
           {/* Hero is above-fold — loaded eagerly */}
           <HeroSection />
           {/* Below-fold sections — lazy loaded */}
+          {/* Flow: Hero → Stats (inside FeaturedServices) → 6 Services → 3 Case Studies → Guarantees → Availability → CTA */}
           <Suspense fallback={<div className="h-96" />}>
             <FeaturedServicesSection />
           </Suspense>
@@ -60,16 +49,7 @@ export default function HomePage() {
             <FeaturedPortfolioSection />
           </Suspense>
           <Suspense fallback={<div className="h-96" />}>
-            <TestimonialsSection />
-          </Suspense>
-          <Suspense fallback={<div className="h-96" />}>
-            <ProcessSection />
-          </Suspense>
-          <Suspense fallback={<div className="h-96" />}>
             <GuaranteesSection />
-          </Suspense>
-          <Suspense fallback={<div className="h-96" />}>
-            <FAQSection />
           </Suspense>
           <Suspense fallback={<div className="h-96" />}>
             <AvailabilitySection />
