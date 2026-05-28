@@ -7,7 +7,6 @@ import ContactHero from '@/app/contact/components/ContactHero';
 import dynamic from 'next/dynamic';
 
 const ContactMain = dynamic(() => import('@/app/contact/components/ContactMain'), { ssr: true });
-const ContactCTACards = dynamic(() => import('@/app/contact/components/ContactCTACards'), { ssr: true });
 const FAQSection = dynamic(() => import('@/app/components/FAQSection'), { ssr: true });
 
 export const metadata = {
@@ -22,14 +21,11 @@ export default function ContactPage() {
         <Header />
         <main className="pt-16">
           <ContactHero />
-          <Suspense fallback={<div className="h-96" />}>
+          <Suspense fallback={<div className="h-48" />}>
             <ContactMain />
           </Suspense>
-          <Suspense fallback={<div className="h-96" />}>
-            <FAQSection />
-          </Suspense>
           <Suspense fallback={<div className="h-48" />}>
-            <ContactCTACards />
+            <FAQSection />
           </Suspense>
         </main>
         <Footer />
