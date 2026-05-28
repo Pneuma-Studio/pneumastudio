@@ -238,6 +238,52 @@ export default function ContactMain() {
                   );
                 })}
               </div>
+
+              {/* Tagline below CTA cards — aligned with right form card */}
+              <div className="mt-6 relative">
+                {/* Teal blur line accent */}
+                <div
+                  className="w-12 h-px mb-4"
+                  style={{ background: 'linear-gradient(to right, transparent, #00C4A0, transparent)' }}
+                />
+                <p className="text-base font-700 text-white" style={{ letterSpacing: '-0.01em' }}>
+                  {lang === 'es' ? (
+                    <>
+                      Diseñamos sistemas. Construimos el{' '}
+                      <span className="relative inline-block">
+                        <span
+                          className="absolute inset-0 pointer-events-none"
+                          style={{
+                            background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(0,196,160,0.45) 0%, transparent 70%)',
+                            filter: 'blur(8px)',
+                            bottom: '-4px',
+                            top: 'auto',
+                            height: '140%',
+                          }}
+                        />
+                        <span style={{ color: '#ffffff', position: 'relative' }}>futuro.</span>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      We design systems. We build the{' '}
+                      <span className="relative inline-block">
+                        <span
+                          className="absolute inset-0 pointer-events-none"
+                          style={{
+                            background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(0,196,160,0.45) 0%, transparent 70%)',
+                            filter: 'blur(8px)',
+                            bottom: '-4px',
+                            top: 'auto',
+                            height: '140%',
+                          }}
+                        />
+                        <span style={{ color: '#ffffff', position: 'relative' }}>future.</span>
+                      </span>
+                    </>
+                  )}
+                </p>
+              </div>
             </div>
           </ScrollAnimator>
 
