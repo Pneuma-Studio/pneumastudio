@@ -240,52 +240,27 @@ export default function ContactMain() {
               </div>
 
               {/* Tagline below CTA cards — centered */}
-              <div className="mt-6 relative flex flex-col items-center text-center">
-                <p className="text-base font-700 text-white" style={{ letterSpacing: '-0.01em' }}>
-                  {lang === 'es' ? (
-                    <>
-                      Diseñamos sistemas. Construimos el{' '}
-                      <span className="relative inline-block">
-                        <span
-                          className="absolute inset-0 pointer-events-none"
-                          style={{
-                            background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(0,196,160,0.45) 0%, transparent 70%)',
-                            filter: 'blur(8px)',
-                            bottom: '-4px',
-                            top: 'auto',
-                            height: '140%',
-                          }}
-                        />
-                        <span style={{ color: '#ffffff', position: 'relative' }}>futuro.</span>
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      We design systems. We build the{' '}
-                      <span className="relative inline-block">
-                        <span
-                          className="absolute inset-0 pointer-events-none"
-                          style={{
-                            background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(0,196,160,0.45) 0%, transparent 70%)',
-                            filter: 'blur(8px)',
-                            bottom: '-4px',
-                            top: 'auto',
-                            height: '140%',
-                          }}
-                        />
-                        <span style={{ color: '#ffffff', position: 'relative' }}>future.</span>
-                      </span>
-                    </>
-                  )}
+              <div className="mt-3 relative flex flex-col items-center text-center">
+                <p
+                  className="text-base font-700"
+                  style={{
+                    letterSpacing: '-0.01em',
+                    background: 'linear-gradient(to right, #ffffff 0%, #ffffff 55%, #00C4A0 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  {lang === 'es' ?'Diseñamos sistemas. Construimos el futuro.' :'We design systems. We build the future.'}
                 </p>
-                {/* Teal blur accent centered below text */}
-                <div className="mt-3 flex justify-center">
+                {/* Teal sharp accent line centered below text — thin with subtle glow */}
+                <div className="mt-2 flex justify-center">
                   <div
-                    className="w-16 h-1 rounded-full"
                     style={{
+                      width: '80px',
+                      height: '1px',
                       background: 'linear-gradient(to right, transparent, #00C4A0, transparent)',
-                      boxShadow: '0 0 10px 3px rgba(0,196,160,0.5)',
-                      filter: 'blur(2px)',
+                      boxShadow: '0 0 6px 1px rgba(0,196,160,0.6)',
                     }}
                   />
                 </div>
