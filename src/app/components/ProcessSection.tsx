@@ -54,7 +54,6 @@ export default function ProcessSection() {
           filter: 'blur(60px)',
         }}
       />
-
       <div className="max-w-5xl mx-auto px-4 sm:px-6 relative">
         {/* Header */}
         <ScrollAnimator>
@@ -73,7 +72,7 @@ export default function ProcessSection() {
                 De idea a plataforma{' '}
                 <span
                   style={{
-                    background: 'linear-gradient(135deg, #00C4A0 0%, #FFFFFF 100%)',
+                    background: 'linear-gradient(135deg, #FFFFFF 0%, #00C4A0 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text',
@@ -87,7 +86,7 @@ export default function ProcessSection() {
                 From idea to platform{' '}
                 <span
                   style={{
-                    background: 'linear-gradient(135deg, #00C4A0 0%, #FFFFFF 100%)',
+                    background: 'linear-gradient(135deg, #FFFFFF 0%, #00C4A0 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text',
@@ -99,9 +98,7 @@ export default function ProcessSection() {
             )}
           </h2>
           <p className="text-sm mb-12 max-w-xl" style={{ color: '#8A9BB5' }}>
-            {lang === 'es'
-              ? 'Un proceso simple y transparente diseñado para que empieces a ver resultados lo antes posible.'
-              : 'A simple, transparent process designed to get you results as fast as possible.'}
+            {lang === 'es' ?'Un proceso simple y transparente diseñado para que empieces a ver resultados lo antes posible.' :'A simple, transparent process designed to get you results as fast as possible.'}
           </p>
         </ScrollAnimator>
 
@@ -113,7 +110,7 @@ export default function ProcessSection() {
             style={{ background: 'linear-gradient(90deg, rgba(0,196,160,0.3), rgba(0,196,160,0.15), rgba(0,196,160,0.3))' }}
           />
 
-          {steps.map((step, i) => (
+          {steps?.map((step, i) => (
             <ScrollAnimator key={i} delay={i * 120} className="h-full">
               <div
                 className="rounded-2xl p-6 flex flex-col gap-4 relative service-card h-full"
@@ -138,23 +135,23 @@ export default function ProcessSection() {
                     }}
                   >
                     <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="#00C4A0" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={step.iconPath} />
+                      <path strokeLinecap="round" strokeLinejoin="round" d={step?.iconPath} />
                     </svg>
                   </div>
                   <span
                     className="text-4xl font-800 leading-none"
                     style={{ color: 'rgba(0,196,160,0.15)' }}
                   >
-                    {step.number}
+                    {step?.number}
                   </span>
                 </div>
 
                 <div>
                   <h3 className="text-lg font-800 text-white mb-2">
-                    {lang === 'es' ? step.titleEs : step.titleEn}
+                    {lang === 'es' ? step?.titleEs : step?.titleEn}
                   </h3>
                   <p className="text-sm leading-relaxed" style={{ color: '#8A9BB5' }}>
-                    {lang === 'es' ? step.descEs : step.descEn}
+                    {lang === 'es' ? step?.descEs : step?.descEn}
                   </p>
                 </div>
 
@@ -171,7 +168,7 @@ export default function ProcessSection() {
                     style={{ background: '#00C4A0' }}
                   />
                   <span className="text-xs font-600" style={{ color: '#00C4A0' }}>
-                    {lang === 'es' ? step.tagEs : step.tagEn}
+                    {lang === 'es' ? step?.tagEs : step?.tagEn}
                   </span>
                 </div>
               </div>

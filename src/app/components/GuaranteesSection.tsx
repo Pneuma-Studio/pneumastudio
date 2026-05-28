@@ -128,7 +128,7 @@ export default function GuaranteesSection() {
                 Lo que prometemos,{' '}
                 <span
                   style={{
-                    background: 'linear-gradient(135deg, #00C4A0 0%, #FFFFFF 100%)',
+                    background: 'linear-gradient(135deg, #FFFFFF 0%, #00C4A0 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text',
@@ -142,7 +142,7 @@ export default function GuaranteesSection() {
                 What we promise,{' '}
                 <span
                   style={{
-                    background: 'linear-gradient(135deg, #00C4A0 0%, #FFFFFF 100%)',
+                    background: 'linear-gradient(135deg, #FFFFFF 0%, #00C4A0 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text',
