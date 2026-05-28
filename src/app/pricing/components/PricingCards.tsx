@@ -162,9 +162,9 @@ export default function PricingCards() {
         </ScrollAnimator>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-stretch">
           {tiers.map((tier, i) => (
-            <ScrollAnimator key={tier.name} delay={i * 70}>
+            <ScrollAnimator key={tier.name} delay={i * 70} className="h-full">
               {tier.popular ? (
                 /* Popular card — elevated treatment */
                 <div

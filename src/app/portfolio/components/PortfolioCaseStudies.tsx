@@ -118,8 +118,39 @@ export default function PortfolioCaseStudies() {
     : caseStudies.filter((cs) => cs.industry === activeFilter);
 
   return (
-    <section className="section-padding" style={{ background: '#0A1628' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+    <section className="section-padding relative overflow-hidden" style={{ background: '#0A1628' }}>
+      {/* Ambient orbs */}
+      <div
+        className="absolute top-0 right-1/4 w-96 h-96 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(0,196,160,0.05) 0%, transparent 70%)', filter: 'blur(40px)' }}
+      />
+      <div
+        className="absolute bottom-0 left-1/4 w-80 h-80 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 70%)', filter: 'blur(40px)' }}
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
+        {/* Section header */}
+        <ScrollAnimator>
+          <div className="mb-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-1 h-5 rounded-full" style={{ background: '#00C4A0' }} />
+              <span className="label-tag text-primary">{lang === 'es' ? 'CASOS DE ESTUDIO' : 'CASE STUDIES'}</span>
+            </div>
+            <h2
+              className="text-3xl sm:text-4xl font-800 text-white mb-3"
+              style={{ letterSpacing: '-0.02em' }}
+            >
+              {lang === 'es' ? 'Proyectos que generan resultados.' : 'Projects that generate results.'}
+            </h2>
+            <p className="text-sm max-w-xl" style={{ color: '#8A9BB5' }}>
+              {lang === 'es'
+                ? 'Cada uno construido con arquitectura de producción y métricas reales.'
+                : 'Each one built with production architecture and real metrics.'}
+            </p>
+          </div>
+        </ScrollAnimator>
+
         {/* Filter Tabs */}
         <ScrollAnimator>
           <div className="flex flex-wrap gap-2 mb-10">

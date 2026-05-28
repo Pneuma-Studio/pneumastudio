@@ -54,31 +54,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
 
           {/* Left — Brand */}
-          <div>
-            <Link href="/" className="inline-block mb-4">
+          <div className="flex flex-col justify-center">
+            <Link href="/" className="inline-block">
               <AppLogo
                 src="/assets/images/Pneuma_Studio_Logo_Final_Draft_Sin_Fondo_-_copia-1779900651659.png"
                 size={148}
               />
             </Link>
-            <p
-              className="text-sm leading-relaxed mb-4 font-600"
-              style={{
-                background: 'linear-gradient(135deg, #FFFFFF 0%, rgba(255,255,255,0.6) 50%, #00C4A0 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              {t('footer.tagline')}
-            </p>
-            <div className="flex items-center gap-2">
-              <span
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ background: '#00C4A0', boxShadow: '0 0 6px rgba(0,196,160,0.8)' }}
-              />
-              <span className="label-tag" style={{ color: '#00C4A0' }}>Monterrey, México</span>
-            </div>
           </div>
 
           {/* Center — Navigation */}
@@ -103,7 +85,7 @@ export default function Footer() {
           </div>
 
           {/* Right — Contact */}
-          <div>
+          <div className="flex flex-col">
             <p className="label-tag text-muted-foreground mb-5">CONTACT</p>
             <div className="flex flex-col gap-3">
               <a
@@ -165,6 +147,19 @@ export default function Footer() {
                 @pneumastudiomx
               </a>
             </div>
+
+            {/* Tagline pushed to bottom of column */}
+            <p
+              className="text-sm leading-relaxed mt-auto pt-6 font-600"
+              style={{
+                background: 'linear-gradient(135deg, #FFFFFF 0%, rgba(255,255,255,0.6) 50%, #00C4A0 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              {t('footer.tagline')}
+            </p>
           </div>
         </div>
 

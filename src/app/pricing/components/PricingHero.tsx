@@ -10,8 +10,8 @@ export default function PricingHero() {
   return (
     <section className="relative py-24 sm:py-28 overflow-hidden" style={{ background: '#050D1A' }}>
       <AnimatedGridBackground />
-      <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 text-center">
-        <div className="flex items-center justify-center gap-3 mb-5">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center gap-3 mb-5">
           <div className="w-1 h-5 rounded-full" style={{ background: '#00C4A0' }} />
           <span className="label-tag text-primary">
             {lang === 'es' ? 'PRECIOS' : 'PRICING'}
