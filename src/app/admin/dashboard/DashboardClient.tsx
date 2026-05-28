@@ -42,7 +42,7 @@ function KPICard({ title, subtitle, value, value2, accent, icon }: {
   return (
     <div
       className="rounded-2xl p-5 flex flex-col gap-3"
-      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
     >
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium" style={{ color: '#8A9BB5' }}>{title}</span>

@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updatePagoStatus, deletePago } from '@/lib/notion';
-import { createClient } from '@/lib/supabase/server';
+import { getAdminSession } from '@/lib/admin-auth';
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const session = await getAdminSession();
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { id } = await params;
     const body = await request.json();
@@ -22,9 +21,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const session = await getAdminSession();
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { id } = await params;
     await deletePago(id);

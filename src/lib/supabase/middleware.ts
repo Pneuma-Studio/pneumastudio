@@ -1,51 +1,37 @@
-import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
+const COOKIE_NAME = 'admin_session';
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value);
-            response.cookies.set(name, value, options);
-          });
-        },
-      },
-    }
+async function buildToken(): Promise<string> {
+  const data = new TextEncoder().encode(
+    `${process.env.ADMIN_EMAIL}:${process.env.ADMIN_PASSWORD}:pneumastudio`
   );
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-
   const isAdminRoute = pathname.startsWith('/admin');
   const isLoginPage = pathname === '/admin/login';
 
-  if (isAdminRoute && !isLoginPage && !user) {
+  const sessionCookie = request.cookies.get(COOKIE_NAME)?.value;
+  const expectedToken = await buildToken();
+  const isAuthenticated = sessionCookie === expectedToken;
+
+  if (isAdminRoute && !isLoginPage && !isAuthenticated) {
     const url = request.nextUrl.clone();
     url.pathname = '/admin/login';
     return NextResponse.redirect(url);
   }
 
-  if (isLoginPage && user) {
+  if (isLoginPage && isAuthenticated) {
     const url = request.nextUrl.clone();
     url.pathname = '/admin/dashboard';
     return NextResponse.redirect(url);
   }
 
-  return response;
+  return NextResponse.next({ request: { headers: request.headers } });
 }

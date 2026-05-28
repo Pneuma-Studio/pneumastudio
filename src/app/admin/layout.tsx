@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 
 interface NavItem {
   label: string;
@@ -75,14 +74,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   async function handleSignOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/admin/login');
+    await fetch('/api/admin/signout', { method: 'POST' });
+    router.replace('/admin/login');
     router.refresh();
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#050D1A', color: '#FFFFFF' }}>
+    <div className="min-h-screen flex" style={{ background: '#050D1A', color: '#FFFFFF', fontFamily: "var(--font-inter, 'Inter', sans-serif)" }}>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
