@@ -1,9 +1,14 @@
+import { redirect } from 'next/navigation';
+import { getAdminSession } from '@/lib/admin-auth';
 import { getAllClientes, getPagosByMonth, getMRR } from '@/lib/notion';
 import DashboardClient from './DashboardClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
+  const session = await getAdminSession();
+  if (!session) redirect('/admin/login');
+
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1;

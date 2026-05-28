@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const TIPOS = ['Anticipo', 'Saldo Final', 'Mensualidad', 'Mantenimiento', 'Add-on'];
-const METODOS = ['Stripe', 'Transferencia SPEI', 'Otro'];
+const METODOS = ['Stripe', 'Transferencia SPEI', 'Efectivo', 'Otro'];
 const ESTADOS = ['Pagado', 'Pendiente', 'Vencido', 'Fallido'];
 
 const inputStyle = {

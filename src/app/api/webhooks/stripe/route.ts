@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { findPagoByStripeCustomer, updatePagoStatus } from '@/lib/notion';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', { apiVersion: '2025-04-30.basil' });
 
@@ -26,6 +27,32 @@ export async function POST(request: NextRequest) {
   const month = now.getMonth() + 1;
 
   try {
+    // New client from Stripe Checkout → auto-occupy one availability slot
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object as Stripe.Checkout.Session;
+      if (session.payment_status === 'paid' || session.mode === 'subscription') {
+        const supabase = createAdminClient();
+        const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        const monthLabel = `${MONTHS_ES[now.getMonth()]} ${now.getFullYear()}`;
+
+        // Find the active slot for this month
+        const { data: activeSlot } = await supabase
+          .from('availability_slots')
+          .select('id, taken_slots, total_slots')
+          .eq('month_label', monthLabel)
+          .eq('is_active', true)
+          .single();
+
+        if (activeSlot && activeSlot.taken_slots < activeSlot.total_slots) {
+          await supabase
+            .from('availability_slots')
+            .update({ taken_slots: activeSlot.taken_slots + 1 })
+            .eq('id', activeSlot.id);
+          console.log(`📅 Lugar ocupado automáticamente en ${monthLabel} (Stripe checkout ${session.id})`);
+        }
+      }
+    }
+
     if (event.type === 'invoice.paid') {
       const invoice = event.data.object as Stripe.Invoice;
       const customerId = typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id;

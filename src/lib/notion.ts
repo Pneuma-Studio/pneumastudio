@@ -8,9 +8,9 @@ const PAGOS_DB = process.env.NOTION_PAGOS_DB_ID!;
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type ClienteEstado = 'Activo' | 'Pausado' | 'Cancelado' | 'Moroso';
-export type ClientePaquete = 'Starter' | 'Esencial' | 'Profesional' | 'Premium' | 'Enterprise';
+export type ClientePaquete = 'Starter' | 'Esencial' | 'Profesional' | 'Premium' | 'Enterprise' | 'Personalizado';
 export type ClienteMoneda = 'MXN' | 'USD';
-export type ClienteMetodoPago = 'Stripe' | 'Transferencia SPEI' | 'Otro';
+export type ClienteMetodoPago = 'Stripe' | 'Transferencia SPEI' | 'Efectivo' | 'Otro';
 export type ClienteFechaCobro = '1' | '5' | '10' | '15' | '20';
 
 export interface Cliente {
@@ -34,7 +34,7 @@ export interface Cliente {
 
 export type PagoEstado = 'Pagado' | 'Pendiente' | 'Vencido' | 'Fallido';
 export type PagoTipo = 'Anticipo' | 'Saldo Final' | 'Mensualidad' | 'Mantenimiento' | 'Add-on';
-export type PagoMetodo = 'Stripe' | 'Transferencia SPEI' | 'Otro';
+export type PagoMetodo = 'Stripe' | 'Transferencia SPEI' | 'Efectivo' | 'Otro';
 
 export interface Pago {
   id: string;

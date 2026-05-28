@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import type { Cliente, Pago, PagoEstado, PagoTipo, PagoMetodo } from '@/lib/notion';
 
@@ -30,7 +30,7 @@ const PAGO_ESTADO_COLORS: Record<string, { bg: string; text: string }> = {
 };
 
 const PAQUETE_COLORS: Record<string, string> = {
-  Starter: '#6B7280', Esencial: '#3B82F6', Profesional: '#00C4A0', Premium: '#8B5CF6', Enterprise: '#F59E0B',
+  Starter: '#6B7280', Esencial: '#3B82F6', Profesional: '#00C4A0', Premium: '#8B5CF6', Enterprise: '#F59E0B', Personalizado: '#EC4899',
 };
 
 // ─── Mark as Paid Modal ───────────────────────────────────────────────────────
@@ -157,7 +157,7 @@ function RegisterPaymentModal({ clienteId, moneda, onClose, onSuccess }: {
           <div>
             <label className="block text-xs font-medium mb-1" style={{ color: '#8A9BB5' }}>Método</label>
             <select value={form.metodo} onChange={e => setForm(f => ({ ...f, metodo: e.target.value as PagoMetodo }))} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={inputStyle}>
-              {['Stripe','Transferencia SPEI','Otro'].map(m => <option key={m} value={m} style={{ background: '#0A1628' }}>{m}</option>)}
+              {['Stripe','Transferencia SPEI','Efectivo','Otro'].map(m => <option key={m} value={m} style={{ background: '#0A1628' }}>{m}</option>)}
             </select>
           </div>
           <div>
@@ -182,6 +182,228 @@ function RegisterPaymentModal({ clienteId, moneda, onClose, onSuccess }: {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+// ─── Documentos Section ───────────────────────────────────────────────────────
+
+interface DocItem {
+  path: string;
+  name: string;
+  originalName: string;
+  tipo: string;
+  size: number;
+  createdAt: string;
+}
+
+const TIPO_COLORS: Record<string, { bg: string; text: string }> = {
+  Propuesta: { bg: 'rgba(139,92,246,0.15)', text: '#8B5CF6' },
+  Contrato: { bg: 'rgba(59,130,246,0.15)', text: '#3B82F6' },
+  Otro: { bg: 'rgba(107,114,128,0.15)', text: '#9CA3AF' },
+};
+
+function fmtSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function DocumentosSection({ clienteId }: { clienteId: string }) {
+  const [docs, setDocs] = useState<DocItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [uploadTipo, setUploadTipo] = useState('Propuesta');
+  const [error, setError] = useState('');
+  const [drag, setDrag] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const fetchDocs = useCallback(async () => {
+    const res = await fetch(`/api/admin/clientes/${clienteId}/documentos`);
+    if (res.ok) setDocs(await res.json());
+    setLoading(false);
+  }, [clienteId]);
+
+  useEffect(() => { fetchDocs(); }, [fetchDocs]);
+
+  async function uploadFile(file: File) {
+    setUploading(true);
+    setError('');
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('tipo', uploadTipo);
+      const res = await fetch(`/api/admin/clientes/${clienteId}/documentos`, { method: 'POST', body: fd });
+      if (!res.ok) throw new Error((await res.json()).error || 'Error al subir');
+      const doc: DocItem = await res.json();
+      setDocs(prev => [doc, ...prev]);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function handleOpen(doc: DocItem) {
+    const res = await fetch('/api/admin/documentos/signed-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: doc.path }),
+    });
+    if (res.ok) {
+      const { url } = await res.json();
+      window.open(url, '_blank');
+    }
+  }
+
+  async function handleDelete(doc: DocItem) {
+    if (!confirm(`¿Eliminar "${doc.originalName}"?`)) return;
+    setDocs(prev => prev.filter(d => d.path !== doc.path));
+    await fetch(`/api/admin/clientes/${clienteId}/documentos`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: doc.path }),
+    });
+  }
+
+  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) uploadFile(file);
+    e.target.value = '';
+  }
+
+  function onDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDrag(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) uploadFile(file);
+  }
+
+  const inputStyle = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF' };
+
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <h2 className="text-sm font-semibold text-white">Propuestas y contratos</h2>
+        <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', color: '#8A9BB5' }}>
+          {docs.length} archivos
+        </span>
+      </div>
+
+      <div className="p-5 space-y-4">
+        {/* Upload area */}
+        <div className="flex items-start gap-3">
+          <select
+            value={uploadTipo}
+            onChange={e => setUploadTipo(e.target.value)}
+            className="px-3 py-2 rounded-xl text-sm outline-none shrink-0"
+            style={inputStyle}
+          >
+            {['Propuesta', 'Contrato', 'Otro'].map(t => (
+              <option key={t} value={t} style={{ background: '#0A1628' }}>{t}</option>
+            ))}
+          </select>
+
+          <div
+            className="flex-1 rounded-xl flex flex-col items-center justify-center gap-2 py-5 cursor-pointer transition-all"
+            style={{
+              border: drag ? '1.5px dashed #00C4A0' : '1.5px dashed rgba(255,255,255,0.12)',
+              background: drag ? 'rgba(0,196,160,0.05)' : 'rgba(255,255,255,0.02)',
+            }}
+            onDragOver={e => { e.preventDefault(); setDrag(true); }}
+            onDragLeave={() => setDrag(false)}
+            onDrop={onDrop}
+            onClick={() => fileRef.current?.click()}
+          >
+            {uploading ? (
+              <div className="w-5 h-5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#00C4A0' }} />
+            ) : (
+              <>
+                <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none" style={{ color: '#8A9BB5' }}>
+                  <path d="M10 13V4m0 0L6 8m4-4l4 4M3 16h14" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span className="text-xs" style={{ color: '#8A9BB5' }}>
+                  {drag ? 'Suelta el archivo' : 'Arrastra o haz clic para subir'}
+                </span>
+              </>
+            )}
+          </div>
+          <input ref={fileRef} type="file" className="hidden" onChange={onFileChange} accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" />
+        </div>
+
+        {error && (
+          <div className="text-xs px-3 py-2 rounded-xl" style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}>{error}</div>
+        )}
+
+        {/* Document list */}
+        {loading ? (
+          <div className="flex items-center justify-center py-6">
+            <div className="w-5 h-5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#00C4A0' }} />
+          </div>
+        ) : docs.length === 0 ? (
+          <p className="text-xs text-center py-4" style={{ color: '#8A9BB5' }}>Sin documentos subidos</p>
+        ) : (
+          <div className="space-y-2">
+            {docs.map(doc => {
+              const tipoStyle = TIPO_COLORS[doc.tipo] ?? TIPO_COLORS.Otro;
+              return (
+                <div
+                  key={doc.path}
+                  className="flex items-center gap-3 rounded-xl px-4 py-3"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  {/* File icon */}
+                  <svg className="w-5 h-5 shrink-0" viewBox="0 0 20 20" fill="none" style={{ color: '#8A9BB5' }}>
+                    <path d="M11 2H5a1 1 0 00-1 1v14a1 1 0 001 1h10a1 1 0 001-1V7l-5-5z" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round" />
+                    <path d="M11 2v5h5" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+
+                  {/* Name + meta */}
+                  <div className="flex-1 min-w-0">
+                    <button
+                      onClick={() => handleOpen(doc)}
+                      className="text-sm text-white truncate block max-w-full text-left hover:underline"
+                    >
+                      {doc.originalName}
+                    </button>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: tipoStyle.bg, color: tipoStyle.text }}>
+                        {doc.tipo}
+                      </span>
+                      {doc.size > 0 && (
+                        <span className="text-xs" style={{ color: '#8A9BB5' }}>{fmtSize(doc.size)}</span>
+                      )}
+                      {doc.createdAt && (
+                        <span className="text-xs" style={{ color: '#8A9BB5' }}>
+                          {new Date(doc.createdAt).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-3 shrink-0">
+                    <button
+                      onClick={() => handleOpen(doc)}
+                      className="text-xs font-medium"
+                      style={{ color: '#00C4A0' }}
+                    >
+                      Abrir
+                    </button>
+                    <button
+                      onClick={() => handleDelete(doc)}
+                      className="text-xs"
+                      style={{ color: '#8A9BB5' }}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -398,6 +620,9 @@ export default function ClienteDetailClient({ cliente, pagos: initialPagos }: { 
           </>
         )}
       </div>
+
+      {/* Documentos */}
+      <DocumentosSection clienteId={cliente.id} />
 
       {/* Client info */}
       <div className="rounded-2xl p-5 space-y-3" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>

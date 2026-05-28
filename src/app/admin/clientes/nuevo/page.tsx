@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const PAQUETES = ['Starter', 'Esencial', 'Profesional', 'Premium', 'Enterprise'];
+const PAQUETES = ['Starter', 'Esencial', 'Profesional', 'Premium', 'Enterprise', 'Personalizado'];
 const ADDONS = ['WhatsApp Avanzado', 'Mercado Libre', 'SEO Avanzado', 'Soporte Priority'];
 const MONEDAS = ['MXN', 'USD'];
 const DIAS_COBRO = ['1', '5', '10', '15', '20'];
 const ESTADOS = ['Activo', 'Pausado', 'Cancelado', 'Moroso'];
-const METODOS_PAGO = ['Stripe', 'Transferencia SPEI', 'Otro'];
+const METODOS_PAGO = ['Stripe', 'Transferencia SPEI', 'Efectivo', 'Otro'];
 
 function Field({ label, children, required }: { label: string; children: React.ReactNode; required?: boolean }) {
   return (

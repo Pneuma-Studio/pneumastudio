@@ -20,6 +20,7 @@ interface CaseStudy {
   sub2: string;
   sub2Es: string;
   iconPath: string;
+  comingSoon?: boolean;
 }
 
 const caseStudies: CaseStudy[] = [
@@ -69,11 +70,11 @@ const caseStudies: CaseStudy[] = [
     iconPath: 'M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 1115 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077l1.41-.513m14.095-5.13l1.41-.513M5.106 17.785l1.15-.964m11.49-9.642l1.149-.964M7.501 19.795l.75-1.3m7.5-12.99l.75-1.3m-6.063 16.658l.26-1.477m2.605-14.772l.26-1.477m0 17.726l-.26-1.477M10.698 4.614l-.26-1.477M16.5 19.794l-.75-1.299M7.5 4.205L12 12m6.894 5.785l-1.149-.964M6.256 7.178l-1.15-.964m15.352 8.864l-1.41-.513M4.954 9.435l-1.41-.514M12.002 12l-3.75 6.495',
   },
   {
-    industry: 'Architecture',
-    name: 'Professional Substrate Ecommerce',
-    nameEs: 'Ecommerce de Sustratos Profesionales',
+    industry: 'Ecommerce',
+    name: 'Verdantis — Professional Substrate',
+    nameEs: 'Verdantis — Sustratos Profesionales',
     problem: 'Premium single-product store for a professional substrate brand. Deep UX, custom configurator, and dynamic checkout.',
-    problemEs: 'Tienda premium de producto único. UX profundo, configurador a medida y checkout dinámico.',
+    problemEs: 'Tienda premium de producto único para marca de sustratos. UX profundo, configurador a medida y checkout dinámico.',
     metric: '+58%',
     metricLabel: 'Online Sales',
     metricLabelEs: 'Ventas Online',
@@ -82,6 +83,22 @@ const caseStudies: CaseStudy[] = [
     sub2: 'Custom Configurator Built',
     sub2Es: 'Configurador a Medida Construido',
     iconPath: 'M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42',
+  },
+  {
+    industry: 'Architecture',
+    name: 'De La Cruz Architects',
+    nameEs: 'De La Cruz Architects',
+    problem: 'Full digital presence for a premium architecture studio — portfolio, project gallery, and client inquiry system.',
+    problemEs: 'Presencia digital completa para estudio de arquitectura premium — portafolio, galería de proyectos y sistema de contacto.',
+    metric: '—',
+    metricLabel: 'Coming Soon',
+    metricLabelEs: 'Próximamente',
+    sub1: 'Architecture Portfolio',
+    sub1Es: 'Portafolio de Arquitectura',
+    sub2: 'Client Inquiry System',
+    sub2Es: 'Sistema de Contacto',
+    iconPath: 'M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z',
+    comingSoon: true,
   },
   {
     industry: 'Retail',
@@ -173,19 +190,34 @@ export default function PortfolioCaseStudies() {
           {filtered.map((cs, i) => (
             <ScrollAnimator key={cs.name} delay={i * 80}>
               <div
-                className="rounded-2xl overflow-hidden h-full flex flex-col service-card"
+                className="rounded-2xl overflow-hidden h-full flex flex-col service-card relative"
                 style={{
-                  background: 'rgba(255,255,255,0.04)',
+                  background: cs.comingSoon ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.04)',
                   backdropFilter: 'blur(12px)',
+                  opacity: cs.comingSoon ? 0.7 : 1,
                 }}
               >
+                {cs.comingSoon && (
+                  <div className="absolute top-3 right-3 z-10">
+                    <span
+                      className="text-xs font-600 px-2.5 py-1 rounded-full"
+                      style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)', color: '#F59E0B' }}
+                    >
+                      {lang === 'es' ? 'Próximamente' : 'Coming Soon'}
+                    </span>
+                  </div>
+                )}
+
                 <div className="p-5 flex flex-col flex-1">
-                  {/* Teal square icon badge */}
+                  {/* Icon badge */}
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 shrink-0"
-                    style={{ background: 'rgba(0,196,160,0.15)', border: '1px solid rgba(0,196,160,0.2)' }}
+                    style={{
+                      background: cs.comingSoon ? 'rgba(245,158,11,0.1)' : 'rgba(0,196,160,0.15)',
+                      border: cs.comingSoon ? '1px solid rgba(245,158,11,0.2)' : '1px solid rgba(0,196,160,0.2)',
+                    }}
                   >
-                    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="#00C4A0" strokeWidth={1.5}>
+                    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke={cs.comingSoon ? '#F59E0B' : '#00C4A0'} strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d={cs.iconPath} />
                     </svg>
                   </div>
@@ -200,20 +232,27 @@ export default function PortfolioCaseStudies() {
                     {lang === 'es' ? cs.problemEs : cs.problem}
                   </p>
 
-                  {/* Hero metric — large teal */}
-                  <div className="mb-4">
-                    <span
-                      className="text-3xl font-800 leading-none block"
-                      style={{ color: '#00C4A0' }}
-                    >
-                      {cs.metric}
-                    </span>
-                    <span className="text-xs font-600 mt-1 block" style={{ color: '#00C4A0' }}>
-                      {lang === 'es' ? cs.metricLabelEs : cs.metricLabel}
-                    </span>
-                  </div>
+                  {/* Hero metric */}
+                  {!cs.comingSoon && (
+                    <div className="mb-4">
+                      <span
+                        className="text-3xl font-800 leading-none block"
+                        style={{
+                          background: 'linear-gradient(135deg, #FFFFFF 0%, #00C4A0 100%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                        }}
+                      >
+                        {cs.metric}
+                      </span>
+                      <span className="text-xs font-600 mt-1 block" style={{ color: 'rgba(0,196,160,0.8)' }}>
+                        {lang === 'es' ? cs.metricLabelEs : cs.metricLabel}
+                      </span>
+                    </div>
+                  )}
 
-                  {/* Supporting metrics — teal-border pills */}
+                  {/* Supporting pills */}
                   <div className="flex flex-col gap-2 mt-auto">
                     {[
                       lang === 'es' ? cs.sub1Es : cs.sub1,
@@ -221,10 +260,11 @@ export default function PortfolioCaseStudies() {
                     ].map((sub, j) => (
                       <div
                         key={j}
-                        className="px-3 py-1.5 rounded-lg text-xs font-600 text-white"
+                        className="px-3 py-1.5 rounded-lg text-xs font-600"
                         style={{
-                          background: 'rgba(0,196,160,0.08)',
-                          border: '1px solid rgba(0,196,160,0.2)',
+                          background: cs.comingSoon ? 'rgba(245,158,11,0.06)' : 'rgba(0,196,160,0.08)',
+                          border: cs.comingSoon ? '1px solid rgba(245,158,11,0.15)' : '1px solid rgba(0,196,160,0.2)',
+                          color: cs.comingSoon ? 'rgba(245,158,11,0.8)' : '#FFFFFF',
                         }}
                       >
                         {sub}
