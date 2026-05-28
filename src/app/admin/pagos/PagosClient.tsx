@@ -1,0 +1,238 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import Link from 'next/link';
+import type { Pago } from '@/lib/notion';
+
+function fmt(n: number) {
+  return n.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function fmtDate(d: string) {
+  if (!d) return '—';
+  const [y, m, day] = d.split('-');
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return `${day}/${months[parseInt(m)-1]}/${y}`;
+}
+
+const ESTADO_COLORS: Record<string, { bg: string; text: string }> = {
+  Pagado: { bg: 'rgba(34,197,94,0.15)', text: '#22C55E' },
+  Pendiente: { bg: 'rgba(245,158,11,0.15)', text: '#F59E0B' },
+  Vencido: { bg: 'rgba(239,68,68,0.15)', text: '#EF4444' },
+  Fallido: { bg: 'rgba(107,114,128,0.15)', text: '#6B7280' },
+};
+
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
+  const now = new Date();
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+  const [estadoFilter, setEstadoFilter] = useState<string>('Todos');
+  const [monedaFilter, setMonedaFilter] = useState<string>('Todos');
+  const [tipoFilter, setTipoFilter] = useState<string>('Todos');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
+
+  const filtered = useMemo(() => {
+    const monthStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
+    return allPagos.filter(p => {
+      if (!p.fechaCobro.startsWith(monthStr)) return false;
+      if (estadoFilter !== 'Todos' && p.estado !== estadoFilter) return false;
+      if (monedaFilter !== 'Todos' && p.moneda !== monedaFilter) return false;
+      if (tipoFilter !== 'Todos' && p.tipo !== tipoFilter) return false;
+      return true;
+    });
+  }, [allPagos, selectedYear, selectedMonth, estadoFilter, monedaFilter, tipoFilter]);
+
+  const summary = useMemo(() => {
+    const pagadoMXN = filtered.filter(p => p.estado === 'Pagado' && p.moneda === 'MXN').reduce((s, p) => s + p.monto, 0);
+    const pagadoUSD = filtered.filter(p => p.estado === 'Pagado' && p.moneda === 'USD').reduce((s, p) => s + p.monto, 0);
+    const pendienteMXN = filtered.filter(p => p.estado === 'Pendiente' && p.moneda === 'MXN').reduce((s, p) => s + p.monto, 0);
+    const vencidoMXN = filtered.filter(p => p.estado === 'Vencido' && p.moneda === 'MXN').reduce((s, p) => s + p.monto, 0);
+    return { pagadoMXN, pagadoUSD, pendienteMXN, vencidoMXN };
+  }, [filtered]);
+
+  function toggleSelect(id: string) {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    if (selected.size === filtered.length) setSelected(new Set());
+    else setSelected(new Set(filtered.map(p => p.id)));
+  }
+
+  async function handleBulkPaid() {
+    if (!selected.size) return;
+    setBulkLoading(true);
+    try {
+      await Promise.all([...selected].map(id =>
+        fetch(`/api/admin/pagos/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ estado: 'Pagado' }),
+        })
+      ));
+      window.location.reload();
+    } catch {
+      setBulkLoading(false);
+    }
+  }
+
+  const years = Array.from({ length: 3 }, (_, i) => now.getFullYear() - i);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Pagos</h1>
+          <p className="text-sm mt-1" style={{ color: '#8A9BB5' }}>Todos los pagos registrados</p>
+        </div>
+        <Link href="/admin/pagos/nuevo" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold" style={{ background: '#00C4A0', color: '#050D1A' }}>
+          + Registrar pago
+        </Link>
+      </div>
+
+      {/* Filters */}
+      <div
+        className="rounded-2xl p-4 space-y-3"
+        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+      >
+        <div className="flex flex-wrap gap-3">
+          {/* Month/Year */}
+          <div className="flex gap-2">
+            <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))} className="px-3 py-2 rounded-xl text-sm outline-none" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF' }}>
+              {MESES.map((m, i) => <option key={i} value={i + 1} style={{ background: '#0A1628' }}>{m}</option>)}
+            </select>
+            <select value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="px-3 py-2 rounded-xl text-sm outline-none" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF' }}>
+              {years.map(y => <option key={y} value={y} style={{ background: '#0A1628' }}>{y}</option>)}
+            </select>
+          </div>
+
+          {/* Estado */}
+          <div className="flex gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            {['Todos','Pagados','Pendientes','Vencidos','Fallidos'].map(f => (
+              <button key={f} onClick={() => setEstadoFilter(f === 'Todos' ? 'Todos' : f.replace(/s$/, ''))} className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all" style={{ background: estadoFilter === (f === 'Todos' ? 'Todos' : f.replace(/s$/, '')) ? 'rgba(0,196,160,0.15)' : 'transparent', color: estadoFilter === (f === 'Todos' ? 'Todos' : f.replace(/s$/, '')) ? '#00C4A0' : '#8A9BB5' }}>
+                {f}
+              </button>
+            ))}
+          </div>
+
+          {/* Moneda */}
+          <div className="flex gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            {['Todos','MXN','USD'].map(f => (
+              <button key={f} onClick={() => setMonedaFilter(f)} className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all" style={{ background: monedaFilter === f ? 'rgba(0,196,160,0.15)' : 'transparent', color: monedaFilter === f ? '#00C4A0' : '#8A9BB5' }}>
+                {f}
+              </button>
+            ))}
+          </div>
+
+          {/* Tipo */}
+          <select value={tipoFilter} onChange={e => setTipoFilter(e.target.value)} className="px-3 py-2 rounded-xl text-sm outline-none" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#8A9BB5' }}>
+            {['Todos','Anticipo','Mensualidad','Mantenimiento','Add-on','Saldo Final'].map(t => <option key={t} value={t} style={{ background: '#0A1628' }}>{t}</option>)}
+          </select>
+        </div>
+
+        {/* Summary row */}
+        <div className="flex flex-wrap gap-4 text-sm pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <span><span style={{ color: '#22C55E' }}>Pagado:</span> <strong className="text-white">${fmt(summary.pagadoMXN)} MXN{summary.pagadoUSD > 0 ? ` · $${fmt(summary.pagadoUSD)} USD` : ''}</strong></span>
+          <span><span style={{ color: '#F59E0B' }}>Pendiente:</span> <strong className="text-white">${fmt(summary.pendienteMXN)} MXN</strong></span>
+          <span><span style={{ color: '#EF4444' }}>Vencido:</span> <strong className="text-white">${fmt(summary.vencidoMXN)} MXN</strong></span>
+        </div>
+      </div>
+
+      {/* Bulk action */}
+      {selected.size > 0 && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(0,196,160,0.1)', border: '1px solid rgba(0,196,160,0.2)' }}>
+          <span className="text-sm" style={{ color: '#00C4A0' }}>{selected.size} seleccionados</span>
+          <button onClick={handleBulkPaid} disabled={bulkLoading} className="px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: '#22C55E', color: '#050D1A' }}>
+            {bulkLoading ? 'Procesando...' : 'Marcar todos como pagados'}
+          </button>
+          <button onClick={() => setSelected(new Set())} className="text-xs" style={{ color: '#8A9BB5' }}>Cancelar</button>
+        </div>
+      )}
+
+      {/* Table */}
+      {filtered.length === 0 ? (
+        <div className="rounded-2xl p-12 text-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <p className="text-sm" style={{ color: '#8A9BB5' }}>No hay pagos para el período seleccionado</p>
+        </div>
+      ) : (
+        <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          {/* Desktop */}
+          <div className="hidden lg:block overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <th className="px-4 py-3 text-left">
+                    <input type="checkbox" checked={selected.size === filtered.length && filtered.length > 0} onChange={toggleAll} className="w-4 h-4 rounded" />
+                  </th>
+                  {['Fecha','Cliente','Tipo','Monto','Estado','Método','Referencia','Factura'].map(h => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-medium" style={{ color: '#8A9BB5' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((p, i) => {
+                  const estadoStyle = ESTADO_COLORS[p.estado] ?? { bg: 'rgba(107,114,128,0.15)', text: '#6B7280' };
+                  const isOverdue = p.estado === 'Pendiente' && p.fechaCobro < new Date().toISOString().split('T')[0];
+                  return (
+                    <tr
+                      key={p.id}
+                      style={{
+                        borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                        background: isOverdue ? 'rgba(239,68,68,0.04)' : selected.has(p.id) ? 'rgba(0,196,160,0.04)' : 'transparent',
+                      }}
+                    >
+                      <td className="px-4 py-3">
+                        <input type="checkbox" checked={selected.has(p.id)} onChange={() => toggleSelect(p.id)} className="w-4 h-4 rounded" />
+                      </td>
+                      <td className="px-4 py-3 text-xs" style={{ color: '#8A9BB5' }}>{fmtDate(p.fechaCobro)}</td>
+                      <td className="px-4 py-3">
+                        <Link href={`/admin/clientes/${p.clienteId}`} className="text-sm font-medium text-white hover:underline">{p.clienteNombre}</Link>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-white">{p.tipo}</td>
+                      <td className="px-4 py-3 font-medium text-white">${fmt(p.monto)} <span style={{ color: '#8A9BB5' }}>{p.moneda}</span></td>
+                      <td className="px-4 py-3">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: estadoStyle.bg, color: estadoStyle.text }}>{p.estado}</span>
+                      </td>
+                      <td className="px-4 py-3 text-xs" style={{ color: '#8A9BB5' }}>{p.metodo}</td>
+                      <td className="px-4 py-3 text-xs max-w-[100px] truncate" style={{ color: '#8A9BB5' }}>{p.referencia || '—'}</td>
+                      <td className="px-4 py-3 text-center text-xs">
+                        {p.factura ? <span style={{ color: '#22C55E' }}>✓</span> : <span style={{ color: '#8A9BB5' }}>—</span>}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile */}
+          <div className="lg:hidden divide-y" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+            {filtered.map(p => {
+              const estadoStyle = ESTADO_COLORS[p.estado] ?? { bg: 'rgba(107,114,128,0.15)', text: '#6B7280' };
+              return (
+                <div key={p.id} className="p-4 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Link href={`/admin/clientes/${p.clienteId}`} className="text-sm font-medium text-white">{p.clienteNombre}</Link>
+                    <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: estadoStyle.bg, color: estadoStyle.text }}>{p.estado}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs" style={{ color: '#8A9BB5' }}>
+                    <span>{fmtDate(p.fechaCobro)}</span>
+                    <span>{p.tipo}</span>
+                    <span className="font-bold text-white">${fmt(p.monto)} {p.moneda}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

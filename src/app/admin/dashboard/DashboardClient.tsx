@@ -1,0 +1,415 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import Link from 'next/link';
+import type { Cliente, Pago } from '@/lib/notion';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function fmt(n: number) {
+  return n.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function fmtDate(d: string) {
+  if (!d) return '—';
+  const [y, m, day] = d.split('-');
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return `${day}/${months[parseInt(m)-1]}/${y}`;
+}
+
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+const PAQUETE_COLORS: Record<string, string> = {
+  Starter: '#6B7280',
+  Esencial: '#3B82F6',
+  Profesional: '#00C4A0',
+  Premium: '#8B5CF6',
+  Enterprise: '#F59E0B',
+};
+
+const ESTADO_COLORS: Record<string, { bg: string; text: string }> = {
+  Activo: { bg: 'rgba(34,197,94,0.15)', text: '#22C55E' },
+  Moroso: { bg: 'rgba(239,68,68,0.15)', text: '#EF4444' },
+  Pausado: { bg: 'rgba(245,158,11,0.15)', text: '#F59E0B' },
+  Cancelado: { bg: 'rgba(107,114,128,0.15)', text: '#6B7280' },
+};
+
+// ─── KPI Card ─────────────────────────────────────────────────────────────────
+
+function KPICard({ title, subtitle, value, value2, accent, icon }: {
+  title: string; subtitle: string; value: string; value2?: string; accent: string; icon: React.ReactNode;
+}) {
+  return (
+    <div
+      className="rounded-2xl p-5 flex flex-col gap-3"
+      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium" style={{ color: '#8A9BB5' }}>{title}</span>
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${accent}20`, color: accent }}>
+          {icon}
+        </div>
+      </div>
+      <div>
+        <div className="text-2xl font-bold text-white">{value}</div>
+        {value2 && <div className="text-sm mt-0.5" style={{ color: '#8A9BB5' }}>{value2}</div>}
+      </div>
+      <div className="text-xs" style={{ color: '#8A9BB5' }}>{subtitle}</div>
+    </div>
+  );
+}
+
+// ─── Mini Calendar ────────────────────────────────────────────────────────────
+
+function MiniCalendar({ year, month, clientes }: { year: number; month: number; clientes: Cliente[] }) {
+  const firstDay = new Date(year, month - 1, 1).getDay();
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const blanks = Array.from({ length: firstDay }, (_, i) => i);
+
+  const billingDays: Record<number, Cliente[]> = {};
+  clientes.filter(c => c.estado === 'Activo').forEach(c => {
+    const day = parseInt(c.fechaCobro || '1', 10);
+    if (!billingDays[day]) billingDays[day] = [];
+    billingDays[day].push(c);
+  });
+
+  return (
+    <div
+      className="rounded-2xl p-5"
+      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+    >
+      <div className="text-sm font-semibold text-white mb-4">
+        {MESES[month - 1]} {year}
+      </div>
+      <div className="grid grid-cols-7 gap-1 text-center mb-2">
+        {['D','L','M','X','J','V','S'].map(d => (
+          <div key={d} className="text-xs font-medium" style={{ color: '#8A9BB5' }}>{d}</div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-1">
+        {blanks.map(i => <div key={`b-${i}`} />)}
+        {days.map(day => {
+          const hasBilling = !!billingDays[day];
+          const isToday = new Date().getDate() === day && new Date().getMonth() + 1 === month && new Date().getFullYear() === year;
+          return (
+            <div
+              key={day}
+              className="relative flex flex-col items-center justify-center rounded-lg py-1 text-xs cursor-default group"
+              style={{
+                background: isToday ? 'rgba(0,196,160,0.2)' : 'transparent',
+                color: isToday ? '#00C4A0' : '#FFFFFF',
+                fontWeight: isToday ? '700' : '400',
+              }}
+              title={hasBilling ? billingDays[day].map(c => `${c.nombre} — $${fmt(c.mensualidad)} ${c.moneda}`).join('\n') : ''}
+            >
+              {day}
+              {hasBilling && (
+                <div className="w-1 h-1 rounded-full mt-0.5" style={{ background: '#00C4A0' }} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
+interface Props {
+  clientes: Cliente[];
+  pagosThisMonth: Pago[];
+  mrr: { mxn: number; usd: number };
+  cobradoMXN: number;
+  cobradoUSD: number;
+  pendienteMXN: number;
+  pendienteUSD: number;
+  activosCount: number;
+  enStripe: number;
+  porTransferencia: number;
+  currentYear: number;
+  currentMonth: number;
+}
+
+export default function DashboardClient({
+  clientes, pagosThisMonth, mrr, cobradoMXN, cobradoUSD,
+  pendienteMXN, pendienteUSD, activosCount, enStripe, porTransferencia,
+  currentYear, currentMonth,
+}: Props) {
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<'Todos' | 'Activos' | 'Morosos' | 'Pausados'>('Todos');
+  const [sortBy, setSortBy] = useState<'nombre' | 'mensualidad' | 'fechaCobro'>('fechaCobro');
+
+  const mesNombre = MESES[currentMonth - 1];
+
+  // Build last-payment map
+  const lastPaymentMap = useMemo(() => {
+    const map: Record<string, Pago> = {};
+    pagosThisMonth.forEach(p => {
+      if (!map[p.clienteId] || p.fechaCobro > map[p.clienteId].fechaCobro) {
+        map[p.clienteId] = p;
+      }
+    });
+    return map;
+  }, [pagosThisMonth]);
+
+  const filtered = useMemo(() => {
+    let list = [...clientes];
+    if (filter === 'Activos') list = list.filter(c => c.estado === 'Activo');
+    else if (filter === 'Morosos') list = list.filter(c => c.estado === 'Moroso');
+    else if (filter === 'Pausados') list = list.filter(c => c.estado === 'Pausado');
+    if (search) list = list.filter(c => c.nombre.toLowerCase().includes(search.toLowerCase()) || c.empresa.toLowerCase().includes(search.toLowerCase()));
+    list.sort((a, b) => {
+      if (sortBy === 'nombre') return a.nombre.localeCompare(b.nombre);
+      if (sortBy === 'mensualidad') return b.mensualidad - a.mensualidad;
+      return parseInt(a.fechaCobro || '1') - parseInt(b.fechaCobro || '1');
+    });
+    return list;
+  }, [clientes, filter, search, sortBy]);
+
+  const nextBillingDate = (c: Cliente) => {
+    const day = parseInt(c.fechaCobro || '1', 10);
+    const now = new Date();
+    let m = now.getMonth() + 1;
+    let y = now.getFullYear();
+    if (day <= now.getDate()) {
+      m += 1;
+      if (m > 12) { m = 1; y += 1; }
+    }
+    return `${y}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Overview</h1>
+          <p className="text-sm mt-1" style={{ color: '#8A9BB5' }}>{mesNombre} {currentYear}</p>
+        </div>
+        <Link
+          href="/admin/clientes/nuevo"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+          style={{ background: '#00C4A0', color: '#050D1A' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Nuevo cliente
+        </Link>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <KPICard
+          title="MRR Total"
+          subtitle="Ingresos recurrentes mensuales"
+          value={`$${fmt(mrr.mxn)} MXN`}
+          value2={mrr.usd > 0 ? `+ $${fmt(mrr.usd)} USD` : undefined}
+          accent="#00C4A0"
+          icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>}
+        />
+        <KPICard
+          title="Cobrado este mes"
+          subtitle={`${mesNombre} ${currentYear}`}
+          value={`$${fmt(cobradoMXN)} MXN`}
+          value2={cobradoUSD > 0 ? `+ $${fmt(cobradoUSD)} USD` : undefined}
+          accent="#22C55E"
+          icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>}
+        />
+        <KPICard
+          title="Por cobrar"
+          subtitle="Pendiente este mes"
+          value={`$${fmt(pendienteMXN)} MXN`}
+          value2={pendienteUSD > 0 ? `+ $${fmt(pendienteUSD)} USD` : undefined}
+          accent="#F59E0B"
+          icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>}
+        />
+        <KPICard
+          title="Clientes activos"
+          subtitle={`${enStripe} en Stripe · ${porTransferencia} por transferencia`}
+          value={String(activosCount)}
+          accent="#3B82F6"
+          icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>}
+        />
+      </div>
+
+      {/* Main grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        {/* Client table */}
+        <div className="xl:col-span-3 space-y-4">
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#8A9BB5' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input
+                type="text"
+                placeholder="Buscar cliente..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-white outline-none"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
+              />
+            </div>
+            <div className="flex gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              {(['Todos','Activos','Morosos','Pausados'] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={{
+                    background: filter === f ? 'rgba(0,196,160,0.15)' : 'transparent',
+                    color: filter === f ? '#00C4A0' : '#8A9BB5',
+                  }}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as any)}
+              className="px-3 py-2.5 rounded-xl text-sm outline-none"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#8A9BB5' }}
+            >
+              <option value="fechaCobro" style={{ background: '#0A1628' }}>Ordenar: Día cobro</option>
+              <option value="nombre" style={{ background: '#0A1628' }}>Ordenar: Nombre</option>
+              <option value="mensualidad" style={{ background: '#0A1628' }}>Ordenar: Monto</option>
+            </select>
+          </div>
+
+          {/* Table */}
+          {filtered.length === 0 ? (
+            <div
+              className="rounded-2xl p-12 flex flex-col items-center justify-center text-center"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+            >
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'rgba(0,196,160,0.1)' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00C4A0" strokeWidth="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                </svg>
+              </div>
+              <p className="text-white font-semibold mb-2">No tienes clientes registrados</p>
+              <p className="text-sm mb-4" style={{ color: '#8A9BB5' }}>Comienza registrando tu primer cliente</p>
+              <Link href="/admin/clientes/nuevo" className="px-4 py-2 rounded-xl text-sm font-semibold" style={{ background: '#00C4A0', color: '#050D1A' }}>
+                Registrar primer cliente →
+              </Link>
+            </div>
+          ) : (
+            <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              {/* Desktop table */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                      {['Cliente','Paquete','Mensualidad','Día cobro','Último pago','Próximo cobro','Estado','Método','Acciones'].map(h => (
+                        <th key={h} className="px-4 py-3 text-left text-xs font-medium" style={{ color: '#8A9BB5' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((c, i) => {
+                      const lastPago = lastPaymentMap[c.id];
+                      const estadoStyle = ESTADO_COLORS[c.estado] ?? { bg: 'rgba(107,114,128,0.15)', text: '#6B7280' };
+                      const paqueteColor = PAQUETE_COLORS[c.paquete] ?? '#6B7280';
+                      const nextDate = nextBillingDate(c);
+                      return (
+                        <tr
+                          key={c.id}
+                          style={{ borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
+                          className="hover:bg-white/[0.02] transition-colors"
+                        >
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              {c.estado === 'Moroso' && <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#EF4444' }} />}
+                              <div>
+                                <div className="font-medium text-white">{c.nombre}</div>
+                                {c.empresa && <div className="text-xs" style={{ color: '#8A9BB5' }}>{c.empresa}</div>}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: `${paqueteColor}20`, color: paqueteColor }}>
+                              {c.paquete}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 font-medium text-white">
+                            ${fmt(c.mensualidad)} <span style={{ color: '#8A9BB5' }}>{c.moneda}</span>
+                          </td>
+                          <td className="px-4 py-3" style={{ color: '#8A9BB5' }}>Día {c.fechaCobro}</td>
+                          <td className="px-4 py-3">
+                            {lastPago ? (
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-2 h-2 rounded-full" style={{ background: lastPago.estado === 'Pagado' ? '#22C55E' : lastPago.estado === 'Vencido' ? '#EF4444' : '#F59E0B' }} />
+                                <span className="text-xs" style={{ color: '#8A9BB5' }}>{fmtDate(lastPago.fechaCobro)}</span>
+                              </div>
+                            ) : <span style={{ color: '#8A9BB5' }}>—</span>}
+                          </td>
+                          <td className="px-4 py-3 text-xs" style={{ color: '#8A9BB5' }}>{fmtDate(nextDate)}</td>
+                          <td className="px-4 py-3">
+                            <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: estadoStyle.bg, color: estadoStyle.text }}>
+                              {c.estado}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            {c.metodoPago === 'Stripe' ? (
+                              <span className="text-xs font-medium" style={{ color: '#6772E5' }}>Stripe</span>
+                            ) : c.metodoPago === 'Transferencia SPEI' ? (
+                              <span className="text-xs font-medium" style={{ color: '#3B82F6' }}>SPEI</span>
+                            ) : (
+                              <span className="text-xs" style={{ color: '#8A9BB5' }}>Otro</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <Link href={`/admin/clientes/${c.id}`} className="text-xs font-medium transition-colors" style={{ color: '#00C4A0' }}>Ver</Link>
+                              <span style={{ color: '#8A9BB5' }}>·</span>
+                              <Link href={`/admin/clientes/${c.id}#pagos`} className="text-xs transition-colors" style={{ color: '#8A9BB5' }}>Pagos</Link>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile cards */}
+              <div className="lg:hidden divide-y" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+                {filtered.map(c => {
+                  const estadoStyle = ESTADO_COLORS[c.estado] ?? { bg: 'rgba(107,114,128,0.15)', text: '#6B7280' };
+                  const paqueteColor = PAQUETE_COLORS[c.paquete] ?? '#6B7280';
+                  return (
+                    <div key={c.id} className="p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-white">{c.nombre}</div>
+                          {c.empresa && <div className="text-xs" style={{ color: '#8A9BB5' }}>{c.empresa}</div>}
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: estadoStyle.bg, color: estadoStyle.text }}>{c.estado}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: `${paqueteColor}20`, color: paqueteColor }}>{c.paquete}</span>
+                        <span className="font-medium text-white">${fmt(c.mensualidad)} {c.moneda}</span>
+                        <span style={{ color: '#8A9BB5' }}>Día {c.fechaCobro}</span>
+                      </div>
+                      <Link href={`/admin/clientes/${c.id}`} className="text-xs font-medium" style={{ color: '#00C4A0' }}>Ver detalle →</Link>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Mini calendar */}
+        <div className="xl:col-span-1">
+          <MiniCalendar year={currentYear} month={currentMonth} clientes={clientes} />
+        </div>
+      </div>
+    </div>
+  );
+}
