@@ -48,7 +48,7 @@ export default function Header() {
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center group transition-opacity duration-200 hover:opacity-80">
-            <Image src="/assets/images/pneuma-studio-icon.png" alt="Pneuma Studio" width={52} height={46} className="object-contain flex-shrink-0" priority />
+            <Image src="/assets/images/pneuma-studio-icon.png" alt="Pneuma Studio" width={62} height={54} className="object-contain flex-shrink-0" priority />
           </Link>
 
           {/* Desktop Nav */}
@@ -116,7 +116,7 @@ export default function Header() {
             style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
           >
             <Link href="/" className="flex items-center" onClick={() => setMobileOpen(false)}>
-              <Image src="/assets/images/pneuma-studio-icon.png" alt="Pneuma Studio" width={52} height={46} className="object-contain flex-shrink-0" priority />
+              <Image src="/assets/images/pneuma-studio-icon.png" alt="Pneuma Studio" width={62} height={54} className="object-contain flex-shrink-0" priority />
             </Link>
             <button
               className="p-2 text-muted-foreground hover:text-foreground transition-colors"
