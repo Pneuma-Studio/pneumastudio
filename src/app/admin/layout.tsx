@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import CommandPalette from '@/components/admin/CommandPalette';
 
@@ -135,20 +136,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: 'rgba(0,196,160,0.12)', border: '1px solid rgba(0,196,160,0.25)' }}
-          >
-            <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
-              <path d="M16 4L28 10V22L16 28L4 22V10L16 4Z" stroke="#00C4A0" strokeWidth="2" fill="none" />
-              <circle cx="16" cy="16" r="3.5" fill="#00C4A0" />
-            </svg>
-          </div>
-          <div>
-            <div className="text-sm font-700 text-white tracking-tight">Pneuma Studio</div>
-            <div className="text-xs font-500" style={{ color: 'rgba(0,196,160,0.7)' }}>Admin Panel</div>
-          </div>
+        <div className="flex flex-col px-5 py-4 gap-0.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <Image
+            src="/assets/images/pneuma-studio-logo.png"
+            alt="Pneuma Studio"
+            width={130}
+            height={130}
+            className="object-contain"
+            priority
+          />
+          <div className="text-xs font-500 -mt-1" style={{ color: 'rgba(0,196,160,0.7)' }}>Admin Panel</div>
         </div>
 
         {/* Nav */}

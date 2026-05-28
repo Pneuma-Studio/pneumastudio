@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import Image from 'next/image';
 
 interface LoginFormProps {
   loginAction: (formData: FormData) => Promise<void>;
@@ -39,18 +40,15 @@ function LoginFormInner({ loginAction }: LoginFormProps) {
         >
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: 'rgba(0,196,160,0.12)', border: '1px solid rgba(0,196,160,0.3)' }}
-            >
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <path d="M16 4L28 10V22L16 28L4 22V10L16 4Z" stroke="#00C4A0" strokeWidth="2" fill="none" />
-                <path d="M16 10L22 13V19L16 22L10 19V13L16 10Z" fill="#00C4A0" fillOpacity="0.3" />
-                <circle cx="16" cy="16" r="3" fill="#00C4A0" />
-              </svg>
-            </div>
-            <h1 className="text-xl font-bold text-white">Pneuma Studio</h1>
-            <p className="text-sm mt-1" style={{ color: '#8A9BB5' }}>
+            <Image
+              src="/assets/images/pneuma-studio-logo.png"
+              alt="Pneuma Studio"
+              width={160}
+              height={160}
+              className="object-contain mb-1"
+              priority
+            />
+            <p className="text-sm" style={{ color: '#8A9BB5' }}>
               Panel de Administración
             </p>
           </div>

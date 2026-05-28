@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     description: 'High-performance ecommerce platforms and WhatsApp automation built in 3–5 weeks.',
     type: 'website',
     locale: 'es_MX',
-    images: [{ url: '/assets/images/app_logo.png', width: 1200, height: 630 }],
+    images: [{ url: '/assets/images/pneuma-studio-logo.png', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',

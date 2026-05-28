@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
@@ -68,7 +68,7 @@ export default function FounderSection() {
             />
 
             <div className="relative flex flex-col sm:flex-row gap-8 items-start">
-              {/* Avatar — logo badge */}
+              {/* Avatar â€” logo badge */}
               <div className="shrink-0">
                 <div
                   className="w-20 h-20 rounded-2xl flex items-center justify-center"
@@ -79,7 +79,7 @@ export default function FounderSection() {
                   }}
                 >
                   <AppLogo
-                    src="/assets/images/Pneuma_Studio_Logo_Final_Draft_Sin_Fondo_-_copia-1779900651659.png"
+                    src="/assets/images/pneuma-studio-logo.png"
                     size={44}
                   />
                 </div>
@@ -134,3 +134,4 @@ export default function FounderSection() {
     </section>
   );
 }
+

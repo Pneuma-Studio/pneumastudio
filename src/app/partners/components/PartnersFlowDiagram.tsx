@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
@@ -122,7 +122,7 @@ export default function PartnersFlowDiagram() {
         </ScrollAnimator>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          {/* Left — Flow Diagram */}
+          {/* Left â€” Flow Diagram */}
           <ScrollAnimator>
             <div className="flex flex-col items-center gap-0">
               {nodes.map((node, i) => (
@@ -150,7 +150,7 @@ export default function PartnersFlowDiagram() {
                     {node.isCenter ? (
                       <div className="flex flex-col items-center gap-2">
                         <img
-                          src="/assets/images/Pneuma_Studio_Logo_Final_Draft_Sin_Fondo_-_copia-1779900651659.png"
+                          src="/assets/images/pneuma-studio-logo.png"
                           alt="Pneuma Studio"
                           className="h-[35px] w-auto object-contain"
                         />
@@ -178,7 +178,7 @@ export default function PartnersFlowDiagram() {
             </div>
           </ScrollAnimator>
 
-          {/* Right — Benefits */}
+          {/* Right â€” Benefits */}
           <ScrollAnimator delay={150}>
             <div className="flex flex-col gap-3">
               {benefitData.map((item, i) => (
@@ -211,3 +211,4 @@ export default function PartnersFlowDiagram() {
     </section>
   );
 }
+

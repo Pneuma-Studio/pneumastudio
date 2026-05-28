@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -49,7 +49,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center group">
             <AppLogo
-              src="/assets/images/Pneuma_Studio_Logo_Final_Draft_Sin_Fondo_-_copia-1779900651659.png"
+              src="/assets/images/pneuma-studio-logo.png"
               size={140}
               className="transition-transform duration-200 group-hover:scale-105"
             />
@@ -121,7 +121,7 @@ export default function Header() {
           >
             <Link href="/" className="flex items-center" onClick={() => setMobileOpen(false)}>
               <AppLogo
-                src="/assets/images/Pneuma_Studio_Logo_Final_Draft_Sin_Fondo_-_copia-1779900651659.png"
+                src="/assets/images/pneuma-studio-logo.png"
                 size={140}
               />
             </Link>
@@ -179,3 +179,4 @@ export default function Header() {
     </>
   );
 }
+

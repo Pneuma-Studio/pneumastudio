@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -52,17 +52,17 @@ export default function Footer() {
         {/* Main grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
 
-          {/* Left — Brand */}
+          {/* Left â€” Brand */}
           <div className="flex flex-col justify-center">
             <Link href="/" className="inline-block">
               <AppLogo
-                src="/assets/images/Pneuma_Studio_Logo_Final_Draft_Sin_Fondo_-_copia-1779900651659.png"
+                src="/assets/images/pneuma-studio-logo.png"
                 size={148}
               />
             </Link>
           </div>
 
-          {/* Center — Navigation */}
+          {/* Center â€” Navigation */}
           <div>
             <p className="label-tag text-muted-foreground mb-5">
               {lang === 'es' ? 'NAVEGACIÓN' : 'NAVIGATION'}
@@ -83,7 +83,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Right — Contact */}
+          {/* Right â€” Contact */}
           <div className="flex flex-col">
             <p className="label-tag text-muted-foreground mb-5">CONTACT</p>
             <div className="flex flex-col gap-3">
@@ -184,3 +184,4 @@ export default function Footer() {
     </footer>
   );
 }
+
