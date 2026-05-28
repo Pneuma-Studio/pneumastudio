@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import AppLogo from '@/components/ui/AppLogo';
 import { useLanguage } from '@/context/LanguageContext';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
@@ -47,12 +47,9 @@ export default function Header() {
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center group">
-            <AppLogo
-              src="/assets/images/pneuma-studio-logo.png"
-              size={140}
-              className="transition-transform duration-200 group-hover:scale-105"
-            />
+          <Link href="/" className="flex items-center gap-2.5 group transition-opacity duration-200 hover:opacity-80">
+            <Image src="/assets/images/pneuma-studio-icon.png" alt="Pneuma Studio" width={40} height={35} className="object-contain flex-shrink-0" priority />
+            <Image src="/assets/images/pneuma-studio-wordmark.png" alt="" width={90} height={45} className="object-contain flex-shrink-0" style={{ filter: 'brightness(0) invert(1)' }} priority />
           </Link>
 
           {/* Desktop Nav */}
@@ -119,11 +116,9 @@ export default function Header() {
             className="flex items-center justify-between px-4 h-16"
             style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
           >
-            <Link href="/" className="flex items-center" onClick={() => setMobileOpen(false)}>
-              <AppLogo
-                src="/assets/images/pneuma-studio-logo.png"
-                size={140}
-              />
+            <Link href="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
+              <Image src="/assets/images/pneuma-studio-icon.png" alt="Pneuma Studio" width={40} height={35} className="object-contain flex-shrink-0" priority />
+              <Image src="/assets/images/pneuma-studio-wordmark.png" alt="" width={90} height={45} className="object-contain flex-shrink-0" style={{ filter: 'brightness(0) invert(1)' }} priority />
             </Link>
             <button
               className="p-2 text-muted-foreground hover:text-foreground transition-colors"

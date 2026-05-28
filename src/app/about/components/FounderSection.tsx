@@ -1,9 +1,9 @@
 ﻿'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import ScrollAnimator from '@/components/ScrollAnimator';
-import AppLogo from '@/components/ui/AppLogo';
 
 export default function FounderSection() {
   const { t, lang } = useLanguage();
@@ -78,9 +78,13 @@ export default function FounderSection() {
                     boxShadow: '0 0 24px rgba(0,196,160,0.12)',
                   }}
                 >
-                  <AppLogo
-                    src="/assets/images/pneuma-studio-logo.png"
-                    size={44}
+                  <Image
+                    src="/assets/images/pneuma-studio-icon.png"
+                    alt="Pneuma Studio"
+                    width={46}
+                    height={40}
+                    className="object-contain"
+                    priority
                   />
                 </div>
               </div>

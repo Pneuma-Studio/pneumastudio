@@ -41,11 +41,20 @@ function LoginFormInner({ loginAction }: LoginFormProps) {
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
             <Image
-              src="/assets/images/pneuma-studio-logo.png"
+              src="/assets/images/pneuma-studio-icon.png"
               alt="Pneuma Studio"
+              width={72}
+              height={63}
+              className="object-contain mb-3"
+              priority
+            />
+            <Image
+              src="/assets/images/pneuma-studio-wordmark.png"
+              alt=""
               width={160}
-              height={160}
+              height={80}
               className="object-contain mb-1"
+              style={{ filter: 'brightness(0) invert(1)' }}
               priority
             />
             <p className="text-sm" style={{ color: '#8A9BB5' }}>

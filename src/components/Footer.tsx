@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import AppLogo from '@/components/ui/AppLogo';
+import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function Footer() {
@@ -54,11 +54,9 @@ export default function Footer() {
 
           {/* Left â€” Brand */}
           <div className="flex flex-col justify-center">
-            <Link href="/" className="inline-block">
-              <AppLogo
-                src="/assets/images/pneuma-studio-logo.png"
-                size={148}
-              />
+            <Link href="/" className="inline-flex items-center gap-2.5 hover:opacity-80 transition-opacity duration-200">
+              <Image src="/assets/images/pneuma-studio-icon.png" alt="Pneuma Studio" width={40} height={35} className="object-contain flex-shrink-0" />
+              <Image src="/assets/images/pneuma-studio-wordmark.png" alt="" width={90} height={45} className="object-contain flex-shrink-0" style={{ filter: 'brightness(0) invert(1)' }} />
             </Link>
           </div>
 

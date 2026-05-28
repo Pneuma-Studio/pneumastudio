@@ -136,16 +136,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }}
       >
         {/* Logo */}
-        <div className="flex flex-col px-5 py-4 gap-0.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <Image
-            src="/assets/images/pneuma-studio-logo.png"
-            alt="Pneuma Studio"
-            width={130}
-            height={130}
-            className="object-contain"
-            priority
-          />
-          <div className="text-xs font-500 -mt-1" style={{ color: 'rgba(0,196,160,0.7)' }}>Admin Panel</div>
+        <div className="flex items-center gap-2.5 px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <Image src="/assets/images/pneuma-studio-icon.png" alt="Pneuma Studio" width={34} height={30} className="object-contain flex-shrink-0" priority />
+          <div>
+            <Image src="/assets/images/pneuma-studio-wordmark.png" alt="" width={80} height={40} className="object-contain" style={{ filter: 'brightness(0) invert(1)' }} priority />
+            <div className="text-xs font-500 -mt-1" style={{ color: 'rgba(0,196,160,0.7)' }}>Admin Panel</div>
+          </div>
         </div>
 
         {/* Nav */}
