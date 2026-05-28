@@ -57,7 +57,7 @@ function LoginFormInner({ loginAction }: LoginFormProps) {
 
           {/* Form */}
           <form action={loginAction} className="space-y-4" suppressHydrationWarning>
-            <div>
+            <div suppressHydrationWarning>
               <label className="block text-sm font-medium mb-2" style={{ color: '#8A9BB5' }}>
                 Email
               </label>
@@ -72,10 +72,11 @@ function LoginFormInner({ loginAction }: LoginFormProps) {
                   background: 'rgba(255,255,255,0.06)',
                   border: '1px solid rgba(255,255,255,0.1)',
                 }}
+                suppressHydrationWarning
               />
             </div>
 
-            <div>
+            <div suppressHydrationWarning>
               <label className="block text-sm font-medium mb-2" style={{ color: '#8A9BB5' }}>
                 Contraseña
               </label>
@@ -90,6 +91,7 @@ function LoginFormInner({ loginAction }: LoginFormProps) {
                   background: 'rgba(255,255,255,0.06)',
                   border: '1px solid rgba(255,255,255,0.1)',
                 }}
+                suppressHydrationWarning
               />
             </div>
 
