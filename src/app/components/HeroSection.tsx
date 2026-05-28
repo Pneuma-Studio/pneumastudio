@@ -63,10 +63,9 @@ export default function HeroSection() {
       {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center pt-12 pb-8">
 
-        {/* Location chip */}
-        <div className="hero-reveal inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full" style={{ animationDelay: '0ms', background: 'rgba(0,196,160,0.08)', border: '1px solid rgba(0,196,160,0.2)' }}>
-          <span className="w-1.5 h-1.5 rounded-full bg-[#00C4A0] animate-pulse" />
-          <Image src="/assets/images/pneuma-studio-wordmark.png?v=2" alt="Pneuma Studio" width={54} height={18} className="object-contain" style={{ filter: 'brightness(0) invert(1)' }} priority />
+        {/* Logo wordmark */}
+        <div className="hero-reveal mb-6" style={{ animationDelay: '0ms' }}>
+          <Image src="/assets/images/pneuma-studio-wordmark.png?v=2" alt="Pneuma Studio" width={180} height={60} className="object-contain mx-auto" style={{ filter: 'brightness(0) invert(1)' }} priority />
         </div>
 
         {/* Headline */}
