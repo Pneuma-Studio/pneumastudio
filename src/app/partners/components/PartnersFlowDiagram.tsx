@@ -149,7 +149,7 @@ export default function PartnersFlowDiagram() {
                     </p>
                     {node.isCenter ? (
                       <div className="flex flex-col items-center gap-2">
-                        <img src="/assets/images/pneuma-studio-wordmark.png" alt="Pneuma Studio" style={{ height: 70, width: 'auto', objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
+                        <img src="/assets/images/pneuma-studio-wordmark.png" alt="Pneuma Studio" style={{ height: 150, width: 'auto', objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
                       </div>
                     ) : (
                       <h3 className="text-xl font-800 text-white mb-2">
