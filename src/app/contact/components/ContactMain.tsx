@@ -239,13 +239,8 @@ export default function ContactMain() {
                 })}
               </div>
 
-              {/* Tagline below CTA cards — aligned with right form card */}
-              <div className="mt-6 relative">
-                {/* Teal blur line accent */}
-                <div
-                  className="w-12 h-px mb-4"
-                  style={{ background: 'linear-gradient(to right, transparent, #00C4A0, transparent)' }}
-                />
+              {/* Tagline below CTA cards — centered */}
+              <div className="mt-6 relative flex flex-col items-center text-center">
                 <p className="text-base font-700 text-white" style={{ letterSpacing: '-0.01em' }}>
                   {lang === 'es' ? (
                     <>
@@ -283,6 +278,17 @@ export default function ContactMain() {
                     </>
                   )}
                 </p>
+                {/* Teal blur accent centered below text */}
+                <div className="mt-3 flex justify-center">
+                  <div
+                    className="w-16 h-1 rounded-full"
+                    style={{
+                      background: 'linear-gradient(to right, transparent, #00C4A0, transparent)',
+                      boxShadow: '0 0 10px 3px rgba(0,196,160,0.5)',
+                      filter: 'blur(2px)',
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </ScrollAnimator>
