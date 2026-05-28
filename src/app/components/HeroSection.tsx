@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import AnimatedGridBackground from '@/components/AnimatedGridBackground';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
@@ -65,9 +66,7 @@ export default function HeroSection() {
         {/* Location chip */}
         <div className="hero-reveal inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full" style={{ animationDelay: '0ms', background: 'rgba(0,196,160,0.08)', border: '1px solid rgba(0,196,160,0.2)' }}>
           <span className="w-1.5 h-1.5 rounded-full bg-[#00C4A0] animate-pulse" />
-          <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: '#00C4A0', letterSpacing: '0.14em' }}>
-            Live in Monterrey, MX
-          </span>
+          <Image src="/assets/images/pneuma-studio-wordmark.png?v=2" alt="Pneuma Studio" width={54} height={18} className="object-contain" style={{ filter: 'brightness(0) invert(1)' }} priority />
         </div>
 
         {/* Headline */}
