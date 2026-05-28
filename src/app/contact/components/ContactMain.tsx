@@ -238,7 +238,33 @@ export default function ContactMain() {
                   );
                 })}
               </div>
- 
+
+              {/* Tagline below CTA cards — centered */}
+              <div className="mt-3 relative flex flex-col items-center text-center">
+                <p
+                  className="text-base font-700"
+                  style={{
+                    letterSpacing: '-0.01em',
+                    background: 'linear-gradient(to right, #ffffff 0%, #ffffff 55%, #00C4A0 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  {lang === 'es' ?'Diseñamos sistemas. Construimos el futuro.' :'We design systems. We build the future.'}
+                </p>
+                {/* Teal sharp accent line centered below text — thin with subtle glow */}
+                <div className="mt-2 flex justify-center">
+                  <div
+                    style={{
+                      width: '80px',
+                      height: '1px',
+                      background: 'linear-gradient(to right, transparent, #00C4A0, transparent)',
+                      boxShadow: '0 0 6px 1px rgba(0,196,160,0.6)',
+                    }}
+                  />
+                </div>
+              </div>
             </div>
           </ScrollAnimator>
 
