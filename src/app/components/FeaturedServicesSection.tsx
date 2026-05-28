@@ -232,10 +232,9 @@ export default function FeaturedServicesSection() {
                 {whoWeAreFeatures.map((feat, i) => (
                   <div
                     key={i}
-                    className="flex items-start gap-4 p-4 rounded-xl group hover:border-primary/20 transition-all duration-200"
+                    className="flex items-start gap-4 p-4 rounded-xl service-card"
                     style={{
                       background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.06)',
                     }}
                   >
                     <div

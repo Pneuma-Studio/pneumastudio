@@ -142,10 +142,9 @@ export default function PortfolioCaseStudies() {
           {filtered.map((cs, i) => (
             <ScrollAnimator key={cs.name} delay={i * 80}>
               <div
-                className="rounded-2xl overflow-hidden h-full flex flex-col group hover:border-primary/40 transition-all duration-300"
+                className="rounded-2xl overflow-hidden h-full flex flex-col service-card"
                 style={{
                   background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
                   backdropFilter: 'blur(12px)',
                 }}
               >
