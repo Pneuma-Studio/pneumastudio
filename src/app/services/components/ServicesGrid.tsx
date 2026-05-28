@@ -110,10 +110,9 @@ export default function ServicesGrid() {
           {services.map((service, i) => (
             <ScrollAnimator key={i} delay={i * 50}>
               <div
-                className="rounded-xl p-6 group cursor-default h-full hover:border-primary/30 transition-all duration-300"
+                className="rounded-xl p-6 h-full service-card"
                 style={{
                   background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
                   backdropFilter: 'blur(12px)',
                 }}
               >

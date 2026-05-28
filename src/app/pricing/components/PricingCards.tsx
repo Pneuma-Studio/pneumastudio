@@ -140,7 +140,10 @@ export default function PricingCards() {
         {/* Currency Toggle */}
         <ScrollAnimator>
           <div className="flex justify-center mb-10">
-            <div className="flex items-center gap-1 p-1 rounded-xl border border-white/10 bg-white/3">
+            <div
+              className="flex items-center gap-1 p-1 rounded-xl"
+              style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}
+            >
               {(['MXN', 'USD'] as Currency[]).map((c) => (
                 <button
                   key={c}
@@ -162,61 +165,130 @@ export default function PricingCards() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
           {tiers.map((tier, i) => (
             <ScrollAnimator key={tier.name} delay={i * 70}>
-              <div
-                className={`relative rounded-xl flex flex-col h-full ${
-                  tier.popular
-                    ? 'pricing-card-popular glass-card' :'glass-card'
-                }`}
-              >
-                {tier.popular && (
+              {tier.popular ? (
+                /* Popular card — elevated treatment */
+                <div
+                  className="relative rounded-xl flex flex-col h-full"
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '2px solid #00C4A0',
+                    backdropFilter: 'blur(16px)',
+                    boxShadow: '0 0 40px rgba(0,196,160,0.18), 0 0 80px rgba(0,196,160,0.06), 0 8px 32px rgba(0,0,0,0.4)',
+                    transform: 'scale(1.02)',
+                  }}
+                >
+                  {/* Popular badge */}
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="label-tag bg-primary text-primary-foreground px-3 py-1 rounded-full whitespace-nowrap">
+                    <span
+                      className="label-tag px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1.5"
+                      style={{
+                        background: '#00C4A0',
+                        color: '#050D1A',
+                        boxShadow: '0 0 16px rgba(0,196,160,0.5)',
+                      }}
+                    >
+                      <span
+                        className="w-1.5 h-1.5 rounded-full animate-pulse"
+                        style={{ background: '#050D1A', opacity: 0.6 }}
+                      />
                       {t('pricing.popular')}
                     </span>
                   </div>
-                )}
 
-                <div className="p-5 flex flex-col flex-1">
-                  <h3 className="font-800 text-base mb-4">{tier.name}</h3>
+                  {/* Inner ambient glow */}
+                  <div
+                    className="absolute inset-0 rounded-xl pointer-events-none"
+                    style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(0,196,160,0.12) 0%, transparent 60%)' }}
+                  />
 
-                  {/* Price */}
-                  <div className="mb-5">
-                    <div className="flex items-baseline gap-1 mb-1">
-                      <span className="text-2xl font-800 text-foreground">
+                  <div className="relative p-5 flex flex-col flex-1">
+                    <h3 className="font-800 text-base mb-4" style={{ color: '#00C4A0' }}>{tier.name}</h3>
+
+                    {/* Price */}
+                    <div className="mb-5">
+                      <div
+                        className="text-2xl font-800 mb-1"
+                        style={{
+                          background: 'linear-gradient(135deg, #FFFFFF 0%, #00C4A0 100%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                        }}
+                      >
                         {currency === 'MXN' ? tier.mxnInitial : tier.usdInitial}
-                      </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t('pricing.initial')} +{' '}
+                        <span className="font-600" style={{ color: '#00C4A0' }}>
+                          {currency === 'MXN' ? tier.mxnMonthly : tier.usdMonthly}
+                        </span>
+                        /{t('pricing.monthly')}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {t('pricing.initial')} +{' '}
-                      <span className="text-primary font-600">
-                        {currency === 'MXN' ? tier.mxnMonthly : tier.usdMonthly}
-                      </span>
-                      /{t('pricing.monthly')}
-                    </p>
+
+                    {/* Features */}
+                    <ul className="flex flex-col gap-2.5 mb-6 flex-1">
+                      {(lang === 'es' ? tier.featuresEs : tier.features).map((f, j) => (
+                        <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <CheckIcon className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#00C4A0' }} />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* CTA */}
+                    <Link
+                      href="/contact"
+                      className="btn-primary text-center py-2.5 px-4 block"
+                      style={{ boxShadow: '0 0 20px rgba(0,196,160,0.3)' }}
+                    >
+                      {lang === 'es' ? tier.ctaEs : tier.cta}
+                    </Link>
                   </div>
-
-                  {/* Features */}
-                  <ul className="flex flex-col gap-2.5 mb-6 flex-1">
-                    {(lang === 'es' ? tier.featuresEs : tier.features).map((f, j) => (
-                      <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <CheckIcon className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* CTA */}
-                  <Link
-                    href="/contact"
-                    className={`text-center py-2.5 px-4 rounded-lg text-sm font-700 transition-all duration-200 block ${
-                      tier.popular
-                        ? 'btn-primary' :'btn-ghost'
-                    }`}
-                  >
-                    {lang === 'es' ? tier.ctaEs : tier.cta}
-                  </Link>
                 </div>
-              </div>
+              ) : (
+                /* Standard card */
+                <div
+                  className="relative rounded-xl flex flex-col h-full service-card"
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    backdropFilter: 'blur(12px)',
+                  }}
+                >
+                  <div className="p-5 flex flex-col flex-1">
+                    <h3 className="font-800 text-base mb-4 text-white">{tier.name}</h3>
+
+                    {/* Price */}
+                    <div className="mb-5">
+                      <div className="text-2xl font-800 text-foreground mb-1">
+                        {currency === 'MXN' ? tier.mxnInitial : tier.usdInitial}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t('pricing.initial')} +{' '}
+                        <span className="text-primary font-600">
+                          {currency === 'MXN' ? tier.mxnMonthly : tier.usdMonthly}
+                        </span>
+                        /{t('pricing.monthly')}
+                      </p>
+                    </div>
+
+                    {/* Features */}
+                    <ul className="flex flex-col gap-2.5 mb-6 flex-1">
+                      {(lang === 'es' ? tier.featuresEs : tier.features).map((f, j) => (
+                        <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <CheckIcon className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* CTA */}
+                    <Link href="/contact" className="btn-ghost text-center py-2.5 px-4 block text-sm font-700">
+                      {lang === 'es' ? tier.ctaEs : tier.cta}
+                    </Link>
+                  </div>
+                </div>
+              )}
             </ScrollAnimator>
           ))}
         </div>

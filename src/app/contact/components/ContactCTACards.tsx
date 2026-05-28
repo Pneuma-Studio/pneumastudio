@@ -41,10 +41,9 @@ export default function ContactCTACards() {
                   href={card?.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-2xl p-8 flex flex-col items-center gap-4 text-center group hover:border-primary/30 transition-all duration-300 cursor-pointer"
+                  className="rounded-2xl p-8 flex flex-col items-center gap-4 text-center group service-card cursor-pointer"
                   style={{
                     background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
                     backdropFilter: 'blur(12px)',
                   }}
                 >
@@ -61,10 +60,9 @@ export default function ContactCTACards() {
               ) : (
                 <Link
                   href={card?.href}
-                  className="rounded-2xl p-8 flex flex-col items-center gap-4 text-center group hover:border-primary/30 transition-all duration-300 cursor-pointer"
+                  className="rounded-2xl p-8 flex flex-col items-center gap-4 text-center group service-card cursor-pointer"
                   style={{
                     background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
                     backdropFilter: 'blur(12px)',
                   }}
                 >

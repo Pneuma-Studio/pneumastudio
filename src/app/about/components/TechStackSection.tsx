@@ -77,10 +77,9 @@ export default function TechStackSection() {
           {/* Frontend */}
           <ScrollAnimator delay={100}>
             <div
-              className="rounded-xl p-6"
+              className="rounded-xl p-6 service-card"
               style={{
                 background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
                 backdropFilter: 'blur(12px)',
               }}
             >
@@ -117,10 +116,9 @@ export default function TechStackSection() {
           {/* Backend */}
           <ScrollAnimator delay={150}>
             <div
-              className="rounded-xl p-6"
+              className="rounded-xl p-6 service-card"
               style={{
                 background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
                 backdropFilter: 'blur(12px)',
               }}
             >

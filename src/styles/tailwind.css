@@ -324,4 +324,137 @@
     background: rgba(255,255,255,0.06);
     border-color: rgba(255,255,255,0.3);
   }
+
+  /* ── Cinematic orbs ── */
+  .cinematic-orb,
+  .admin-orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(90px);
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    pointer-events: none;
+  }
+
+  @keyframes orb-drift-1 {
+    0%   { transform: translate(0, 0) scale(1); }
+    50%  { transform: translate(40px, -30px) scale(1.08); }
+    100% { transform: translate(-20px, 20px) scale(0.95); }
+  }
+  @keyframes orb-drift-2 {
+    0%   { transform: translate(0, 0) scale(1); }
+    50%  { transform: translate(-50px, -20px) scale(1.1); }
+    100% { transform: translate(30px, 40px) scale(0.92); }
+  }
+  @keyframes orb-drift-3 {
+    0%   { transform: translate(0, 0); }
+    33%  { transform: translate(25px, 50px); }
+    66%  { transform: translate(-35px, -25px); }
+    100% { transform: translate(15px, -40px); }
+  }
+
+  /* ── Film grain overlay ── */
+  .grain-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+  }
+
+  /* ── Cursor spotlight ── */
+  .hero-spotlight::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,196,160,0.07) 0%, transparent 65%);
+    left: var(--sx, 50%);
+    top: var(--sy, 50%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 2;
+    transition: left 0.08s linear, top 0.08s linear;
+  }
+
+  /* ── Hero text reveal ── */
+  .hero-reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: hero-reveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes hero-reveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Gradient hero text ── */
+  .text-gradient-hero {
+    background: linear-gradient(135deg, #FFFFFF 0%, rgba(255,255,255,0.7) 40%, #00C4A0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Service / feature card hover ── */
+  .service-card {
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .service-card:hover {
+    border-color: rgba(0,196,160,0.35);
+    box-shadow: 0 0 32px rgba(0,196,160,0.08), 0 8px 32px rgba(0,0,0,0.3);
+    transform: translateY(-2px);
+  }
+
+  /* ── CTA card ── */
+  .cta-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .cta-border-glow {
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(0,196,160,0.6) 0%, transparent 40%, transparent 60%, rgba(0,196,160,0.4) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: border-rotate 4s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes border-rotate {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  /* ── Admin table row micro-animation ── */
+  .table-row-hover {
+    position: relative;
+    transition: background 0.2s ease;
+  }
+  .table-row-hover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(0,196,160,0.04) 50%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+  }
+  .table-row-hover:hover::after {
+    opacity: 1;
+  }
+  .table-row-hover:hover {
+    background: rgba(255,255,255,0.02);
+  }
 }
