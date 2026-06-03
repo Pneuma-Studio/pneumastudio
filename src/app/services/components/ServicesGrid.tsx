@@ -214,6 +214,12 @@ export default function ServicesGrid() {
             </ScrollAnimator>
           ))}
         </div>
+
+        <p className="mt-8 text-xs" style={{ color: 'rgba(138,155,181,0.5)' }}>
+          {lang === 'es'
+            ? '* Cada servicio incluye una mensualidad base de mantenimiento y soporte.'
+            : '* Every service includes a base monthly maintenance and support fee.'}
+        </p>
       </div>
     </section>
   );
