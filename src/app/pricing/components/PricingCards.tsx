@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import ScrollAnimator from '@/components/ScrollAnimator';
-import { CheckIcon } from '@heroicons/react/24/solid';
+import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
 type Currency = 'MXN' | 'USD';
 
@@ -13,10 +13,15 @@ interface PricingTier {
   popular?: boolean;
   mxnInitial: string;
   mxnMonthly: string;
+  mxnMaintenance: string;
   usdInitial: string;
   usdMonthly: string;
   features: string[];
   featuresEs: string[];
+  expandedFeatures: string[];
+  expandedFeaturesEs: string[];
+  description: string;
+  descriptionEs: string;
   cta: string;
   ctaEs: string;
 }
@@ -26,8 +31,11 @@ const tiers: PricingTier[] = [
     name: 'Starter',
     mxnInitial: '$25,000',
     mxnMonthly: '$699',
+    mxnMaintenance: '$1,500',
     usdInitial: '$2,999',
     usdMonthly: '$199',
+    description: 'Ideal for businesses taking their first step into digital commerce.',
+    descriptionEs: 'Ideal para negocios que dan su primer paso al comercio digital.',
     features: [
       'Single-page storefront',
       'Up to 100 products',
@@ -40,15 +48,40 @@ const tiers: PricingTier[] = [
       'Integración básica WhatsApp',
       'Soporte mensual (4 hrs)',
     ],
+    expandedFeatures: [
+      'Single-page storefront',
+      'Custom domain',
+      'Contact forms',
+      'Pre-configured WhatsApp messages',
+      'Google Analytics installed',
+      'Up to 100 products',
+      'Mobile-responsive design',
+      'Monthly support (4 hrs)',
+      '$1,500 MXN/mo maintenance (required)',
+    ],
+    expandedFeaturesEs: [
+      'Tienda de una página',
+      'Dominio personalizado',
+      'Formularios de contacto',
+      'Mensajes preconfigurados de WhatsApp',
+      'Google Analytics instalado',
+      'Hasta 100 productos',
+      'Diseño adaptable a móvil',
+      'Soporte mensual (4 hrs)',
+      'Mantenimiento $1,500 MXN/mes (requerido)',
+    ],
     cta: 'Start with Starter',
     ctaEs: 'Comenzar con Starter',
   },
   {
-    name: 'Essential',
+    name: 'Esencial',
     mxnInitial: '$45,900',
     mxnMonthly: '$999',
+    mxnMaintenance: '$2,000',
     usdInitial: '$5,999',
     usdMonthly: '$359',
+    description: 'Professional digital presence with a full-featured ecommerce site.',
+    descriptionEs: 'Presencia digital profesional con sitio ecommerce completo.',
     features: [
       'Everything in Starter +',
       'Multi-page ecommerce',
@@ -61,16 +94,39 @@ const tiers: PricingTier[] = [
       'Hasta 500 productos',
       'Panel admin incluido',
     ],
+    expandedFeatures: [
+      'Everything in Starter +',
+      'Multi-page premium website',
+      'Up to 500 products',
+      'Admin panel included',
+      'Contact & lead capture forms',
+      'Advanced Google Analytics',
+      'Monthly support (8 hrs)',
+      '$2,000 MXN/mo maintenance (required)',
+    ],
+    expandedFeaturesEs: [
+      'Todo lo de Starter +',
+      'Sitio web premium multi-página',
+      'Hasta 500 productos',
+      'Panel administrativo incluido',
+      'Formularios de contacto y captura de leads',
+      'Google Analytics avanzado',
+      'Soporte mensual (8 hrs)',
+      'Mantenimiento $2,000 MXN/mes (requerido)',
+    ],
     cta: 'Start with Essential',
-    ctaEs: 'Comenzar con Essential',
+    ctaEs: 'Comenzar con Esencial',
   },
   {
     name: 'Professional',
     popular: true,
     mxnInitial: '$75,900',
     mxnMonthly: '$1,699',
+    mxnMaintenance: '$4,000',
     usdInitial: '$10,999',
     usdMonthly: '$699',
+    description: 'A complete commercial platform with automation and advanced analytics.',
+    descriptionEs: 'Plataforma comercial completa con automatización y analítica avanzada.',
     features: [
       'Everything in Essential +',
       'WhatsApp automation flows',
@@ -78,10 +134,34 @@ const tiers: PricingTier[] = [
       'Analytics & reporting',
     ],
     featuresEs: [
-      'Todo lo de Essential +',
+      'Todo lo de Esencial +',
       'Flujos automatización WhatsApp',
       'Dashboard CRM',
       'Analytics y reportes',
+    ],
+    expandedFeatures: [
+      'Everything in Esencial +',
+      'Shopping cart & checkout',
+      'Card payment processing',
+      'Coupons & site content manager',
+      'WhatsApp automation flows',
+      'CRM dashboard',
+      'Advanced analytics & sales dashboard',
+      'Lead capture system',
+      'Monthly support (12 hrs)',
+      '$4,000 MXN/mo maintenance (required)',
+    ],
+    expandedFeaturesEs: [
+      'Todo lo de Esencial +',
+      'Carrito de compras y checkout',
+      'Pagos con tarjeta',
+      'Cupones y gestor de contenido del sitio',
+      'Flujos de automatización WhatsApp',
+      'Dashboard CRM',
+      'Analytics avanzado y dashboard de ventas',
+      'Sistema de captura de prospectos',
+      'Soporte mensual (12 hrs)',
+      'Mantenimiento $4,000 MXN/mes (requerido)',
     ],
     cta: 'Start with Professional',
     ctaEs: 'Comenzar con Professional',
@@ -90,8 +170,11 @@ const tiers: PricingTier[] = [
     name: 'Premium',
     mxnInitial: '$125,900',
     mxnMonthly: '$2,699',
+    mxnMaintenance: '$7,500',
     usdInitial: '$17,999',
     usdMonthly: '$999',
+    description: 'End-to-end commerce intelligence with multi-location support and priority care.',
+    descriptionEs: 'Inteligencia comercial completa con soporte multi-sucursal y atención prioritaria.',
     features: [
       'Everything in Professional +',
       'Multi-location system',
@@ -104,6 +187,28 @@ const tiers: PricingTier[] = [
       'Integraciones API (3)',
       'Soporte prioritario (20 hrs/mes)',
     ],
+    expandedFeatures: [
+      'Everything in Professional +',
+      'Customer purchase history',
+      'Commercial follow-up system',
+      'Intelligent automated responses',
+      'Advanced reports & product profitability',
+      'Multi-location system',
+      'API integrations (up to 3)',
+      'Priority support (20 hrs/mo)',
+      '$7,500 MXN/mo maintenance (required)',
+    ],
+    expandedFeaturesEs: [
+      'Todo lo de Professional +',
+      'Historial de compras por cliente',
+      'Sistema de seguimiento comercial',
+      'Respuestas inteligentes automatizadas',
+      'Reportes avanzados y rentabilidad por producto',
+      'Sistema multi-sucursal',
+      'Integraciones API (hasta 3)',
+      'Soporte prioritario (20 hrs/mes)',
+      'Mantenimiento $7,500 MXN/mes (requerido)',
+    ],
     cta: 'Start with Premium',
     ctaEs: 'Comenzar con Premium',
   },
@@ -111,8 +216,11 @@ const tiers: PricingTier[] = [
     name: 'Enterprise',
     mxnInitial: 'Desde $180,000',
     mxnMonthly: 'Desde $4,900',
+    mxnMaintenance: 'Negociable',
     usdInitial: 'From $35,000',
     usdMonthly: 'From $4,000',
+    description: 'Fully custom architecture with a dedicated team, SLA, and enterprise-grade support.',
+    descriptionEs: 'Arquitectura completamente personalizada con equipo dedicado, SLA y soporte enterprise.',
     features: [
       'Everything in Premium +',
       'Custom architecture',
@@ -125,6 +233,28 @@ const tiers: PricingTier[] = [
       'Equipo dedicado',
       'SLA y soporte enterprise',
     ],
+    expandedFeatures: [
+      'Everything in Premium +',
+      'Fully custom system architecture',
+      'Dedicated development team',
+      'Guaranteed SLA uptime',
+      'Dedicated account manager',
+      '4-hr guaranteed response time',
+      'Unlimited API integrations',
+      'Custom reporting & dashboards',
+      'Negotiable maintenance fee',
+    ],
+    expandedFeaturesEs: [
+      'Todo lo de Premium +',
+      'Arquitectura de sistema totalmente personalizada',
+      'Equipo de desarrollo dedicado',
+      'SLA de disponibilidad garantizado',
+      'Gerente de cuenta asignado',
+      'Tiempo de respuesta garantizado en 4 hrs',
+      'Integraciones API ilimitadas',
+      'Reportes y dashboards a medida',
+      'Tarifa de mantenimiento negociable',
+    ],
     cta: 'Contact for Enterprise',
     ctaEs: 'Contactar para Enterprise',
   },
@@ -133,6 +263,21 @@ const tiers: PricingTier[] = [
 export default function PricingCards() {
   const { t, lang } = useLanguage();
   const [currency, setCurrency] = useState<Currency>('MXN');
+  const [expandedTier, setExpandedTier] = useState<string | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  const activeTier = tiers.find(t => t.name === expandedTier) ?? null;
+
+  useEffect(() => {
+    if (!expandedTier) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setExpandedTier(null); };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [expandedTier]);
 
   return (
     <section className="pb-16 bg-background">
@@ -166,9 +311,8 @@ export default function PricingCards() {
           {tiers.map((tier, i) => (
             <ScrollAnimator key={tier.name} delay={i * 70} className="h-full">
               {tier.popular ? (
-                /* Popular card — elevated treatment */
                 <div
-                  className="relative rounded-xl flex flex-col h-full"
+                  className="relative rounded-xl flex flex-col h-full cursor-pointer"
                   style={{
                     background: 'rgba(255,255,255,0.05)',
                     border: '2px solid #00C4A0',
@@ -176,57 +320,31 @@ export default function PricingCards() {
                     boxShadow: '0 0 40px rgba(0,196,160,0.18), 0 0 80px rgba(0,196,160,0.06), 0 8px 32px rgba(0,0,0,0.4)',
                     transform: 'scale(1.02)',
                   }}
+                  onClick={() => setExpandedTier(tier.name)}
                 >
-                  {/* Popular badge */}
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                     <span
                       className="label-tag px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1.5"
-                      style={{
-                        background: '#00C4A0',
-                        color: '#050D1A',
-                        boxShadow: '0 0 16px rgba(0,196,160,0.5)',
-                      }}
+                      style={{ background: '#00C4A0', color: '#050D1A', boxShadow: '0 0 16px rgba(0,196,160,0.5)' }}
                     >
-                      <span
-                        className="w-1.5 h-1.5 rounded-full animate-pulse"
-                        style={{ background: '#050D1A', opacity: 0.6 }}
-                      />
+                      <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#050D1A', opacity: 0.6 }} />
                       {t('pricing.popular')}
                     </span>
                   </div>
-
-                  {/* Inner ambient glow */}
-                  <div
-                    className="absolute inset-0 rounded-xl pointer-events-none"
-                    style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(0,196,160,0.12) 0%, transparent 60%)' }}
-                  />
-
+                  <div className="absolute inset-0 rounded-xl pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(0,196,160,0.12) 0%, transparent 60%)' }} />
                   <div className="relative p-5 flex flex-col flex-1">
                     <h3 className="font-800 text-base mb-4" style={{ color: '#00C4A0' }}>{tier.name}</h3>
-
-                    {/* Price */}
                     <div className="mb-5">
-                      <div
-                        className="text-2xl font-800 mb-1"
-                        style={{
-                          background: 'linear-gradient(135deg, #FFFFFF 0%, #00C4A0 100%)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          backgroundClip: 'text',
-                        }}
-                      >
+                      <div className="text-2xl font-800 mb-1" style={{ background: 'linear-gradient(135deg, #FFFFFF 0%, #00C4A0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                         {currency === 'MXN' ? tier.mxnInitial : tier.usdInitial}
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {t('pricing.initial')} +{' '}
                         <span className="font-600" style={{ color: '#00C4A0' }}>
                           {currency === 'MXN' ? tier.mxnMonthly : tier.usdMonthly}
-                        </span>
-                        /{t('pricing.monthly')}
+                        </span>/{t('pricing.monthly')}
                       </p>
                     </div>
-
-                    {/* Features */}
                     <ul className="flex flex-col gap-2.5 mb-6 flex-1">
                       {(lang === 'es' ? tier.featuresEs : tier.features).map((f, j) => (
                         <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
@@ -235,30 +353,24 @@ export default function PricingCards() {
                         </li>
                       ))}
                     </ul>
-
-                    {/* CTA */}
-                    <Link
-                      href="/contact"
-                      className="btn-primary text-center py-2.5 px-4 block"
-                      style={{ boxShadow: '0 0 20px rgba(0,196,160,0.3)' }}
-                    >
-                      {lang === 'es' ? tier.ctaEs : tier.cta}
-                    </Link>
+                    <div className="flex items-center justify-center gap-1.5 mt-auto pt-3" style={{ borderTop: '1px solid rgba(0,196,160,0.15)' }}>
+                      <span className="text-xs font-600" style={{ color: 'rgba(0,196,160,0.7)' }}>
+                        {lang === 'es' ? 'Ver todo lo incluido' : 'See everything included'}
+                      </span>
+                      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style={{ color: 'rgba(0,196,160,0.7)' }}>
+                        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
               ) : (
-                /* Standard card */
                 <div
-                  className="relative rounded-xl flex flex-col h-full service-card"
-                  style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    backdropFilter: 'blur(12px)',
-                  }}
+                  className="relative rounded-xl flex flex-col h-full service-card cursor-pointer"
+                  style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(12px)' }}
+                  onClick={() => setExpandedTier(tier.name)}
                 >
                   <div className="p-5 flex flex-col flex-1">
                     <h3 className="font-800 text-base mb-4 text-white">{tier.name}</h3>
-
-                    {/* Price */}
                     <div className="mb-5">
                       <div className="text-2xl font-800 text-foreground mb-1">
                         {currency === 'MXN' ? tier.mxnInitial : tier.usdInitial}
@@ -267,12 +379,9 @@ export default function PricingCards() {
                         {t('pricing.initial')} +{' '}
                         <span className="text-primary font-600">
                           {currency === 'MXN' ? tier.mxnMonthly : tier.usdMonthly}
-                        </span>
-                        /{t('pricing.monthly')}
+                        </span>/{t('pricing.monthly')}
                       </p>
                     </div>
-
-                    {/* Features */}
                     <ul className="flex flex-col gap-2.5 mb-6 flex-1">
                       {(lang === 'es' ? tier.featuresEs : tier.features).map((f, j) => (
                         <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
@@ -281,11 +390,14 @@ export default function PricingCards() {
                         </li>
                       ))}
                     </ul>
-
-                    {/* CTA */}
-                    <Link href="/contact" className="btn-ghost text-center py-2.5 px-4 block text-sm font-700">
-                      {lang === 'es' ? tier.ctaEs : tier.cta}
-                    </Link>
+                    <div className="flex items-center justify-center gap-1.5 mt-auto pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <span className="text-xs font-600" style={{ color: 'rgba(138,155,181,0.6)' }}>
+                        {lang === 'es' ? 'Ver todo lo incluido' : 'See everything included'}
+                      </span>
+                      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style={{ color: 'rgba(138,155,181,0.6)' }}>
+                        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
               )}
@@ -300,6 +412,116 @@ export default function PricingCards() {
           </p>
         </ScrollAnimator>
       </div>
+
+      {/* Modal */}
+      {activeTier && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setExpandedTier(null); }}
+        >
+          <div
+            ref={modalRef}
+            className="relative w-full max-w-lg rounded-2xl overflow-hidden"
+            style={{
+              background: 'rgba(8,18,34,0.98)',
+              border: activeTier.popular ? '1px solid rgba(0,196,160,0.4)' : '1px solid rgba(255,255,255,0.1)',
+              boxShadow: activeTier.popular
+                ? '0 0 60px rgba(0,196,160,0.15), 0 24px 48px rgba(0,0,0,0.6)'
+                : '0 24px 48px rgba(0,0,0,0.6)',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+            }}
+          >
+            {/* Top accent */}
+            <div className="absolute top-0 left-0 right-0 h-px" style={{
+              background: activeTier.popular
+                ? 'linear-gradient(90deg, transparent, #00C4A0, transparent)'
+                : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)',
+            }} />
+
+            {/* Inner glow */}
+            {activeTier.popular && (
+              <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(0,196,160,0.08) 0%, transparent 55%)' }} />
+            )}
+
+            <div className="relative p-7">
+              {/* Close button */}
+              <button
+                onClick={() => setExpandedTier(null)}
+                className="absolute top-5 right-5 w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+                style={{ background: 'rgba(255,255,255,0.06)', color: '#8A9BB5' }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'}
+              >
+                <XMarkIcon className="w-4 h-4" />
+              </button>
+
+              {/* Header */}
+              <div className="mb-6">
+                {activeTier.popular && (
+                  <span className="inline-flex items-center gap-1.5 label-tag px-2.5 py-1 rounded-full mb-3" style={{ background: 'rgba(0,196,160,0.12)', color: '#00C4A0', border: '1px solid rgba(0,196,160,0.25)' }}>
+                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#00C4A0' }} />
+                    {t('pricing.popular')}
+                  </span>
+                )}
+                <h2 className="text-2xl font-800 text-white mb-1">{activeTier.name}</h2>
+                <p className="text-sm" style={{ color: '#8A9BB5' }}>
+                  {lang === 'es' ? activeTier.descriptionEs : activeTier.description}
+                </p>
+              </div>
+
+              {/* Price block */}
+              <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                <div className="flex items-end gap-3 flex-wrap">
+                  <div>
+                    <p className="text-xs mb-0.5" style={{ color: '#8A9BB5' }}>{t('pricing.initial')}</p>
+                    <div className="text-3xl font-800" style={activeTier.popular ? {
+                      background: 'linear-gradient(135deg, #FFFFFF 0%, #00C4A0 100%)',
+                      WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                    } : { color: '#FFFFFF' }}>
+                      {currency === 'MXN' ? activeTier.mxnInitial : activeTier.usdInitial} {currency}
+                    </div>
+                  </div>
+                  <div className="pb-1">
+                    <p className="text-xs mb-0.5" style={{ color: '#8A9BB5' }}>{lang === 'es' ? 'Mensualidad' : 'Monthly'}</p>
+                    <div className="text-lg font-700" style={{ color: '#00C4A0' }}>
+                      {currency === 'MXN' ? activeTier.mxnMonthly : activeTier.usdMonthly}/{t('pricing.monthly')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Features list */}
+              <div className="mb-7">
+                <p className="text-xs font-700 tracking-widest mb-4" style={{ color: 'rgba(138,155,181,0.5)' }}>
+                  {lang === 'es' ? 'QUÉ INCLUYE' : "WHAT'S INCLUDED"}
+                </p>
+                <ul className="flex flex-col gap-3">
+                  {(lang === 'es' ? activeTier.expandedFeaturesEs : activeTier.expandedFeatures).map((f, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm" style={{ color: '#C8D5E8' }}>
+                      <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5" style={{ background: 'rgba(0,196,160,0.12)', border: '1px solid rgba(0,196,160,0.2)' }}>
+                        <CheckIcon className="w-3 h-3" style={{ color: '#00C4A0' }} />
+                      </div>
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* CTA */}
+              <Link
+                href="/contact"
+                className={activeTier.popular ? 'btn-primary text-center py-3 px-6 block' : 'btn-ghost text-center py-3 px-6 block text-sm font-700'}
+                style={activeTier.popular ? { boxShadow: '0 0 20px rgba(0,196,160,0.3)' } : {}}
+                onClick={() => setExpandedTier(null)}
+              >
+                {lang === 'es' ? activeTier.ctaEs : activeTier.cta}
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
