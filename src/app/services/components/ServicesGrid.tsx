@@ -13,6 +13,7 @@ interface ServiceCard {
   descEs: string;
   tag?: string;
   tagEs?: string;
+  price: string;
 }
 
 const services: ServiceCard[] = [
@@ -24,6 +25,7 @@ const services: ServiceCard[] = [
     descEs: 'Tiendas construidas a medida, optimizadas para conversión con gestión de catálogo.',
     tag: 'CORE',
     tagEs: 'NÚCLEO',
+    price: 'Desde $45,900 MXN',
   },
   {
     icon: 'BuildingStorefrontIcon',
@@ -33,6 +35,7 @@ const services: ServiceCard[] = [
     descEs: 'Motores de comercio multi-vendedor y multi-categoría con sincronización en tiempo real.',
     tag: 'CORE',
     tagEs: 'NÚCLEO',
+    price: 'Desde $75,900 MXN',
   },
   {
     icon: 'CubeIcon',
@@ -40,6 +43,7 @@ const services: ServiceCard[] = [
     titleEs: 'Inventario & POS',
     desc: 'Real-time stock sync across all channels, locations, and platforms.',
     descEs: 'Sincronización de inventario en tiempo real en todos los canales y sucursales.',
+    price: 'Desde $45,900 MXN',
   },
   {
     icon: 'UserGroupIcon',
@@ -47,6 +51,7 @@ const services: ServiceCard[] = [
     titleEs: 'CRM Dashboards',
     desc: 'Customer intelligence centralized in a unified, actionable view.',
     descEs: 'Inteligencia de clientes centralizada en una vista unificada y accionable.',
+    price: 'Desde $75,900 MXN',
   },
   {
     icon: 'ChatBubbleLeftRightIcon',
@@ -56,6 +61,7 @@ const services: ServiceCard[] = [
     descEs: 'Comercio conversacional, flujos de soporte y notificaciones de pedidos.',
     tag: 'POPULAR',
     tagEs: 'POPULAR',
+    price: 'Desde $25,000 MXN',
   },
   {
     icon: 'CalendarDaysIcon',
@@ -63,6 +69,7 @@ const services: ServiceCard[] = [
     titleEs: 'Sistemas de Citas',
     desc: 'Booking, automated reminders, and full calendar management.',
     descEs: 'Reservas, recordatorios automáticos y gestión completa de calendario.',
+    price: 'Desde $25,000 MXN',
   },
   {
     icon: 'ChartBarIcon',
@@ -70,6 +77,7 @@ const services: ServiceCard[] = [
     titleEs: 'Analytics de Negocio',
     desc: 'Real-time data visualization for faster, smarter decisions.',
     descEs: 'Visualización de datos en tiempo real para decisiones más inteligentes.',
+    price: 'Desde $45,900 MXN',
   },
   {
     icon: 'Squares2X2Icon',
@@ -77,6 +85,7 @@ const services: ServiceCard[] = [
     titleEs: 'Paneles Admin a Medida',
     desc: 'Tailored control centers built around your exact operation.',
     descEs: 'Centros de control personalizados construidos alrededor de tu operación.',
+    price: 'Desde $45,900 MXN',
   },
   {
     icon: 'CpuChipIcon',
@@ -86,6 +95,7 @@ const services: ServiceCard[] = [
     descEs: 'Automatización inteligente y optimización de procesos en cada capa.',
     tag: 'NEW',
     tagEs: 'NUEVO',
+    price: 'Desde $75,900 MXN',
   },
   {
     icon: 'PuzzlePieceIcon',
@@ -93,6 +103,7 @@ const services: ServiceCard[] = [
     titleEs: 'Integraciones API',
     desc: 'Connect any platform, tool, or data source seamlessly.',
     descEs: 'Conecta cualquier plataforma, herramienta o fuente de datos sin fricción.',
+    price: 'Desde $25,000 MXN',
   },
   {
     icon: 'TagIcon',
@@ -100,6 +111,7 @@ const services: ServiceCard[] = [
     titleEs: 'Mercado Libre',
     desc: 'Full ML catalog, listing automation, and order management.',
     descEs: 'Catálogo ML completo, automatización de listados y gestión de pedidos.',
+    price: 'Desde $25,000 MXN',
   },
   {
     icon: 'MapPinIcon',
@@ -107,6 +119,7 @@ const services: ServiceCard[] = [
     titleEs: 'Sistemas Multi-sucursal',
     desc: 'Centralized operations and reporting across all branches.',
     descEs: 'Operaciones y reportes centralizados en todas las sucursales.',
+    price: 'Desde $75,900 MXN',
   },
 ];
 
@@ -189,9 +202,14 @@ export default function ServicesGrid() {
                 <h3 className="font-700 text-base mb-2.5 text-white">
                   {lang === 'es' ? service.titleEs : service.title}
                 </h3>
-                <p className="text-sm leading-relaxed" style={{ color: '#8A9BB5' }}>
+                <p className="text-sm leading-relaxed mb-4" style={{ color: '#8A9BB5' }}>
                   {lang === 'es' ? service.descEs : service.desc}
                 </p>
+                <div className="pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span className="text-xs font-700 tracking-wide" style={{ color: '#00C4A0' }}>
+                    {service.price}
+                  </span>
+                </div>
               </div>
             </ScrollAnimator>
           ))}
