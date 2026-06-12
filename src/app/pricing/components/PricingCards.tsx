@@ -397,7 +397,7 @@ export default function PricingCards() {
 
         {/* Note */}
         <ScrollAnimator delay={200}>
-          <p className="text-center text-sm text-muted-foreground mt-8 max-w-lg mx-auto">
+          <p className="text-center text-sm text-muted-foreground mt-8 max-w-2xl mx-auto whitespace-nowrap">
             * {t('pricing.note')}
           </p>
         </ScrollAnimator>

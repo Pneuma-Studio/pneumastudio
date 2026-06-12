@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -53,18 +53,18 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
 
           {/* Left – Brand */}
-          <div className="flex flex-col">
-            <Link href="/" className="inline-block hover:opacity-80 transition-opacity duration-200 self-start">
-              <Image src="/assets/images/pneuma-studio-logo.png" alt="Pneuma Studio" width={240} height={160} className="object-contain w-40 md:w-60" />
+          <div className="flex flex-col items-center justify-center">
+            <Link href="/" className="inline-block hover:opacity-80 transition-opacity duration-200">
+              <Image src="/assets/images/pneuma-studio-wordmark.png" alt="Pneuma Studio" width={180} height={60} className="object-contain w-36 md:w-44" />
             </Link>
           </div>
 
-          {/* Center â€” Navigation */}
+          {/* Center – Navigation */}
           <div>
             <p className="label-tag text-muted-foreground mb-5">
               {lang === 'es' ? 'NAVEGACIÓN' : 'NAVIGATION'}
             </p>
-            <div className="flex flex-col gap-2.5">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-2.5">
               {navLinks?.map((link) => (
                 <Link
                   key={link?.href}
@@ -80,7 +80,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Right â€” Contact */}
+          {/* Right – Contact */}
           <div className="flex flex-col">
             <p className="label-tag text-muted-foreground mb-5">CONTACT</p>
             <div className="flex flex-col gap-3">
@@ -143,21 +143,21 @@ export default function Footer() {
                 @pneumastudiomx
               </a>
             </div>
-
-            {/* Tagline pushed to bottom of column */}
-            <p
-              className="text-sm leading-relaxed mt-auto pt-6 font-600"
-              style={{
-                background: 'linear-gradient(135deg, #FFFFFF 0%, rgba(255,255,255,0.6) 50%, #00C4A0 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              {t('footer.tagline')}
-            </p>
           </div>
         </div>
+
+        {/* Tagline centered */}
+        <p
+          className="text-sm leading-relaxed mb-8 font-600 text-center"
+          style={{
+            background: 'linear-gradient(135deg, #FFFFFF 0%, rgba(255,255,255,0.6) 50%, #00C4A0 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
+          {t('footer.tagline')}
+        </p>
 
         {/* Bottom bar */}
         <div
@@ -181,4 +181,3 @@ export default function Footer() {
     </footer>
   );
 }
-

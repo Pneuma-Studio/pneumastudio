@@ -48,7 +48,7 @@ export default function Header() {
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center group transition-opacity duration-200 hover:opacity-80">
-            <Image src="/assets/images/pneuma-studio-icon.png" alt="Pneuma Studio" width={68} height={60} className="object-contain flex-shrink-0" priority />
+            <Image src="/assets/images/pneuma-studio-icon.png" alt="Pneuma Studio" width={80} height={70} className="object-contain flex-shrink-0" priority />
           </Link>
 
           {/* Desktop Nav */}
