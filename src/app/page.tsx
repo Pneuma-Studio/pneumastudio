@@ -47,6 +47,14 @@ const AvailabilitySection = dynamic(
   () => import('@/app/components/AvailabilitySection'),
   { ssr: true }
 );
+const ProcessSection = dynamic(
+  () => import('@/app/components/ProcessSection'),
+  { ssr: true }
+);
+const TestimonialsSection = dynamic(
+  () => import('@/app/components/TestimonialsSection'),
+  { ssr: true }
+);
 
 export default function HomePage() {
   return (
@@ -65,7 +73,13 @@ export default function HomePage() {
             <FeaturedPortfolioSection />
           </Suspense>
           <Suspense fallback={<div className="h-96" />}>
+            <ProcessSection />
+          </Suspense>
+          <Suspense fallback={<div className="h-96" />}>
             <GuaranteesSection />
+          </Suspense>
+          <Suspense fallback={<div className="h-64" />}>
+            <TestimonialsSection />
           </Suspense>
           <Suspense fallback={<div className="h-96" />}>
             <AvailabilitySection />

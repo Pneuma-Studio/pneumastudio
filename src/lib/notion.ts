@@ -4,6 +4,112 @@ const notion = new Client({ auth: process.env.NOTION_API_KEY });
 
 const CLIENTES_DB = process.env.NOTION_CLIENTES_DB_ID!;
 const PAGOS_DB = process.env.NOTION_PAGOS_DB_ID!;
+const BLOG_DB = process.env.NOTION_BLOG_DB_ID!;
+
+// ─── Blog Types ───────────────────────────────────────────────────────────────
+
+export interface BlogPost {
+  id: string;
+  titulo: string;
+  slug: string;
+  extracto: string;
+  tags: string[];
+  fechaPublicacion: string;
+  tiempoLectura: number;
+  imagen: string;
+  autor: string;
+}
+
+export interface BlogBlock {
+  type: string;
+  text: string;
+  url?: string;
+  language?: string;
+}
+
+function mapBlogPost(page: any): BlogPost {
+  const p = page.properties;
+  return {
+    id: page.id,
+    titulo: extractText(p['Título'] ?? p['Title'] ?? p['title']),
+    slug: extractText(p['Slug']),
+    extracto: extractText(p['Extracto']),
+    tags: extractMultiSelect(p['Etiquetas']),
+    fechaPublicacion: extractDate(p['FechaPublicacion'] ?? p['Fecha']),
+    tiempoLectura: extractNumber(p['TiempoLectura']) || 5,
+    imagen: p['Imagen']?.url ?? '',
+    autor: extractText(p['Autor']) || 'Pneuma Studio',
+  };
+}
+
+export async function getPublishedPosts(): Promise<BlogPost[]> {
+  if (!BLOG_DB) return [];
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const res: any = await notion.databases.query({
+      database_id: BLOG_DB,
+      filter: {
+        and: [
+          { property: 'Estado', select: { equals: 'Publicado' } },
+          { property: 'FechaPublicacion', date: { on_or_before: today } },
+        ],
+      },
+      sorts: [{ property: 'FechaPublicacion', direction: 'descending' }],
+    });
+    return res.results.map(mapBlogPost);
+  } catch {
+    return [];
+  }
+}
+
+export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
+  if (!BLOG_DB) return null;
+  try {
+    const res: any = await notion.databases.query({
+      database_id: BLOG_DB,
+      filter: { property: 'Slug', rich_text: { equals: slug } },
+    });
+    if (!res.results.length) return null;
+    return mapBlogPost(res.results[0]);
+  } catch {
+    return null;
+  }
+}
+
+export async function getPostBlocks(pageId: string): Promise<BlogBlock[]> {
+  try {
+    const res: any = await notion.blocks.children.list({ block_id: pageId, page_size: 100 });
+    return res.results.flatMap((block: any): BlogBlock[] => {
+      const richText = (arr: any[]) => arr?.map((r: any) => r.plain_text).join('') ?? '';
+      switch (block.type) {
+        case 'paragraph':
+          return [{ type: 'paragraph', text: richText(block.paragraph.rich_text) }];
+        case 'heading_1':
+          return [{ type: 'h1', text: richText(block.heading_1.rich_text) }];
+        case 'heading_2':
+          return [{ type: 'h2', text: richText(block.heading_2.rich_text) }];
+        case 'heading_3':
+          return [{ type: 'h3', text: richText(block.heading_3.rich_text) }];
+        case 'bulleted_list_item':
+          return [{ type: 'li', text: richText(block.bulleted_list_item.rich_text) }];
+        case 'numbered_list_item':
+          return [{ type: 'oli', text: richText(block.numbered_list_item.rich_text) }];
+        case 'code':
+          return [{ type: 'code', text: richText(block.code.rich_text), language: block.code.language }];
+        case 'quote':
+          return [{ type: 'quote', text: richText(block.quote.rich_text) }];
+        case 'image':
+          return [{ type: 'image', text: block.image.caption?.[0]?.plain_text ?? '', url: block.image.file?.url ?? block.image.external?.url }];
+        case 'divider':
+          return [{ type: 'divider', text: '' }];
+        default:
+          return [];
+      }
+    });
+  } catch {
+    return [];
+  }
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

@@ -12,6 +12,7 @@ export default function Footer() {
     { href: '/services', label: t('nav.services') },
     { href: '/portfolio', label: t('nav.portfolio') },
     { href: '/pricing', label: t('nav.pricing') },
+    { href: '/blog', label: t('nav.blog') },
     { href: '/partners', label: t('nav.partners') },
     { href: '/about', label: t('nav.about') },
     { href: '/contact', label: t('nav.contact') },
@@ -164,9 +165,20 @@ export default function Footer() {
           className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
           style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
         >
-          <p className="text-xs" style={{ color: 'rgba(138,155,181,0.6)' }}>
-            {t('footer.rights')}
-          </p>
+          <div className="flex items-center gap-4">
+            <p className="text-xs" style={{ color: 'rgba(138,155,181,0.6)' }}>
+              {t('footer.rights')}
+            </p>
+            <Link
+              href="/privacidad"
+              className="text-xs transition-colors duration-200"
+              style={{ color: 'rgba(138,155,181,0.6)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#00C4A0')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(138,155,181,0.6)')}
+            >
+              Aviso de Privacidad
+            </Link>
+          </div>
           <div className="flex items-center gap-2">
             <span
               className="w-1.5 h-1.5 rounded-full animate-pulse"

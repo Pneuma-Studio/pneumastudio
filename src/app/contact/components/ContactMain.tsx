@@ -53,9 +53,18 @@ export default function ContactMain() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    router.push(`/confirmation?source=contact&email=${encodeURIComponent(formData.email)}`);
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error('send failed');
+      router.push(`/confirmation?source=contact&email=${encodeURIComponent(formData.email)}`);
+    } catch {
+      setLoading(false);
+      alert(lang === 'es' ? 'Error al enviar. Intenta por WhatsApp.' : 'Send failed. Try via WhatsApp.');
+    }
   };
 
   const serviceOptions = lang === 'es'
@@ -175,7 +184,7 @@ export default function ContactMain() {
 
               {/* CTA button */}
               <a
-                href="https://wa.me/528112803360?text=Hola%20Nazre%2C%20me%20gustar%C3%ADa%20agendar%20una%20llamada%20de%2030%20minutos%20con%20Pneuma%20Studio"
+                href={process.env.NEXT_PUBLIC_CAL_COM_LINK || 'https://wa.me/528112803360?text=Hola%20Nazre%2C%20me%20gustar%C3%ADa%20agendar%20una%20llamada%20de%2030%20minutos%20con%20Pneuma%20Studio'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary w-full justify-center py-3.5 mt-2 inline-flex items-center gap-2"

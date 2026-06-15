@@ -19,6 +19,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.partners': 'White-Label',
     'nav.about': 'Nosotros',
     'nav.contact': 'Contacto',
+    'nav.blog': 'Blog',
     'nav.cta': 'Iniciar Proyecto',
     // Hero
     'hero.label': 'PREMIUM DIGITAL COMMERCE STUDIO',
@@ -78,6 +79,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.partners': 'White-Label',
     'nav.about': 'About',
     'nav.contact': 'Contact',
+    'nav.blog': 'Blog',
     'nav.cta': 'Start a Project',
     // Hero
     'hero.label': 'PREMIUM DIGITAL COMMERCE STUDIO',

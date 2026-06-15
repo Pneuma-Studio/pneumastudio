@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic';
 
 const PricingCards = dynamic(() => import('@/app/pricing/components/PricingCards'), { ssr: true });
 const PricingAddons = dynamic(() => import('@/app/pricing/components/PricingAddons'), { ssr: true });
+const PricingCalculator = dynamic(() => import('@/app/pricing/components/PricingCalculator'), { ssr: true });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pneumastudio.mx';
 
@@ -44,6 +45,9 @@ export default function PricingPage() {
           </Suspense>
           <Suspense fallback={<div className="h-64" />}>
             <PricingAddons />
+          </Suspense>
+          <Suspense fallback={<div className="h-96" />}>
+            <PricingCalculator />
           </Suspense>
         </main>
         <Footer />

@@ -65,9 +65,18 @@ export default function PartnerForm() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    router.push(`/confirmation?source=partner&email=${encodeURIComponent(formData.email)}`);
+    try {
+      const res = await fetch('/api/partner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error('send failed');
+      router.push(`/confirmation?source=partner&email=${encodeURIComponent(formData.email)}`);
+    } catch {
+      setLoading(false);
+      alert(lang === 'es' ? 'Error al enviar. Intenta por WhatsApp.' : 'Send failed. Try via WhatsApp.');
+    }
   };
 
   const modelOptions = lang === 'es'

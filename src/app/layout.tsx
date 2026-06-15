@@ -4,6 +4,7 @@ import { Plus_Jakarta_Sans, Inter } from 'next/font/google';
 import Script from 'next/script';
 import '../styles/tailwind.css';
 import { LanguageProvider } from '@/context/LanguageContext';
+import CookieBanner from '@/components/CookieBanner';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -270,6 +271,7 @@ export default function RootLayout({
         />
         <LanguageProvider>
           {children}
+          <CookieBanner />
         </LanguageProvider>
         {gaId && gaId !== 'your-google-analytics-id-here' && (
           <>
