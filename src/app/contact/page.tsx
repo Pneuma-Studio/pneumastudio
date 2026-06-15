@@ -9,9 +9,26 @@ import dynamic from 'next/dynamic';
 const ContactMain = dynamic(() => import('@/app/contact/components/ContactMain'), { ssr: true });
 const FAQSection = dynamic(() => import('@/app/components/FAQSection'), { ssr: true });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pneumastudio.mx';
+
 export const metadata = {
-  title: 'Contacto — Pneuma Studio',
-  description: 'Inicia tu proyecto con Pneuma Studio. Respondemos en menos de 24 horas. WhatsApp: +52 811 280 3360.',
+  title: 'Contacto — Inicia Tu Proyecto Digital en Monterrey',
+  description:
+    'Habla con Pneuma Studio hoy. Respondemos en menos de 24 horas. WhatsApp: +52 811 280 3360 · Email: pneumastudiomx@gmail.com. Monterrey, Nuevo León, México.',
+  keywords: [
+    'contacto agencia digital Monterrey',
+    'contratar desarrollo web Monterrey',
+    'presupuesto ecommerce México',
+    'WhatsApp agencia digital Monterrey',
+    'iniciar proyecto web México',
+  ],
+  alternates: { canonical: `${siteUrl}/contact` },
+  openGraph: {
+    title: 'Contacto — Inicia Tu Proyecto | Pneuma Studio',
+    description:
+      'Respuesta en menos de 24 horas. WhatsApp +52 811 280 3360. Monterrey, Nuevo León, México.',
+    url: `${siteUrl}/contact`,
+  },
 };
 
 export default function ContactPage() {

@@ -11,9 +11,26 @@ const PortfolioCaseStudies = dynamic(
   { ssr: true }
 );
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pneumastudio.mx';
+
 export const metadata = {
-  title: 'Portafolio — Pneuma Studio',
-  description: 'Casos de estudio reales con resultados medibles. +68% conversión, -80% carga administrativa, 3× volumen de pedidos.',
+  title: 'Portafolio — Casos de Éxito con Resultados Reales',
+  description:
+    'Casos de estudio de Pneuma Studio: +68% conversión, −80% carga administrativa, 3× volumen de pedidos. Plataformas ecommerce y automatizaciones construidas en Monterrey.',
+  keywords: [
+    'portafolio agencia digital Monterrey',
+    'casos de éxito ecommerce México',
+    'resultados desarrollo web',
+    'ejemplos tienda online México',
+    'proyectos automatización WhatsApp',
+  ],
+  alternates: { canonical: `${siteUrl}/portfolio` },
+  openGraph: {
+    title: 'Portafolio — Resultados Reales | Pneuma Studio',
+    description:
+      '+68% conversión, −80% carga admin, 3× pedidos. Casos de éxito reales de ecommerce y automatización en México.',
+    url: `${siteUrl}/portfolio`,
+  },
 };
 
 export default function PortfolioPage() {

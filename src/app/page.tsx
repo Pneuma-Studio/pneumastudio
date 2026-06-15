@@ -1,5 +1,21 @@
 import React, { Suspense } from 'react';
+import type { Metadata } from 'next';
 import { LanguageProvider } from '@/context/LanguageContext';
+
+export const metadata: Metadata = {
+  title: 'Pneuma Studio | Agencia Digital en Monterrey, Nuevo León',
+  description:
+    'Construimos plataformas ecommerce, automatización WhatsApp y sistemas empresariales en Monterrey, NL. Resultados reales: +68% conversión, entrega en 3–5 semanas.',
+  alternates: {
+    canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://pneumastudio.mx',
+  },
+  openGraph: {
+    title: 'Pneuma Studio | Agencia Digital en Monterrey',
+    description:
+      'Ecommerce, automatización WhatsApp y sistemas a medida para negocios en México. Construidos en Monterrey, Nuevo León.',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://pneumastudio.mx',
+  },
+};
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppFloat from '@/components/WhatsAppFloat';

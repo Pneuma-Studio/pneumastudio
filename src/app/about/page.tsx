@@ -10,9 +10,25 @@ const TechStackSection = dynamic(() => import('@/app/about/components/TechStackS
 const MethodologySection = dynamic(() => import('@/app/about/components/MethodologySection'), { ssr: true });
 const FounderSection = dynamic(() => import('@/app/about/components/FounderSection'), { ssr: true });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pneumastudio.mx';
+
 export const metadata = {
-  title: 'Nosotros — Pneuma Studio',
-  description: 'Conoce el equipo, la tecnología y la metodología detrás de Pneuma Studio. Más que desarrolladores, arquitectos.',
+  title: 'Nosotros — Equipo, Tecnología y Metodología',
+  description:
+    'Conoce al equipo de Pneuma Studio: arquitectos digitales basados en Monterrey, Nuevo León. Next.js, TypeScript, PostgreSQL y metodología ágil al servicio de tu negocio.',
+  keywords: [
+    'equipo desarrollo web Monterrey',
+    'arquitectos digitales Nuevo León',
+    'agencia tecnológica Monterrey',
+    'metodología desarrollo software México',
+  ],
+  alternates: { canonical: `${siteUrl}/about` },
+  openGraph: {
+    title: 'Nosotros — Equipo y Metodología | Pneuma Studio',
+    description:
+      'Más que desarrolladores, somos arquitectos digitales. Conoce el stack tecnológico y la metodología de Pneuma Studio en Monterrey.',
+    url: `${siteUrl}/about`,
+  },
 };
 
 export default function AboutPage() {
