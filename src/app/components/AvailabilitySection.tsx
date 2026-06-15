@@ -6,6 +6,15 @@ import { useLanguage } from '@/context/LanguageContext';
 import ScrollAnimator from '@/components/ScrollAnimator';
 import { createClient } from '@/lib/supabase/client';
 
+const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function getCurrentMonthLabel(lang: string) {
+  const now = new Date();
+  const months = lang === 'es' ? MONTHS_ES : MONTHS_EN;
+  return `${months[now.getMonth()]} ${now.getFullYear()}`;
+}
+
 interface SlotData {
   total_slots: number;
   taken_slots: number;
@@ -19,14 +28,16 @@ export default function AvailabilitySection() {
 
   useEffect(() => {
     const supabase = createClient();
+    const now = new Date();
+    const currentLabel = `${MONTHS_ES[now.getMonth()]} ${now.getFullYear()}`;
 
     async function fetchSlot() {
+      // Always query by current month label so the section auto-advances each month
       const { data } = await supabase
         .from('availability_slots')
         .select('total_slots, taken_slots, month_label')
         .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
+        .eq('month_label', currentLabel)
         .maybeSingle();
 
       if (data) setSlotData(data);
@@ -44,8 +55,8 @@ export default function AvailabilitySection() {
   }, []);
 
   const TOTAL = slotData?.total_slots ?? 5;
-  const TAKEN = slotData?.taken_slots ?? 3;
-  const MONTH = slotData?.month_label ?? (lang === 'es' ? 'Mayo 2026' : 'May 2026');
+  const TAKEN = slotData?.taken_slots ?? 0;
+  const MONTH = slotData?.month_label ?? getCurrentMonthLabel(lang);
 
   const available = TOTAL - TAKEN;
   const isCritical = available <= 1;
