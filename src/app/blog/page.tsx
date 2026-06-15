@@ -54,7 +54,7 @@ export default async function BlogPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {posts.map((post) => (
-                  <Link key={post.id} href={`/blog/${encodeURIComponent(post.slug)}`} className="group block rounded-2xl overflow-hidden service-card" style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(12px)' }}>
+                  <Link key={post.id} href={`/blog/${post.slug}`} className="group block rounded-2xl overflow-hidden service-card" style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(12px)' }}>
                     {post.imagen && (
                       <div className="h-48 overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)' }}>
                         <img src={post.imagen} alt={post.titulo} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
