@@ -35,7 +35,7 @@ function mapBlogPost(page: any): BlogPost {
     slug: extractText(p['Slug']),
     extracto: extractText(p['Extracto']),
     tags: extractMultiSelect(p['Etiquetas']),
-    fechaPublicacion: extractDate(p['FechaPublicacion'] ?? p['Fecha']),
+    fechaPublicacion: extractDate(p['FechaPublicación'] ?? p['Fecha']),
     tiempoLectura: extractNumber(p['TiempoLectura']) || 5,
     imagen: p['Imagen']?.url ?? '',
     autor: extractText(p['Autor']) || 'Pneuma Studio',
@@ -51,10 +51,10 @@ export async function getPublishedPosts(): Promise<BlogPost[]> {
       filter: {
         and: [
           { property: 'Estado', select: { equals: 'Publicado' } },
-          { property: 'FechaPublicacion', date: { on_or_before: today } },
+          { property: 'FechaPublicación', date: { on_or_before: today } },
         ],
       },
-      sorts: [{ property: 'FechaPublicacion', direction: 'descending' }],
+      sorts: [{ property: 'FechaPublicación', direction: 'descending' }],
     });
     return res.results.map(mapBlogPost);
   } catch {
