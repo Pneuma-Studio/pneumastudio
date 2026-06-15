@@ -33,7 +33,6 @@ export const metadata: Metadata = {
     description: 'High-performance ecommerce platforms and WhatsApp automation built in 3–5 weeks.',
     type: 'website',
     locale: 'es_MX',
-    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -41,9 +40,8 @@ export const metadata: Metadata = {
     description: 'Premium Digital Commerce & Automation Studio — Monterrey, México',
   },
   icons: {
-    icon: [{ url: '/assets/images/pneuma-studio-icon.png', type: 'image/png' }],
-    shortcut: '/assets/images/pneuma-studio-icon.png',
-    apple: '/assets/images/pneuma-studio-icon.png',
+    icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
+    shortcut: '/favicon.ico',
   },
 };
 
