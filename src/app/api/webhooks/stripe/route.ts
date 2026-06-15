@@ -3,9 +3,8 @@ import Stripe from 'stripe';
 import { findPagoByStripeCustomer, updatePagoStatus } from '@/lib/notion';
 import { createAdminClient } from '@/lib/supabase/admin';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', { apiVersion: '2025-04-30.basil' });
-
 export async function POST(request: NextRequest) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-04-30.basil' });
   const body = await request.text();
   const sig = request.headers.get('stripe-signature');
 
