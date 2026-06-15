@@ -28,7 +28,7 @@ export default function OGImage() {
         <div style={{ position: 'absolute', top: '0', left: '0', right: '0', height: '2px', background: 'linear-gradient(to right, transparent, rgba(0,196,160,0.7), transparent)' }} />
 
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={WORDMARK} width={400} height={133} style={{ objectFit: 'contain', marginBottom: '28px' }} />
+        <img src={WORDMARK} width={600} height={200} style={{ objectFit: 'contain', marginBottom: '32px' }} />
 
         <div style={{ width: '48px', height: '2px', background: '#00C4A0', borderRadius: '2px', marginBottom: '20px' }} />
 
