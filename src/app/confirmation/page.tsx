@@ -4,7 +4,7 @@ import React, { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
-import { EnvelopeIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon } from '@heroicons/react/24/outline';
 import { LanguageProvider } from '@/context/LanguageContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -81,7 +81,7 @@ function ConfirmationContent() {
 
       {/* Success badge */}
       <div className="relative flex flex-col items-center mb-10">
-        <div className="relative mb-6">
+        <div className="mb-6">
           <div
             className="w-20 h-20 rounded-full flex items-center justify-center"
             style={{
@@ -90,14 +90,8 @@ function ConfirmationContent() {
               boxShadow: '0 0 40px rgba(0,196,160,0.2), 0 0 80px rgba(0,196,160,0.08)',
             }}
           >
-            <CheckCircleIcon className="w-10 h-10" style={{ color: '#00C4A0' }} />
+            <EnvelopeIcon className="w-10 h-10" style={{ color: '#00C4A0' }} />
           </div>
-          <span
-            className="absolute -top-1 -right-1 w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-700"
-            style={{ background: '#00C4A0', borderColor: '#050D1A', color: '#050D1A' }}
-          >
-            ✓
-          </span>
         </div>
 
         <span className="label-tag text-primary mb-3">
