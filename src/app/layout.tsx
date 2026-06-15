@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     description: 'High-performance ecommerce platforms and WhatsApp automation built in 3–5 weeks.',
     type: 'website',
     locale: 'es_MX',
-    images: [{ url: '/assets/images/pneuma-studio-logo.png', width: 1200, height: 630 }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -41,7 +41,9 @@ export const metadata: Metadata = {
     description: 'Premium Digital Commerce & Automation Studio — Monterrey, México',
   },
   icons: {
-    icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
+    icon: [{ url: '/assets/images/pneuma-studio-icon.png', type: 'image/png' }],
+    shortcut: '/assets/images/pneuma-studio-icon.png',
+    apple: '/assets/images/pneuma-studio-icon.png',
   },
 };
 
@@ -57,8 +59,7 @@ export default function RootLayout({
           {children}
         </LanguageProvider>
 
-        <script type="module" async src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fpneumastud7019back.builtwithrocket.new&_be=https%3A%2F%2Fappanalytics.rocket.new&_v=0.1.19" />
-        <script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2" /></body>
+</body>
     </html>
   );
 }
