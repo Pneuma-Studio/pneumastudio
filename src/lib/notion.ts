@@ -65,10 +65,17 @@ export async function getPublishedPosts(): Promise<BlogPost[]> {
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
   if (!BLOG_DB) return null;
   try {
-    const res: any = await notion.databases.query({
+    // Try rich_text first, fall back to title in case Slug is the primary column
+    let res: any = await notion.databases.query({
       database_id: BLOG_DB,
       filter: { property: 'Slug', rich_text: { equals: slug } },
     });
+    if (!res.results.length) {
+      res = await notion.databases.query({
+        database_id: BLOG_DB,
+        filter: { property: 'Slug', title: { equals: slug } },
+      });
+    }
     if (!res.results.length) return null;
     return mapBlogPost(res.results[0]);
   } catch {
