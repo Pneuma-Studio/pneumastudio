@@ -4,6 +4,123 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import type { Cliente, Pago, PagoEstado, PagoTipo, PagoMetodo } from '@/lib/notion';
 
+// ─── Portales Section ─────────────────────────────────────────────────────────
+
+const STAGE_LABELS: Record<string, { label: string; color: string }> = {
+  propuesta:   { label: 'Propuesta',   color: '#8A9BB5' },
+  diseno:      { label: 'Diseño',      color: '#3B82F6' },
+  desarrollo:  { label: 'Desarrollo',  color: '#F59E0B' },
+  qa:          { label: 'QA',          color: '#8B5CF6' },
+  lanzamiento: { label: 'Lanzamiento', color: '#00C4A0' },
+};
+
+interface PortalSummary {
+  id: string;
+  token: string;
+  project_name: string;
+  stage: string;
+  preview_url: string | null;
+  created_at: string;
+}
+
+function PortalesSection({ clienteId }: { clienteId: string }) {
+  const [portales, setPortales] = useState<PortalSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/admin/clientes/${clienteId}/portales`)
+      .then(r => r.ok ? r.json() : [])
+      .then(setPortales)
+      .finally(() => setLoading(false));
+  }, [clienteId]);
+
+  function copyLink(token: string) {
+    navigator.clipboard.writeText(`${window.location.origin}/portal/${token}`);
+    setCopied(token);
+    setTimeout(() => setCopied(null), 2000);
+  }
+
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <h2 className="text-sm font-semibold text-white">Portales activos</h2>
+        <div className="flex items-center gap-2">
+          <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', color: '#8A9BB5' }}>
+            {loading ? '…' : portales.length}
+          </span>
+          <Link href="/admin/portales" className="text-xs" style={{ color: '#00C4A0' }}>
+            Ver todos →
+          </Link>
+        </div>
+      </div>
+
+      <div className="p-5">
+        {loading ? (
+          <div className="flex justify-center py-4">
+            <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#00C4A0' }} />
+          </div>
+        ) : portales.length === 0 ? (
+          <p className="text-sm text-center py-2" style={{ color: '#8A9BB5' }}>Sin portales vinculados</p>
+        ) : (
+          <div className="space-y-2">
+            {portales.map(portal => {
+              const stage = STAGE_LABELS[portal.stage] ?? { label: portal.stage, color: '#8A9BB5' };
+              return (
+                <div
+                  key={portal.id}
+                  className="flex items-center gap-3 rounded-xl px-4 py-3"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-white truncate">{portal.project_name}</div>
+                    <span
+                      className="inline-block text-xs px-1.5 py-0.5 rounded-md mt-0.5"
+                      style={{ background: `${stage.color}18`, color: stage.color }}
+                    >
+                      {stage.label}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {portal.preview_url && (
+                      <a
+                        href={portal.preview_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs"
+                        style={{ color: '#00C4A0' }}
+                      >
+                        Preview
+                      </a>
+                    )}
+                    <button
+                      onClick={() => copyLink(portal.token)}
+                      className="text-xs px-2 py-1 rounded-lg transition-colors"
+                      style={{
+                        background: copied === portal.token ? 'rgba(0,196,160,0.15)' : 'rgba(255,255,255,0.06)',
+                        color: copied === portal.token ? '#00C4A0' : '#8A9BB5',
+                      }}
+                    >
+                      {copied === portal.token ? '✓ Copiado' : 'Copiar link'}
+                    </button>
+                    <Link
+                      href="/admin/portales"
+                      className="text-xs"
+                      style={{ color: '#8A9BB5' }}
+                    >
+                      Editar
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Empresa Info Section ─────────────────────────────────────────────────────
 
 function EmpresaSection({ cliente }: { cliente: Cliente }) {
@@ -562,12 +679,233 @@ function DocumentosSection({ clienteId }: { clienteId: string }) {
   );
 }
 
+// ─── Edit Cliente Modal ───────────────────────────────────────────────────────
+
+const PAQUETES = ['Starter', 'Esencial', 'Profesional', 'Premium', 'Enterprise', 'Personalizado'];
+const ADDONS_LIST = ['WhatsApp Avanzado', 'Mercado Libre', 'SEO Avanzado', 'Soporte Priority'];
+const METODOS_PAGO = ['Stripe', 'Transferencia SPEI', 'Efectivo', 'Otro'];
+const ESTADOS_CLIENTE = ['Activo', 'Pausado', 'Cancelado', 'Moroso'];
+const DIAS_COBRO = ['1', '5', '10', '15', '20'];
+
+function EditClienteModal({ cliente, onClose }: { cliente: Cliente; onClose: () => void }) {
+  const [form, setForm] = useState({
+    nombre: cliente.nombre,
+    empresa: cliente.empresa,
+    email: cliente.email,
+    whatsapp: cliente.whatsapp,
+    paquete: cliente.paquete,
+    addons: [...cliente.addons],
+    moneda: cliente.moneda,
+    inversionInicial: String(cliente.inversionInicial || ''),
+    mensualidad: String(cliente.mensualidad || ''),
+    fechaInicio: cliente.fechaInicio,
+    fechaCobro: cliente.fechaCobro,
+    estado: cliente.estado,
+    metodoPago: cliente.metodoPago,
+    stripeCustomerId: cliente.stripeCustomerId,
+    notas: cliente.notas,
+    empresaDescripcion: cliente.empresaDescripcion,
+    empresaGiro: cliente.empresaGiro,
+    empresaSitioWeb: cliente.empresaSitioWeb,
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  function setF(key: string, value: any) {
+    setForm(f => ({ ...f, [key]: value }));
+  }
+
+  function toggleAddon(addon: string) {
+    setForm(f => ({
+      ...f,
+      addons: f.addons.includes(addon) ? f.addons.filter(a => a !== addon) : [...f.addons, addon],
+    }));
+  }
+
+  async function handleSave() {
+    if (!form.nombre.trim() || !form.email.trim()) {
+      setError('Nombre y email son requeridos');
+      return;
+    }
+    setSaving(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/admin/clientes/${cliente.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          inversionInicial: parseFloat(form.inversionInicial) || 0,
+          mensualidad: parseFloat(form.mensualidad) || 0,
+        }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Error al guardar');
+      window.location.reload();
+    } catch (err: any) {
+      setError(err.message);
+      setSaving(false);
+    }
+  }
+
+  const iStyle = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF' };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-10 overflow-y-auto" style={{ background: 'rgba(0,0,0,0.75)' }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="w-full max-w-xl rounded-2xl overflow-hidden mb-10" style={{ background: '#0A1628', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+          <h3 className="text-base font-bold text-white">Editar cliente</h3>
+          <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: '#8A9BB5' }}>
+            <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" /></svg>
+          </button>
+        </div>
+
+        <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+          {/* Datos básicos */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#8A9BB5' }}>Datos del cliente</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Nombre *</label>
+                <input value={form.nombre} onChange={e => setF('nombre', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} />
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Empresa</label>
+                <input value={form.empresa} onChange={e => setF('empresa', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} />
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Email *</label>
+                <input type="email" value={form.email} onChange={e => setF('email', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} />
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>WhatsApp</label>
+                <input value={form.whatsapp} onChange={e => setF('whatsapp', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} />
+              </div>
+            </div>
+          </div>
+
+          {/* Empresa info */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#8A9BB5' }}>Información de la empresa</p>
+            <div>
+              <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Descripción</label>
+              <textarea value={form.empresaDescripcion} onChange={e => setF('empresaDescripcion', e.target.value)} rows={2} className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-none" style={iStyle} placeholder="¿A qué se dedica la empresa?" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Giro</label>
+                <input value={form.empresaGiro} onChange={e => setF('empresaGiro', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} placeholder="ej. Moda y belleza" />
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Sitio Web</label>
+                <input type="url" value={form.empresaSitioWeb} onChange={e => setF('empresaSitioWeb', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} placeholder="https://empresa.com" />
+              </div>
+            </div>
+          </div>
+
+          {/* Paquete */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#8A9BB5' }}>Paquete y servicios</p>
+            <div>
+              <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Paquete</label>
+              <select value={form.paquete} onChange={e => setF('paquete', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle}>
+                {PAQUETES.map(p => <option key={p} value={p} style={{ background: '#0A1628' }}>{p}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Add-ons</label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {ADDONS_LIST.map(a => (
+                  <button key={a} type="button" onClick={() => toggleAddon(a)} className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all" style={{ background: form.addons.includes(a) ? 'rgba(0,196,160,0.15)' : 'rgba(255,255,255,0.06)', border: form.addons.includes(a) ? '1px solid rgba(0,196,160,0.3)' : '1px solid rgba(255,255,255,0.08)', color: form.addons.includes(a) ? '#00C4A0' : '#8A9BB5' }}>
+                    {a}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Financiero */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#8A9BB5' }}>Financiero</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Moneda</label>
+                <select value={form.moneda} onChange={e => setF('moneda', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle}>
+                  {['MXN','USD'].map(m => <option key={m} value={m} style={{ background: '#0A1628' }}>{m}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Mensualidad</label>
+                <input type="number" min="0" value={form.mensualidad} onChange={e => setF('mensualidad', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} />
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Inversión inicial</label>
+                <input type="number" min="0" value={form.inversionInicial} onChange={e => setF('inversionInicial', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} />
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Día de cobro</label>
+                <select value={form.fechaCobro} onChange={e => setF('fechaCobro', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle}>
+                  {DIAS_COBRO.map(d => <option key={d} value={d} style={{ background: '#0A1628' }}>Día {d}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Fecha de inicio</label>
+                <input type="date" value={form.fechaInicio} onChange={e => setF('fechaInicio', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} />
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Método de pago</label>
+                <select value={form.metodoPago} onChange={e => setF('metodoPago', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle}>
+                  {METODOS_PAGO.map(m => <option key={m} value={m} style={{ background: '#0A1628' }}>{m}</option>)}
+                </select>
+              </div>
+            </div>
+            {form.metodoPago === 'Stripe' && (
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Stripe Customer ID</label>
+                <input value={form.stripeCustomerId} onChange={e => setF('stripeCustomerId', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} placeholder="cus_xxx" />
+              </div>
+            )}
+          </div>
+
+          {/* Estado y notas */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#8A9BB5' }}>Estado y notas</p>
+            <div>
+              <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Estado</label>
+              <select value={form.estado} onChange={e => setF('estado', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle}>
+                {ESTADOS_CLIENTE.map(s => <option key={s} value={s} style={{ background: '#0A1628' }}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Notas internas</label>
+              <textarea value={form.notas} onChange={e => setF('notas', e.target.value)} rows={3} className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-none" style={iStyle} placeholder="Notas sobre el cliente..." />
+            </div>
+          </div>
+
+          {error && (
+            <div className="px-3 py-2 rounded-xl text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}>{error}</div>
+          )}
+        </div>
+
+        <div className="flex gap-3 px-6 py-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50" style={{ background: '#00C4A0', color: '#050D1A' }}>
+            {saving ? 'Guardando...' : 'Guardar cambios'}
+          </button>
+          <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm" style={{ background: 'rgba(255,255,255,0.06)', color: '#8A9BB5' }}>
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ClienteDetailClient({ cliente, pagos: initialPagos }: { cliente: Cliente; pagos: Pago[] }) {
   const [pagos, setPagos] = useState(initialPagos);
   const [markingPaid, setMarkingPaid] = useState<Pago | null>(null);
   const [showRegister, setShowRegister] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const estadoStyle = ESTADO_COLORS[cliente.estado] ?? { bg: 'rgba(107,114,128,0.15)', text: '#6B7280' };
   const paqueteColor = PAQUETE_COLORS[cliente.paquete] ?? '#6B7280';
@@ -654,6 +992,16 @@ export default function ClienteDetailClient({ cliente, pagos: initialPagos }: { 
               WhatsApp
             </a>
           )}
+          <button
+            onClick={() => setShowEdit(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium"
+            style={{ background: 'rgba(255,255,255,0.06)', color: '#8A9BB5', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+              <path d="M11.5 2.5a1.5 1.5 0 012.12 2.12l-8.5 8.5-2.83.71.71-2.83 8.5-8.5z" stroke="currentColor" strokeWidth={1.3} strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Editar
+          </button>
           <button
             onClick={() => setShowRegister(true)}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
@@ -777,6 +1125,9 @@ export default function ClienteDetailClient({ cliente, pagos: initialPagos }: { 
       {/* Documentos */}
       <DocumentosSection clienteId={cliente.id} />
 
+      {/* Portales */}
+      <PortalesSection clienteId={cliente.id} />
+
       {/* Empresa info */}
       <EmpresaSection cliente={cliente} />
 
@@ -807,6 +1158,9 @@ export default function ClienteDetailClient({ cliente, pagos: initialPagos }: { 
       </div>
 
       {/* Modals */}
+      {showEdit && (
+        <EditClienteModal cliente={cliente} onClose={() => setShowEdit(false)} />
+      )}
       {markingPaid && (
         <MarkPaidModal
           pago={markingPaid}

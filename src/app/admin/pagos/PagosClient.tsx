@@ -33,6 +33,8 @@ export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
   const [tipoFilter, setTipoFilter] = useState<string>('Todos');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [reminderLoading, setReminderLoading] = useState(false);
+  const [reminderResult, setReminderResult] = useState<{ enviados: number; total: number } | null>(null);
 
   const filtered = useMemo(() => {
     const monthStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
@@ -85,16 +87,56 @@ export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
 
   const years = Array.from({ length: 3 }, (_, i) => now.getFullYear() - i);
 
+  async function handleSendReminders() {
+    if (!confirm('¿Enviar recordatorios de pago a todos los clientes con pagos vencidos?')) return;
+    setReminderLoading(true);
+    setReminderResult(null);
+    try {
+      const res = await fetch('/api/admin/cron/pagos-vencidos', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        setReminderResult({ enviados: data.enviados, total: data.resultados?.length ?? 0 });
+      }
+    } catch {
+      // silent
+    } finally {
+      setReminderLoading(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-white">Pagos</h1>
           <p className="text-sm mt-1" style={{ color: '#8A9BB5' }}>Todos los pagos registrados</p>
         </div>
-        <Link href="/admin/pagos/nuevo" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold" style={{ background: '#00C4A0', color: '#050D1A' }}>
-          + Registrar pago
-        </Link>
+        <div className="flex items-center gap-2 flex-wrap">
+          {reminderResult && (
+            <span className="text-xs px-3 py-2 rounded-xl" style={{ background: 'rgba(0,196,160,0.1)', color: '#00C4A0', border: '1px solid rgba(0,196,160,0.2)' }}>
+              ✓ {reminderResult.enviados} recordatorio{reminderResult.enviados !== 1 ? 's' : ''} enviado{reminderResult.enviados !== 1 ? 's' : ''}
+            </span>
+          )}
+          <button
+            onClick={handleSendReminders}
+            disabled={reminderLoading}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
+            style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}
+          >
+            {reminderLoading ? (
+              <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#EF4444' }} />
+            ) : (
+              <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                <path d="M8 1v2M8 13v2M3.22 3.22l1.42 1.42M11.36 11.36l1.42 1.42M1 8h2M13 8h2M3.22 12.78l1.42-1.42M11.36 4.64l1.42-1.42" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round"/>
+                <circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth={1.4}/>
+              </svg>
+            )}
+            {reminderLoading ? 'Enviando...' : 'Enviar recordatorios'}
+          </button>
+          <Link href="/admin/pagos/nuevo" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold" style={{ background: '#00C4A0', color: '#050D1A' }}>
+            + Registrar pago
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}

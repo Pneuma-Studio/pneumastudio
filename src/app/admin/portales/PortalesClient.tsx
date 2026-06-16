@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import Link from 'next/link';
 
 const STAGES = [
   { key: 'propuesta', label: 'Propuesta' },
@@ -322,7 +323,17 @@ export default function PortalesClient() {
                       </span>
                     </div>
                     <p className="text-sm" style={{ color: '#8A9BB5' }}>
-                      {portal.client_name}
+                      {portal.notion_client_id ? (
+                        <Link
+                          href={`/admin/clientes/${portal.notion_client_id}`}
+                          className="hover:underline"
+                          style={{ color: '#8A9BB5' }}
+                        >
+                          {portal.client_name}
+                        </Link>
+                      ) : (
+                        portal.client_name
+                      )}
                       {portal.client_email && (
                         <span style={{ color: 'rgba(138,155,181,0.5)' }}> · {portal.client_email}</span>
                       )}

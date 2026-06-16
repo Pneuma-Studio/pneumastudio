@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createCliente, createPago } from '@/lib/notion';
 import { getAdminSession } from '@/lib/admin-auth';
+import type { PagoTipo } from '@/lib/notion';
+
+interface PlanItem {
+  tipo: PagoTipo;
+  monto: number;
+  fecha: string;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,9 +32,29 @@ export async function POST(request: NextRequest) {
       metodoPago: body.metodoPago,
       stripeCustomerId: body.stripeCustomerId || '',
       notas: body.notas || '',
+      empresaDescripcion: body.empresaDescripcion || '',
+      empresaGiro: body.empresaGiro || '',
+      empresaSitioWeb: body.empresaSitioWeb || '',
     });
 
-    if (body.inversionInicial > 0) {
+    const planPago: PlanItem[] = body.planPago ?? [];
+
+    if (planPago.length > 0) {
+      for (const item of planPago) {
+        if (item.monto > 0) {
+          await createPago({
+            clienteId: cliente.id,
+            tipo: item.tipo,
+            monto: item.monto,
+            moneda: body.moneda,
+            fechaCobro: item.fecha,
+            estado: 'Pendiente',
+            metodo: body.metodoPago,
+          });
+        }
+      }
+    } else if (body.inversionInicial > 0) {
+      // Legacy fallback: single 50% anticipo
       await createPago({
         clienteId: cliente.id,
         tipo: 'Anticipo',
@@ -36,9 +63,6 @@ export async function POST(request: NextRequest) {
         fechaCobro: body.fechaInicio,
         estado: 'Pendiente',
         metodo: body.metodoPago,
-        referencia: '',
-        factura: false,
-        notas: 'Anticipo 50% generado automáticamente',
       });
     }
 

@@ -333,6 +333,9 @@ export async function createCliente(data: ClienteInput): Promise<Cliente> {
       'Método de Pago': { select: { name: data.metodoPago } },
       'Stripe Customer ID': { rich_text: [{ text: { content: data.stripeCustomerId ?? '' } }] },
       'Notas': { rich_text: [{ text: { content: data.notas ?? '' } }] },
+      'Descripción': { rich_text: [{ text: { content: data.empresaDescripcion ?? '' } }] },
+      'Giro': { rich_text: [{ text: { content: data.empresaGiro ?? '' } }] },
+      'Sitio Web': { url: data.empresaSitioWeb || null },
     },
   });
   return mapCliente(page);
