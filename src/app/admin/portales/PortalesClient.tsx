@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 const STAGES = [
   { key: 'propuesta', label: 'Propuesta' },
@@ -17,7 +17,17 @@ interface Portal {
   project_name: string;
   stage: string;
   preview_url: string | null;
+  notas: string | null;
+  client_email: string | null;
+  notion_client_id: string | null;
   created_at: string;
+}
+
+interface NotionClient {
+  id: string;
+  nombre: string;
+  empresa: string;
+  email: string;
 }
 
 const STAGE_COLORS: Record<string, string> = {
@@ -28,6 +38,111 @@ const STAGE_COLORS: Record<string, string> = {
   lanzamiento: '#00C4A0',
 };
 
+function ClientSearch({ value, onSelect }: {
+  value: string;
+  onSelect: (client: { name: string; email: string; id: string } | null) => void;
+}) {
+  const [query, setQuery] = useState(value);
+  const [results, setResults] = useState<NotionClient[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setQuery(value);
+  }, [value]);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  function search(q: string) {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!q.trim()) {
+      setResults([]);
+      setOpen(false);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/admin/clientes-search?q=${encodeURIComponent(q)}`);
+        if (res.ok) {
+          const data: NotionClient[] = await res.json();
+          setResults(data);
+          setOpen(true);
+        }
+      } finally {
+        setLoading(false);
+      }
+    }, 300);
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const q = e.target.value;
+    setQuery(q);
+    onSelect(null);
+    search(q);
+  }
+
+  function pickClient(c: NotionClient) {
+    setQuery(c.nombre);
+    setOpen(false);
+    onSelect({ name: c.nombre, email: c.email, id: c.id });
+  }
+
+  return (
+    <div ref={containerRef} className="relative">
+      <div className="relative">
+        <input
+          value={query}
+          onChange={handleChange}
+          onFocus={() => query && setOpen(true)}
+          placeholder="Buscar cliente en Notion..."
+          className="w-full px-4 py-2.5 rounded-xl text-sm outline-none text-white pr-8"
+          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
+        />
+        {loading && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#00C4A0' }} />
+          </div>
+        )}
+      </div>
+      {open && results.length > 0 && (
+        <div
+          className="absolute top-full left-0 right-0 mt-1 rounded-xl overflow-hidden z-20"
+          style={{ background: '#0D1E38', border: '1px solid rgba(255,255,255,0.12)' }}
+        >
+          {results.map(c => (
+            <button
+              key={c.id}
+              onClick={() => pickClient(c)}
+              className="w-full text-left px-4 py-2.5 text-sm transition-colors"
+              style={{ color: '#fff' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+            >
+              <div className="font-500">{c.nombre}</div>
+              {(c.empresa || c.email) && (
+                <div className="text-xs mt-0.5" style={{ color: '#8A9BB5' }}>
+                  {c.empresa || c.email}
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PortalesClient() {
   const [portals, setPortals] = useState<Portal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,9 +152,12 @@ export default function PortalesClient() {
 
   // Form state
   const [clientName, setClientName] = useState('');
+  const [clientEmail, setClientEmail] = useState('');
+  const [notionClientId, setNotionClientId] = useState('');
   const [projectName, setProjectName] = useState('');
   const [stage, setStage] = useState('propuesta');
   const [previewUrl, setPreviewUrl] = useState('');
+  const [notas, setNotas] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -58,9 +176,12 @@ export default function PortalesClient() {
   function openCreate() {
     setEditing(null);
     setClientName('');
+    setClientEmail('');
+    setNotionClientId('');
     setProjectName('');
     setStage('propuesta');
     setPreviewUrl('');
+    setNotas('');
     setError('');
     setShowForm(true);
   }
@@ -68,9 +189,12 @@ export default function PortalesClient() {
   function openEdit(portal: Portal) {
     setEditing(portal);
     setClientName(portal.client_name);
+    setClientEmail(portal.client_email ?? '');
+    setNotionClientId(portal.notion_client_id ?? '');
     setProjectName(portal.project_name);
     setStage(portal.stage);
     setPreviewUrl(portal.preview_url ?? '');
+    setNotas(portal.notas ?? '');
     setError('');
     setShowForm(true);
   }
@@ -87,7 +211,7 @@ export default function PortalesClient() {
         const res = await fetch(`/api/admin/portales/${editing.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ stage, preview_url: previewUrl }),
+          body: JSON.stringify({ stage, preview_url: previewUrl, notas }),
         });
         if (!res.ok) throw new Error((await res.json()).error);
         const updated = await res.json();
@@ -96,7 +220,15 @@ export default function PortalesClient() {
         const res = await fetch('/api/admin/portales', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ client_name: clientName, project_name: projectName, stage, preview_url: previewUrl }),
+          body: JSON.stringify({
+            client_name: clientName,
+            project_name: projectName,
+            stage,
+            preview_url: previewUrl,
+            notas,
+            client_email: clientEmail,
+            notion_client_id: notionClientId,
+          }),
         });
         if (!res.ok) throw new Error((await res.json()).error);
         const created = await res.json();
@@ -122,6 +254,8 @@ export default function PortalesClient() {
     setCopied(token);
     setTimeout(() => setCopied(null), 2000);
   }
+
+  const inputStyle = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#FFFFFF' };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -187,7 +321,12 @@ export default function PortalesClient() {
                         {stageLabel}
                       </span>
                     </div>
-                    <p className="text-sm" style={{ color: '#8A9BB5' }}>{portal.client_name}</p>
+                    <p className="text-sm" style={{ color: '#8A9BB5' }}>
+                      {portal.client_name}
+                      {portal.client_email && (
+                        <span style={{ color: 'rgba(138,155,181,0.5)' }}> · {portal.client_email}</span>
+                      )}
+                    </p>
                     {portal.preview_url && (
                       <a
                         href={portal.preview_url}
@@ -198,6 +337,11 @@ export default function PortalesClient() {
                       >
                         {portal.preview_url}
                       </a>
+                    )}
+                    {portal.notas && (
+                      <p className="text-xs mt-1 line-clamp-1" style={{ color: 'rgba(138,155,181,0.6)' }}>
+                        📝 {portal.notas}
+                      </p>
                     )}
                   </div>
 
@@ -293,7 +437,7 @@ export default function PortalesClient() {
           onClick={e => { if (e.target === e.currentTarget) setShowForm(false); }}
         >
           <div
-            className="w-full max-w-md rounded-2xl p-6 space-y-4"
+            className="w-full max-w-md rounded-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto"
             style={{ background: '#0A1628', border: '1px solid rgba(255,255,255,0.1)' }}
           >
             <h3 className="text-base font-bold text-white">
@@ -303,16 +447,52 @@ export default function PortalesClient() {
             {!editing && (
               <>
                 <div>
-                  <label className="block text-xs font-600 mb-1.5" style={{ color: '#8A9BB5' }}>Nombre del cliente</label>
-                  <input
-                    autoFocus
+                  <label className="block text-xs font-600 mb-1.5" style={{ color: '#8A9BB5' }}>
+                    Cliente <span style={{ color: 'rgba(138,155,181,0.5)' }}>(busca en Notion o escribe manualmente)</span>
+                  </label>
+                  <ClientSearch
                     value={clientName}
-                    onChange={e => setClientName(e.target.value)}
-                    placeholder="ej. Juan García"
+                    onSelect={c => {
+                      if (c) {
+                        setClientName(c.name);
+                        setClientEmail(c.email);
+                        setNotionClientId(c.id);
+                      } else {
+                        setNotionClientId('');
+                      }
+                    }}
+                  />
+                  {!notionClientId && (
+                    <input
+                      value={clientName}
+                      onChange={e => setClientName(e.target.value)}
+                      placeholder="o escribe el nombre manualmente..."
+                      className="w-full px-4 py-2.5 rounded-xl text-sm outline-none text-white mt-2"
+                      style={inputStyle}
+                    />
+                  )}
+                  {notionClientId && (
+                    <p className="text-xs mt-1" style={{ color: '#00C4A0' }}>
+                      ✓ Vinculado a Notion · {clientEmail}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-600 mb-1.5" style={{ color: '#8A9BB5' }}>
+                    Email del cliente{' '}
+                    <span style={{ color: 'rgba(138,155,181,0.5)' }}>(para notificaciones de etapa)</span>
+                  </label>
+                  <input
+                    value={clientEmail}
+                    onChange={e => setClientEmail(e.target.value)}
+                    placeholder="cliente@email.com"
+                    type="email"
                     className="w-full px-4 py-2.5 rounded-xl text-sm outline-none text-white"
-                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
+                    style={inputStyle}
                   />
                 </div>
+
                 <div>
                   <label className="block text-xs font-600 mb-1.5" style={{ color: '#8A9BB5' }}>Nombre del proyecto</label>
                   <input
@@ -320,7 +500,7 @@ export default function PortalesClient() {
                     onChange={e => setProjectName(e.target.value)}
                     placeholder="ej. Tienda en línea Bellísima"
                     className="w-full px-4 py-2.5 rounded-xl text-sm outline-none text-white"
-                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
+                    style={inputStyle}
                   />
                 </div>
               </>
@@ -362,7 +542,21 @@ export default function PortalesClient() {
                 onChange={e => setPreviewUrl(e.target.value)}
                 placeholder="https://preview.vercel.app/..."
                 className="w-full px-4 py-2.5 rounded-xl text-sm outline-none text-white"
-                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
+                style={inputStyle}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-600 mb-1.5" style={{ color: '#8A9BB5' }}>
+                Notas internas <span style={{ color: 'rgba(138,155,181,0.5)' }}>(solo tú las ves)</span>
+              </label>
+              <textarea
+                value={notas}
+                onChange={e => setNotas(e.target.value)}
+                rows={3}
+                placeholder="Notas sobre el proyecto, acuerdos, pendientes..."
+                className="w-full px-4 py-2.5 rounded-xl text-sm outline-none text-white resize-none"
+                style={inputStyle}
               />
             </div>
 

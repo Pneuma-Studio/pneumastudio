@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -73,6 +74,24 @@ export async function POST(request: NextRequest) {
   } catch (err: any) {
     console.error('Resend prospect email error:', JSON.stringify(err));
     errors.push(`prospect: ${err?.message ?? 'unknown'}`);
+  }
+
+  // 3. Save lead to Supabase — non-fatal
+  try {
+    const supabase = createAdminClient();
+    await supabase.from('leads').insert({
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone?.trim() || null,
+      company: company?.trim() || null,
+      service: service?.trim() || null,
+      budget: budget?.trim() || null,
+      message: message.trim(),
+      status: 'nuevo',
+      source: 'contacto',
+    });
+  } catch (err: any) {
+    console.error('[leads] Failed to save lead:', err?.message);
   }
 
   // Return ok if at least the admin notification was attempted

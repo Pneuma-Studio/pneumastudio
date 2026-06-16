@@ -4,6 +4,159 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import type { Cliente, Pago, PagoEstado, PagoTipo, PagoMetodo } from '@/lib/notion';
 
+// ─── Empresa Info Section ─────────────────────────────────────────────────────
+
+function EmpresaSection({ cliente }: { cliente: Cliente }) {
+  const [editing, setEditing] = useState(false);
+  const [descripcion, setDescripcion] = useState(cliente.empresaDescripcion ?? '');
+  const [giro, setGiro] = useState(cliente.empresaGiro ?? '');
+  const [sitioWeb, setSitioWeb] = useState(cliente.empresaSitioWeb ?? '');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  async function handleSave() {
+    setSaving(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/admin/clientes/${cliente.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ empresaDescripcion: descripcion, empresaGiro: giro, empresaSitioWeb: sitioWeb }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Error');
+      setEditing(false);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleCancel() {
+    setDescripcion(cliente.empresaDescripcion ?? '');
+    setGiro(cliente.empresaGiro ?? '');
+    setSitioWeb(cliente.empresaSitioWeb ?? '');
+    setEditing(false);
+    setError('');
+  }
+
+  const inputStyle = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF' };
+  const hasInfo = descripcion || giro || sitioWeb;
+
+  return (
+    <div className="rounded-2xl p-5 space-y-3" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-white">Información de la empresa</h2>
+        {!editing ? (
+          <button
+            onClick={() => setEditing(true)}
+            className="text-xs px-3 py-1.5 rounded-lg"
+            style={{ background: 'rgba(255,255,255,0.06)', color: '#8A9BB5' }}
+          >
+            {hasInfo ? 'Editar' : '+ Agregar'}
+          </button>
+        ) : (
+          <div className="flex gap-2">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="text-xs px-3 py-1.5 rounded-lg font-600 disabled:opacity-50"
+              style={{ background: '#00C4A0', color: '#050D1A' }}
+            >
+              {saving ? 'Guardando...' : 'Guardar'}
+            </button>
+            <button
+              onClick={handleCancel}
+              className="text-xs px-3 py-1.5 rounded-lg"
+              style={{ background: 'rgba(255,255,255,0.06)', color: '#8A9BB5' }}
+            >
+              Cancelar
+            </button>
+          </div>
+        )}
+      </div>
+
+      {error && (
+        <p className="text-xs px-3 py-2 rounded-lg" style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}>{error}</p>
+      )}
+
+      {editing ? (
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Descripción</label>
+            <textarea
+              value={descripcion}
+              onChange={e => setDescripcion(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-none"
+              style={inputStyle}
+              placeholder="¿A qué se dedica la empresa?"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Giro</label>
+              <input
+                value={giro}
+                onChange={e => setGiro(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                style={inputStyle}
+                placeholder="ej. Moda y belleza"
+              />
+            </div>
+            <div>
+              <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Sitio Web</label>
+              <input
+                value={sitioWeb}
+                onChange={e => setSitioWeb(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                style={inputStyle}
+                placeholder="https://empresa.com"
+                type="url"
+              />
+            </div>
+          </div>
+        </div>
+      ) : !hasInfo ? (
+        <p className="text-sm" style={{ color: 'rgba(138,155,181,0.5)' }}>
+          Sin información de empresa registrada.
+        </p>
+      ) : (
+        <div className="space-y-3 text-sm">
+          {descripcion && (
+            <div>
+              <div className="text-xs mb-0.5" style={{ color: '#8A9BB5' }}>Descripción</div>
+              <p className="text-white" style={{ lineHeight: 1.6 }}>{descripcion}</p>
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            {giro && (
+              <div>
+                <div className="text-xs mb-0.5" style={{ color: '#8A9BB5' }}>Giro</div>
+                <div className="text-white">{giro}</div>
+              </div>
+            )}
+            {sitioWeb && (
+              <div>
+                <div className="text-xs mb-0.5" style={{ color: '#8A9BB5' }}>Sitio Web</div>
+                <a
+                  href={sitioWeb}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white hover:underline truncate block"
+                  style={{ color: '#00C4A0' }}
+                >
+                  {sitioWeb.replace(/^https?:\/\//, '')}
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function fmt(n: number) {
   return n.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
@@ -623,6 +776,9 @@ export default function ClienteDetailClient({ cliente, pagos: initialPagos }: { 
 
       {/* Documentos */}
       <DocumentosSection clienteId={cliente.id} />
+
+      {/* Empresa info */}
+      <EmpresaSection cliente={cliente} />
 
       {/* Client info */}
       <div className="rounded-2xl p-5 space-y-3" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>

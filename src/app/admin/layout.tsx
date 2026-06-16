@@ -61,6 +61,15 @@ const navItems: NavItem[] = [
     ),
   },
   {
+    label: 'Leads',
+    href: '/admin/leads',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
     label: 'Portales',
     href: '/admin/portales',
     icon: (
@@ -90,6 +99,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/pagos': 'Pagos',
   '/admin/pagos/nuevo': 'Registrar Pago',
   '/admin/disponibilidad': 'Disponibilidad',
+  '/admin/leads': 'Pipeline de Leads',
   '/admin/portales': 'Portales de Cliente',
   '/admin/reportes': 'Reportes',
 };

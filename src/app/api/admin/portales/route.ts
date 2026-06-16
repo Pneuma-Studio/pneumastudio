@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const body = await request.json();
-  const { client_name, project_name, stage, preview_url } = body;
+  const { client_name, project_name, stage, preview_url, notas, client_email, notion_client_id } = body;
 
   if (!client_name?.trim() || !project_name?.trim()) {
     return NextResponse.json({ error: 'Nombre de cliente y proyecto son requeridos' }, { status: 400 });
@@ -39,6 +39,9 @@ export async function POST(request: NextRequest) {
       project_name: project_name.trim(),
       stage: stage ?? 'propuesta',
       preview_url: preview_url?.trim() || null,
+      notas: notas?.trim() || null,
+      client_email: client_email?.trim() || null,
+      notion_client_id: notion_client_id?.trim() || null,
     })
     .select()
     .single();

@@ -139,6 +139,9 @@ export interface Cliente {
   metodoPago: ClienteMetodoPago;
   stripeCustomerId: string;
   notas: string;
+  empresaDescripcion: string;
+  empresaGiro: string;
+  empresaSitioWeb: string;
 }
 
 export type PagoEstado = 'Pagado' | 'Pendiente' | 'Vencido' | 'Fallido';
@@ -177,6 +180,9 @@ export interface ClienteInput {
   metodoPago: ClienteMetodoPago;
   stripeCustomerId?: string;
   notas?: string;
+  empresaDescripcion?: string;
+  empresaGiro?: string;
+  empresaSitioWeb?: string;
 }
 
 export interface PaymentInput {
@@ -223,6 +229,10 @@ function extractCheckbox(prop: any): boolean {
   return prop?.checkbox ?? false;
 }
 
+function extractUrl(prop: any): string {
+  return prop?.url ?? '';
+}
+
 function mapCliente(page: any): Cliente {
   const p = page.properties;
   return {
@@ -242,6 +252,9 @@ function mapCliente(page: any): Cliente {
     metodoPago: extractSelect(p['Método de Pago']) as ClienteMetodoPago,
     stripeCustomerId: extractText(p['Stripe Customer ID']),
     notas: extractText(p['Notas']),
+    empresaDescripcion: extractText(p['Descripción']),
+    empresaGiro: extractText(p['Giro']),
+    empresaSitioWeb: extractUrl(p['Sitio Web']),
   };
 }
 
@@ -342,6 +355,9 @@ export async function updateCliente(id: string, data: Partial<ClienteInput>): Pr
   if (data.metodoPago !== undefined) props['Método de Pago'] = { select: { name: data.metodoPago } };
   if (data.stripeCustomerId !== undefined) props['Stripe Customer ID'] = { rich_text: [{ text: { content: data.stripeCustomerId } }] };
   if (data.notas !== undefined) props['Notas'] = { rich_text: [{ text: { content: data.notas } }] };
+  if (data.empresaDescripcion !== undefined) props['Descripción'] = { rich_text: [{ text: { content: data.empresaDescripcion } }] };
+  if (data.empresaGiro !== undefined) props['Giro'] = { rich_text: [{ text: { content: data.empresaGiro } }] };
+  if (data.empresaSitioWeb !== undefined) props['Sitio Web'] = { url: data.empresaSitioWeb || null };
 
   await notion.pages.update({ page_id: id, properties: props });
 }
