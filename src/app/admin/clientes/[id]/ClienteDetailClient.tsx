@@ -679,11 +679,207 @@ function DocumentosSection({ clienteId }: { clienteId: string }) {
   );
 }
 
+// ─── Facturas Section ─────────────────────────────────────────────────────────
+
+interface Factura {
+  id: string;
+  numero_factura: string;
+  monto: number;
+  moneda: string;
+  fecha_factura: string;
+  path: string;
+  original_name: string;
+  size: number;
+  created_at: string;
+}
+
+function FacturasSection({ clienteId, moneda, clientName }: { clienteId: string; moneda: string; clientName: string }) {
+  const [facturas, setFacturas] = useState<Factura[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const [form, setForm] = useState({
+    numero: '',
+    monto: '',
+    moneda,
+    fecha: new Date().toISOString().split('T')[0],
+  });
+  const [file, setFile] = useState<File | null>(null);
+
+  const fetchFacturas = useCallback(async () => {
+    const res = await fetch(`/api/admin/clientes/${clienteId}/facturas`);
+    if (res.ok) setFacturas(await res.json());
+    setLoading(false);
+  }, [clienteId]);
+
+  useEffect(() => { fetchFacturas(); }, [fetchFacturas]);
+
+  async function handleUpload(e: React.FormEvent) {
+    e.preventDefault();
+    if (!file) { setError('Selecciona un archivo'); return; }
+    if (!form.numero.trim()) { setError('El número de factura es requerido'); return; }
+    setUploading(true);
+    setError('');
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('numero', form.numero);
+      fd.append('monto', form.monto);
+      fd.append('moneda', form.moneda);
+      fd.append('fecha', form.fecha);
+      fd.append('client_name', clientName);
+      const res = await fetch(`/api/admin/clientes/${clienteId}/facturas`, { method: 'POST', body: fd });
+      if (!res.ok) throw new Error((await res.json()).error || 'Error al subir');
+      const created: Factura = await res.json();
+      setFacturas(prev => [created, ...prev]);
+      setShowForm(false);
+      setFile(null);
+      setForm(f => ({ ...f, numero: '', monto: '' }));
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function handleOpen(factura: Factura) {
+    const res = await fetch('/api/admin/documentos/signed-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: factura.path, bucket: 'facturas' }),
+    });
+    if (res.ok) {
+      const { url } = await res.json();
+      window.open(url, '_blank');
+    }
+  }
+
+  async function handleDelete(factura: Factura) {
+    if (!confirm(`¿Eliminar factura ${factura.numero_factura}?`)) return;
+    setFacturas(prev => prev.filter(f => f.id !== factura.id));
+    await fetch(`/api/admin/clientes/${clienteId}/facturas`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: factura.id, path: factura.path }),
+    });
+  }
+
+  const iStyle = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF' };
+
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <h2 className="text-sm font-semibold text-white">Facturas</h2>
+        <div className="flex items-center gap-2">
+          <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', color: '#8A9BB5' }}>
+            {loading ? '…' : facturas.length}
+          </span>
+          <button
+            onClick={() => setShowForm(s => !s)}
+            className="text-xs px-3 py-1.5 rounded-lg font-medium"
+            style={{ background: 'rgba(0,196,160,0.1)', color: '#00C4A0', border: '1px solid rgba(0,196,160,0.2)' }}
+          >
+            {showForm ? 'Cancelar' : '+ Subir factura'}
+          </button>
+        </div>
+      </div>
+
+      <div className="p-5 space-y-4">
+        {showForm && (
+          <form onSubmit={handleUpload} className="rounded-xl p-4 space-y-3" style={{ background: 'rgba(0,196,160,0.04)', border: '1px solid rgba(0,196,160,0.15)' }}>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Número de factura *</label>
+                <input value={form.numero} onChange={e => setForm(f => ({ ...f, numero: e.target.value }))} placeholder="FAC-001" className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} />
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Fecha</label>
+                <input type="date" value={form.fecha} onChange={e => setForm(f => ({ ...f, fecha: e.target.value }))} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} />
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Monto</label>
+                <input type="number" min="0" value={form.monto} onChange={e => setForm(f => ({ ...f, monto: e.target.value }))} placeholder="0" className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} />
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Moneda</label>
+                <select value={form.moneda} onChange={e => setForm(f => ({ ...f, moneda: e.target.value }))} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle}>
+                  {['MXN','USD'].map(m => <option key={m} value={m} style={{ background: '#0A1628' }}>{m}</option>)}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Archivo (PDF, imagen) *</label>
+              <div
+                className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all"
+                style={{ border: '1.5px dashed rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.02)' }}
+                onClick={() => fileRef.current?.click()}
+              >
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="none" style={{ color: '#8A9BB5' }}>
+                  <path d="M10 13V4m0 0L6 8m4-4l4 4M3 16h14" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span className="text-xs" style={{ color: file ? '#fff' : '#8A9BB5' }}>
+                  {file ? file.name : 'Seleccionar archivo'}
+                </span>
+                <input ref={fileRef} type="file" className="hidden" accept=".pdf,.xml,.png,.jpg,.jpeg" onChange={e => setFile(e.target.files?.[0] ?? null)} />
+              </div>
+            </div>
+            {error && <p className="text-xs" style={{ color: '#EF4444' }}>{error}</p>}
+            <button type="submit" disabled={uploading} className="w-full py-2 rounded-xl text-sm font-semibold disabled:opacity-50" style={{ background: '#00C4A0', color: '#050D1A' }}>
+              {uploading ? 'Subiendo...' : 'Guardar factura'}
+            </button>
+          </form>
+        )}
+
+        {loading ? (
+          <div className="flex justify-center py-4">
+            <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#00C4A0' }} />
+          </div>
+        ) : facturas.length === 0 ? (
+          <p className="text-xs text-center py-3" style={{ color: '#8A9BB5' }}>Sin facturas registradas</p>
+        ) : (
+          <div className="space-y-2">
+            {facturas.map(f => (
+              <div key={f.id} className="flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="none" style={{ color: '#8A9BB5' }}>
+                  <path d="M11 2H5a1 1 0 00-1 1v14a1 1 0 001 1h10a1 1 0 001-1V7l-5-5z" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round" />
+                  <path d="M11 2v5h5" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" />
+                </svg>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-semibold text-white">{f.numero_factura}</span>
+                    {f.monto > 0 && <span className="text-xs" style={{ color: '#00C4A0' }}>${fmt(f.monto)} {f.moneda}</span>}
+                    {f.fecha_factura && <span className="text-xs" style={{ color: '#8A9BB5' }}>{fmtDate(f.fecha_factura)}</span>}
+                  </div>
+                  <p className="text-xs truncate mt-0.5" style={{ color: 'rgba(138,155,181,0.6)' }}>{f.original_name}</p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <button onClick={() => handleOpen(f)} className="text-xs font-medium" style={{ color: '#00C4A0' }}>Abrir</button>
+                  <button onClick={() => handleDelete(f)} className="text-xs" style={{ color: '#8A9BB5' }}>Eliminar</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Edit Cliente Modal ───────────────────────────────────────────────────────
 
 const PAQUETES = ['Starter', 'Esencial', 'Profesional', 'Premium', 'Enterprise', 'Personalizado'];
 const ADDONS_LIST = ['WhatsApp Avanzado', 'Mercado Libre', 'SEO Avanzado', 'Soporte Priority'];
-const METODOS_PAGO = ['Stripe', 'Transferencia SPEI', 'Efectivo', 'Otro'];
+const METODOS_PAGO = ['Stripe', 'Conekta', 'Mercado Pago', 'Clip', 'Transferencia SPEI', 'Efectivo', 'Otro'];
+const PROCESADORES_CON_ID = ['Stripe', 'Conekta', 'Mercado Pago', 'Clip'];
+const PROCESADOR_LABEL: Record<string, string> = {
+  'Stripe': 'Stripe Customer ID',
+  'Conekta': 'Conekta Customer ID',
+  'Mercado Pago': 'Mercado Pago Customer ID',
+  'Clip': 'Clip Merchant ID',
+};
 const ESTADOS_CLIENTE = ['Activo', 'Pausado', 'Cancelado', 'Moroso'];
 const DIAS_COBRO = ['1', '5', '10', '15', '20'];
 
@@ -858,10 +1054,10 @@ function EditClienteModal({ cliente, onClose }: { cliente: Cliente; onClose: () 
                 </select>
               </div>
             </div>
-            {form.metodoPago === 'Stripe' && (
+            {PROCESADORES_CON_ID.includes(form.metodoPago) && (
               <div>
-                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Stripe Customer ID</label>
-                <input value={form.stripeCustomerId} onChange={e => setF('stripeCustomerId', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} placeholder="cus_xxx" />
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>{PROCESADOR_LABEL[form.metodoPago] ?? 'ID del procesador'}</label>
+                <input value={form.stripeCustomerId} onChange={e => setF('stripeCustomerId', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} placeholder="ID del cliente en el procesador" />
               </div>
             )}
           </div>
@@ -1017,7 +1213,12 @@ export default function ClienteDetailClient({ cliente, pagos: initialPagos }: { 
         {[
           { label: 'Total cobrado', value: `$${fmt(totalCobrado)} ${cliente.moneda}`, color: '#22C55E' },
           { label: 'Saldo pendiente', value: `$${fmt(saldoPendiente)} ${cliente.moneda}`, color: '#F59E0B' },
-          { label: 'Mensualidad activa', value: `$${fmt(cliente.mensualidad)} ${cliente.moneda}`, sub: `Próximo: ${fmtDate(nextBillingDate())}`, color: '#00C4A0' },
+          {
+          label: cliente.estado === 'Activo' ? 'Mensualidad activa' : `Mensualidad · ${cliente.estado}`,
+          value: `$${fmt(cliente.mensualidad)} ${cliente.moneda}`,
+          sub: cliente.estado === 'Activo' ? `Próximo: ${fmtDate(nextBillingDate())}` : `Sin cobros mientras esté ${cliente.estado.toLowerCase()}`,
+          color: cliente.estado === 'Activo' ? '#00C4A0' : '#F59E0B',
+        },
         ].map(card => (
           <div key={card.label} className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <div className="text-xs font-medium mb-2" style={{ color: '#8A9BB5' }}>{card.label}</div>
@@ -1127,6 +1328,9 @@ export default function ClienteDetailClient({ cliente, pagos: initialPagos }: { 
 
       {/* Portales */}
       <PortalesSection clienteId={cliente.id} />
+
+      {/* Facturas */}
+      <FacturasSection clienteId={cliente.id} moneda={cliente.moneda} clientName={cliente.nombre} />
 
       {/* Empresa info */}
       <EmpresaSection cliente={cliente} />

@@ -6,12 +6,12 @@ export async function POST(req: NextRequest) {
   const session = await getAdminSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { path } = await req.json();
+  const { path, bucket = 'documentos' } = await req.json();
   if (!path) return NextResponse.json({ error: 'No path' }, { status: 400 });
 
   const supabase = createAdminClient();
   const { data, error } = await supabase.storage
-    .from('documentos')
+    .from(bucket)
     .createSignedUrl(path, 3600);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

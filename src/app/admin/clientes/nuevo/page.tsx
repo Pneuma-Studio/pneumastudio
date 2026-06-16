@@ -8,7 +8,14 @@ const ADDONS = ['WhatsApp Avanzado', 'Mercado Libre', 'SEO Avanzado', 'Soporte P
 const MONEDAS = ['MXN', 'USD'];
 const DIAS_COBRO = ['1', '5', '10', '15', '20'];
 const ESTADOS = ['Activo', 'Pausado', 'Cancelado', 'Moroso'];
-const METODOS_PAGO = ['Stripe', 'Transferencia SPEI', 'Efectivo', 'Otro'];
+const METODOS_PAGO = ['Stripe', 'Conekta', 'Mercado Pago', 'Clip', 'Transferencia SPEI', 'Efectivo', 'Otro'];
+const PROCESADORES_CON_ID = ['Stripe', 'Conekta', 'Mercado Pago', 'Clip'];
+const PROCESADOR_LABEL: Record<string, string> = {
+  'Stripe': 'Stripe Customer ID',
+  'Conekta': 'Conekta Customer ID',
+  'Mercado Pago': 'Mercado Pago Customer ID',
+  'Clip': 'Clip Merchant ID',
+};
 const TIPOS_PAGO = ['Anticipo', 'Saldo Final', 'Mensualidad', 'Mantenimiento', 'Add-on'];
 
 function Field({ label, children, required, hint }: { label: string; children: React.ReactNode; required?: boolean; hint?: string }) {
@@ -304,31 +311,37 @@ export default function NuevoClientePage() {
               </select>
             </Field>
           </div>
-          {form.metodoPago === 'Stripe' && (
-            <Field label="Stripe Customer ID">
-              <input value={form.stripeCustomerId} onChange={e => set('stripeCustomerId', e.target.value)} className="w-full px-4 py-2.5 rounded-xl text-sm outline-none" style={inputStyle} placeholder="cus_xxx" />
+          {PROCESADORES_CON_ID.includes(form.metodoPago) && (
+            <Field label={PROCESADOR_LABEL[form.metodoPago] ?? 'ID del procesador'}>
+              <input value={form.stripeCustomerId} onChange={e => set('stripeCustomerId', e.target.value)} className="w-full px-4 py-2.5 rounded-xl text-sm outline-none" style={inputStyle} placeholder="ID del cliente en el procesador" />
             </Field>
           )}
         </section>
 
         {/* Plan de cobro inicial */}
-        {inversionNum > 0 && (
-          <section className="rounded-2xl p-6 space-y-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-semibold text-white">Plan de cobro inicial</h2>
-                <p className="text-xs mt-0.5" style={{ color: '#8A9BB5' }}>Define cómo se dividen los ${fmt(inversionNum)} {form.moneda} del proyecto</p>
-              </div>
-              {planPago.length > 0 && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: pctOk ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)', color: pctOk ? '#22C55E' : '#EF4444' }}>
-                  {totalPct}% de 100%
-                </span>
-              )}
+        <section className="rounded-2xl p-6 space-y-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-white">Plan de cobro inicial</h2>
+              <p className="text-xs mt-0.5" style={{ color: '#8A9BB5' }}>
+                {inversionNum > 0 ? `Define cómo se dividen los $${fmt(inversionNum)} ${form.moneda} del proyecto` : 'Ingresa la inversión inicial para configurar el plan de cobro'}
+              </p>
             </div>
+            {inversionNum > 0 && planPago.length > 0 && (
+              <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: pctOk ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)', color: pctOk ? '#22C55E' : '#EF4444' }}>
+                {totalPct}% de 100%
+              </span>
+            )}
+          </div>
 
-            {planPago.length === 0 ? (
-              <p className="text-sm" style={{ color: 'rgba(138,155,181,0.5)' }}>Sin plan definido — se generará un solo anticipo del 50% al guardar.</p>
-            ) : (
+          {inversionNum === 0 ? (
+            <div className="flex items-center gap-2 text-sm py-2" style={{ color: 'rgba(138,155,181,0.5)' }}>
+              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 shrink-0"><circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth={1.2}/><path d="M8 5v3.5M8 11h.01" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round"/></svg>
+              Llena el campo "Inversión inicial" arriba para habilitar el plan de cobro.
+            </div>
+          ) : planPago.length === 0 ? (
+            <p className="text-sm" style={{ color: 'rgba(138,155,181,0.5)' }}>Sin plan definido — se generará un anticipo del 50% al guardar.</p>
+          ) : (
               <div className="space-y-2">
                 {/* Headers */}
                 <div className="hidden sm:grid grid-cols-12 gap-2 text-xs font-medium px-1" style={{ color: '#8A9BB5' }}>
@@ -397,6 +410,7 @@ export default function NuevoClientePage() {
               </div>
             )}
 
+          {inversionNum > 0 && (
             <button
               type="button"
               onClick={addPlanItem}
@@ -408,8 +422,8 @@ export default function NuevoClientePage() {
               </svg>
               Agregar pago
             </button>
-          </section>
-        )}
+          )}
+        </section>
 
         {/* Estado y notas */}
         <section className="rounded-2xl p-6 space-y-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
