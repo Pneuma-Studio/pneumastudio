@@ -1,10 +1,11 @@
 import React from 'react';
 import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, Inter } from 'next/font/google';
-import Script from 'next/script';
 import '../styles/tailwind.css';
 import { LanguageProvider } from '@/context/LanguageContext';
 import CookieBanner from '@/components/CookieBanner';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
+import { Suspense } from 'react';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -274,20 +275,9 @@ export default function RootLayout({
           <CookieBanner />
         </LanguageProvider>
         {gaId && gaId !== 'your-google-analytics-id-here' && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-              strategy="afterInteractive"
-            />
-            <Script id="ga4-init" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${gaId}', { page_path: window.location.pathname });
-              `}
-            </Script>
-          </>
+          <Suspense fallback={null}>
+            <GoogleAnalytics gaId={gaId} />
+          </Suspense>
         )}
       </body>
     </html>
