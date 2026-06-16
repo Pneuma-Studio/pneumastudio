@@ -72,34 +72,41 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
 export async function getPostBlocks(pageId: string): Promise<BlogBlock[]> {
   try {
     const res: any = await notion.blocks.children.list({ block_id: pageId, page_size: 100 });
+    const richText = (arr: any[]) => (arr ?? []).map((r: any) => r?.plain_text ?? '').join('');
     return res.results.flatMap((block: any): BlogBlock[] => {
-      const richText = (arr: any[]) => arr?.map((r: any) => r.plain_text).join('') ?? '';
-      switch (block.type) {
-        case 'paragraph':
-          return [{ type: 'paragraph', text: richText(block.paragraph.rich_text) }];
-        case 'heading_1':
-          return [{ type: 'h1', text: richText(block.heading_1.rich_text) }];
-        case 'heading_2':
-          return [{ type: 'h2', text: richText(block.heading_2.rich_text) }];
-        case 'heading_3':
-          return [{ type: 'h3', text: richText(block.heading_3.rich_text) }];
-        case 'bulleted_list_item':
-          return [{ type: 'li', text: richText(block.bulleted_list_item.rich_text) }];
-        case 'numbered_list_item':
-          return [{ type: 'oli', text: richText(block.numbered_list_item.rich_text) }];
-        case 'code':
-          return [{ type: 'code', text: richText(block.code.rich_text), language: block.code.language }];
-        case 'quote':
-          return [{ type: 'quote', text: richText(block.quote.rich_text) }];
-        case 'image':
-          return [{ type: 'image', text: block.image.caption?.[0]?.plain_text ?? '', url: block.image.file?.url ?? block.image.external?.url }];
-        case 'divider':
-          return [{ type: 'divider', text: '' }];
-        default:
-          return [];
+      try {
+        switch (block.type) {
+          case 'paragraph':
+            return [{ type: 'paragraph', text: richText(block.paragraph?.rich_text) }];
+          case 'heading_1':
+            return [{ type: 'h1', text: richText(block.heading_1?.rich_text) }];
+          case 'heading_2':
+            return [{ type: 'h2', text: richText(block.heading_2?.rich_text) }];
+          case 'heading_3':
+            return [{ type: 'h3', text: richText(block.heading_3?.rich_text) }];
+          case 'bulleted_list_item':
+            return [{ type: 'li', text: richText(block.bulleted_list_item?.rich_text) }];
+          case 'numbered_list_item':
+            return [{ type: 'oli', text: richText(block.numbered_list_item?.rich_text) }];
+          case 'code':
+            return [{ type: 'code', text: richText(block.code?.rich_text), language: block.code?.language }];
+          case 'quote':
+            return [{ type: 'quote', text: richText(block.quote?.rich_text) }];
+          case 'image': {
+            const img = block.image;
+            return [{ type: 'image', text: richText(img?.caption), url: img?.file?.url ?? img?.external?.url ?? '' }];
+          }
+          case 'divider':
+            return [{ type: 'divider', text: '' }];
+          default:
+            return [];
+        }
+      } catch {
+        return [];
       }
     });
-  } catch {
+  } catch (err: any) {
+    console.error('[notion] getPostBlocks error:', err?.code, err?.message);
     return [];
   }
 }

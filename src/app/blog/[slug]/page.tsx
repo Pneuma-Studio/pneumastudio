@@ -4,15 +4,17 @@ import { notFound } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppFloat from '@/components/WhatsAppFloat';
-import { getPostBySlug, getPostBlocks, getPublishedPosts, BlogBlock } from '@/lib/notion';
+import { getPostBySlug, getPostBlocks, BlogBlock } from '@/lib/notion';
 
 export const dynamic = 'force-dynamic';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pneumastudio.mx';
 
-export async function generateStaticParams() {
-  const posts = await getPublishedPosts();
-  return posts.map((p) => ({ slug: p.slug }));
+function fmtDate(dateStr: string) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -126,7 +128,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <div className="flex items-center gap-4 text-sm" style={{ color: 'rgba(138,155,181,0.7)' }}>
               <span>{post.autor}</span>
               <span>·</span>
-              <span>{new Date(post.fechaPublicacion).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+              <span>{fmtDate(post.fechaPublicacion)}</span>
               <span>·</span>
               <span>{post.tiempoLectura} min de lectura</span>
             </div>
