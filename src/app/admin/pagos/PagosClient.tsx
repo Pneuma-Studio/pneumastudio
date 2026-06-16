@@ -260,7 +260,7 @@ export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
           </div>
 
           <select value={tipoFilter} onChange={e => setTipoFilter(e.target.value)} className="px-3 py-2 rounded-xl text-sm outline-none" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#8A9BB5' }}>
-            {['Todos','Anticipo','Mensualidad','Mantenimiento','Add-on','Saldo Final'].map(t => <option key={t} value={t} style={{ background: '#0A1628' }}>{t}</option>)}
+            {['Todos','Anticipo','Abono','Mensualidad','Saldo Final','Mantenimiento','Add-on'].map(t => <option key={t} value={t} style={{ background: '#0A1628' }}>{t}</option>)}
           </select>
         </div>
 

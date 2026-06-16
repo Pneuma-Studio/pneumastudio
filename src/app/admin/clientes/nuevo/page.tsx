@@ -17,7 +17,7 @@ const PASARELA_LABEL: Record<string, string> = {
   'Mercado Pago': 'Mercado Pago Customer ID',
   'Clip': 'Clip Merchant ID',
 };
-const TIPOS_PAGO = ['Anticipo', 'Saldo Final', 'Mensualidad', 'Mantenimiento', 'Add-on'];
+const TIPOS_PAGO = ['Anticipo', 'Abono', 'Saldo Final', 'Mantenimiento', 'Add-on'];
 
 function Field({ label, children, required, hint }: { label: string; children: React.ReactNode; required?: boolean; hint?: string }) {
   return (

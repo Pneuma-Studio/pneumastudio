@@ -146,7 +146,7 @@ export interface Cliente {
 }
 
 export type PagoEstado = 'Pagado' | 'Pendiente' | 'Vencido' | 'Fallido';
-export type PagoTipo = 'Anticipo' | 'Saldo Final' | 'Mensualidad' | 'Mantenimiento' | 'Add-on';
+export type PagoTipo = 'Anticipo' | 'Abono' | 'Saldo Final' | 'Mensualidad' | 'Mantenimiento' | 'Add-on';
 export type PagoMetodo = 'Stripe' | 'Transferencia SPEI' | 'Efectivo' | 'Otro';
 
 export interface Pago {
