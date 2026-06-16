@@ -10,6 +10,8 @@ const PACKAGES = [
     name: 'Starter',
     price: 25000,
     priceFrom: false,
+    monthly: 699,
+    monthlyFrom: false,
     color: '#6B7280',
     includes: [
       'Sitio web profesional',
@@ -23,6 +25,8 @@ const PACKAGES = [
     name: 'Esencial',
     price: 45900,
     priceFrom: false,
+    monthly: 999,
+    monthlyFrom: false,
     color: '#3B82F6',
     includes: [
       'Todo lo del Starter',
@@ -36,6 +40,8 @@ const PACKAGES = [
     name: 'Profesional',
     price: 75900,
     priceFrom: false,
+    monthly: 1699,
+    monthlyFrom: false,
     color: '#00C4A0',
     includes: [
       'Todo lo del Esencial',
@@ -51,6 +57,8 @@ const PACKAGES = [
     name: 'Premium',
     price: 125900,
     priceFrom: false,
+    monthly: 2699,
+    monthlyFrom: false,
     color: '#8B5CF6',
     includes: [
       'Todo lo del Profesional',
@@ -68,6 +76,8 @@ const PACKAGES = [
     name: 'Enterprise',
     price: 180000,
     priceFrom: true,
+    monthly: 4900,
+    monthlyFrom: true,
     color: '#F59E0B',
     includes: [
       'Todo lo del Premium',
@@ -162,7 +172,8 @@ export default function PricingCalculator() {
   const addonSetup = activeAddons.reduce((s, a) => s + (a.setup ?? 0), 0);
   const addonMonthly = activeAddons.reduce((s, a) => s + (a.monthly ?? 0), 0);
   const totalSetup = (pkg?.price ?? 0) + addonSetup;
-  const hasMonthly = addonMonthly > 0;
+  const totalMonthly = (pkg?.monthly ?? 0) + addonMonthly;
+  const hasMonthly = totalMonthly > 0;
   const hasCitas = selectedAddons.has('citas');
   const blockedAddons = selectedPackage
     ? ADDONS.filter(a => (a.blockedBy as readonly string[]).includes(selectedPackage))
@@ -176,7 +187,7 @@ export default function PricingCalculator() {
 
   const waMessage = !pkg
     ? 'Hola, me interesa cotizar una plataforma con Pneuma Studio.'
-    : `Hola, me interesa cotizar con Pneuma Studio:\n\n${waLines}\n\nInversión inicial estimada: ${fmt(totalSetup)}${pkg.priceFrom ? '+' : ''}${hasMonthly ? `\nMensualidad: ${fmt(addonMonthly)}/mes` : ''}`;
+    : `Hola, me interesa cotizar con Pneuma Studio:\n\n${waLines}\n\nInversión inicial estimada: ${fmt(totalSetup)}${pkg.priceFrom ? '+' : ''}\nMensualidad estimada: ${pkg.monthlyFrom ? 'desde ' : ''}${fmt(totalMonthly)}/mes`;
 
   const waHref = `https://wa.me/528112803360?text=${encodeURIComponent(waMessage)}`;
 
@@ -421,7 +432,18 @@ export default function PricingCalculator() {
                   {/* Monthly costs */}
                   {hasMonthly && (
                     <div className="mb-4 p-3 rounded-xl" style={{ background: 'rgba(0,196,160,0.06)', border: '1px solid rgba(0,196,160,0.15)' }}>
-                      <p className="text-xs mb-2 font-600" style={{ color: '#8A9BB5' }}>MENSUALIDAD ADD-ONS</p>
+                      <p className="text-xs mb-2 font-600" style={{ color: '#8A9BB5' }}>MENSUALIDAD</p>
+                      {/* Package monthly */}
+                      {pkg && (
+                        <div className="flex justify-between text-xs mb-1">
+                          <span style={{ color: '#8A9BB5' }}>Paquete {pkg.name}</span>
+                          <span style={{ color: '#00C4A0' }}>
+                            {pkg.monthlyFrom && <span className="mr-0.5">desde</span>}
+                            {fmt(pkg.monthly)}/mes
+                          </span>
+                        </div>
+                      )}
+                      {/* Add-on monthlies */}
                       {activeAddons.filter(a => (a.monthly ?? 0) > 0).map(a => (
                         <div key={a.id} className="flex justify-between text-xs mb-1">
                           <span style={{ color: '#8A9BB5' }}>{a.name}</span>
@@ -430,7 +452,10 @@ export default function PricingCalculator() {
                       ))}
                       <div className="flex justify-between text-sm font-700 pt-1.5 mt-1" style={{ borderTop: '1px solid rgba(0,196,160,0.15)' }}>
                         <span style={{ color: '#fff' }}>Total mensual</span>
-                        <span style={{ color: '#00C4A0' }}>{fmt(addonMonthly)}/mes</span>
+                        <span style={{ color: '#00C4A0' }}>
+                          {(pkg?.monthlyFrom) && <span className="text-xs font-400 mr-0.5">desde</span>}
+                          {fmt(totalMonthly)}/mes
+                        </span>
                       </div>
                     </div>
                   )}
