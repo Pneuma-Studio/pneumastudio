@@ -1334,11 +1334,11 @@ export default function ClienteDetailClient({ cliente, pagos: initialPagos }: { 
       {/* Documentos */}
       <DocumentosSection clienteId={cliente.id} />
 
-      {/* Portales */}
-      <PortalesSection clienteId={cliente.id} />
-
       {/* Facturas */}
       <FacturasSection clienteId={cliente.id} moneda={cliente.moneda} clientName={cliente.nombre} />
+
+      {/* Portales */}
+      <PortalesSection clienteId={cliente.id} />
 
       {/* Empresa info */}
       <EmpresaSection cliente={cliente} />
