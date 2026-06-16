@@ -37,7 +37,10 @@ function mapBlogPost(page: any): BlogPost {
     tags: extractMultiSelect(p['Etiquetas']),
     fechaPublicacion: extractDate(p['FechaPublicación'] ?? p['Fecha']),
     tiempoLectura: extractNumber(p['TiempoLectura']) || 5,
-    imagen: p['Imagen']?.url ?? '',
+    imagen: p['Imagen']?.url
+      ?? p['Imagen']?.files?.[0]?.file?.url
+      ?? p['Imagen']?.files?.[0]?.external?.url
+      ?? '',
     autor: extractText(p['Autor']) || 'Pneuma Studio',
   };
 }
