@@ -5,6 +5,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import ScrollAnimator from '@/components/ScrollAnimator';
 import { EnvelopeIcon, PhoneIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
+import { trackEvent } from '@/lib/gtag';
 
 interface FormData {
   name: string;
@@ -60,6 +61,11 @@ export default function ContactMain() {
         body: JSON.stringify(formData),
       });
       if (!res.ok) throw new Error('send failed');
+      trackEvent('generate_lead', {
+        method: 'contact_form',
+        service: formData.service || undefined,
+        budget: formData.budget || undefined,
+      });
       router.push(`/confirmation?source=contact&email=${encodeURIComponent(formData.email)}`);
     } catch {
       setLoading(false);
@@ -158,6 +164,7 @@ export default function ContactMain() {
                   href={card.href}
                   target={card.target}
                   rel={card.target ? 'noopener noreferrer' : undefined}
+                  onClick={() => card.label === 'WhatsApp' && trackEvent('whatsapp_click', { location: 'contact_page' })}
                   className="rounded-xl p-5 flex items-center gap-4 service-card"
                   style={{
                     background: 'rgba(255,255,255,0.04)',

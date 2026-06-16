@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { usePathname } from 'next/navigation';
+import { trackEvent } from '@/lib/gtag';
 
 export default function WhatsAppFloat() {
   const pathname = usePathname();
@@ -23,6 +24,7 @@ export default function WhatsAppFloat() {
       href={waUrl}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() => trackEvent('whatsapp_click', { location: 'floating_button', page: pathname })}
       className="whatsapp-float"
       aria-label="Contactar por WhatsApp"
     >

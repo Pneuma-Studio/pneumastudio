@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { trackEvent } from '@/lib/gtag';
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -466,6 +467,7 @@ export default function PricingCalculator() {
                 href={waHref}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackEvent('whatsapp_click', { location: 'pricing_calculator', package: pkg?.name ?? 'none' })}
                 className="btn-primary w-full text-center block text-sm"
               >
                 {!pkg ? 'Solicitar cotización' : `Cotizar paquete ${pkg.name}`}
