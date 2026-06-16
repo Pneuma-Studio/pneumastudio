@@ -112,10 +112,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         <section className="pt-16 pb-10 relative overflow-hidden" style={{ background: '#050D1A' }}>
           <div className="absolute top-0 right-0 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(0,196,160,0.06) 0%, transparent 70%)', filter: 'blur(60px)' }} />
           <div className="max-w-3xl mx-auto px-4 sm:px-6 relative">
-            <Link href="/blog" className="inline-flex items-center gap-2 text-sm mb-8 transition-colors duration-200" style={{ color: '#8A9BB5' }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#00C4A0')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#8A9BB5')}
-            >
+            <Link href="/blog" className="inline-flex items-center gap-2 text-sm mb-8 transition-colors duration-200 hover:text-primary" style={{ color: '#8A9BB5' }}>
               ← Blog
             </Link>
             <div className="flex flex-wrap gap-2 mb-5">
