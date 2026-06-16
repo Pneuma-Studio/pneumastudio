@@ -71,7 +71,7 @@ export default async function BlogPage() {
                       <p className="text-sm leading-relaxed mb-4" style={{ color: '#8A9BB5' }}>{post.extracto}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-xs" style={{ color: 'rgba(138,155,181,0.6)' }}>
-                          {new Date(post.fechaPublicacion).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          {(() => { const d = new Date(post.fechaPublicacion); return isNaN(d.getTime()) ? '' : d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }); })()}
                         </span>
                         <span className="text-xs font-600" style={{ color: '#00C4A0' }}>Leer artículo →</span>
                       </div>
