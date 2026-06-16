@@ -8,9 +8,10 @@ const ADDONS = ['WhatsApp Avanzado', 'Mercado Libre', 'SEO Avanzado', 'Soporte P
 const MONEDAS = ['MXN', 'USD'];
 const DIAS_COBRO = ['1', '5', '10', '15', '20'];
 const ESTADOS = ['Activo', 'Pausado', 'Cancelado', 'Moroso'];
-const METODOS_PAGO = ['Stripe', 'Conekta', 'Mercado Pago', 'Clip', 'Transferencia SPEI', 'Efectivo', 'Otro'];
-const PROCESADORES_CON_ID = ['Stripe', 'Conekta', 'Mercado Pago', 'Clip'];
-const PROCESADOR_LABEL: Record<string, string> = {
+const METODOS_PAGO = ['Transferencia SPEI', 'Efectivo', 'Stripe', 'Otro'];
+const PASARELAS_PAGO = ['Stripe', 'Conekta', 'Mercado Pago', 'Clip', 'Otra', 'No aplica'];
+const PASARELA_CON_ID = ['Stripe', 'Conekta', 'Mercado Pago', 'Clip'];
+const PASARELA_LABEL: Record<string, string> = {
   'Stripe': 'Stripe Customer ID',
   'Conekta': 'Conekta Customer ID',
   'Mercado Pago': 'Mercado Pago Customer ID',
@@ -77,6 +78,7 @@ export default function NuevoClientePage() {
     fechaCobro: '1',
     estado: 'Activo',
     metodoPago: 'Transferencia SPEI',
+    pasarelaPago: 'No aplica',
     stripeCustomerId: '',
     notas: '',
     empresaDescripcion: '',
@@ -194,9 +196,9 @@ export default function NuevoClientePage() {
               ))}
             </div>
           )}
-          {form.metodoPago === 'Stripe' && (
+          {form.pasarelaPago !== 'No aplica' && form.pasarelaPago !== 'Otra' && !form.stripeCustomerId && (
             <div className="rounded-xl px-4 py-3 text-sm mb-4" style={{ background: 'rgba(103,114,229,0.1)', border: '1px solid rgba(103,114,229,0.2)', color: '#6772E5' }}>
-              Recuerda crear la suscripción en Stripe y pegar el Customer ID en el perfil del cliente.
+              Recuerda configurar el cliente en <strong>{form.pasarelaPago}</strong> y actualizar el ID en su perfil.
             </div>
           )}
           <div className="flex gap-3 justify-center">
@@ -305,15 +307,20 @@ export default function NuevoClientePage() {
             <Field label="Fecha de inicio">
               <input type="date" value={form.fechaInicio} onChange={e => set('fechaInicio', e.target.value)} className="w-full px-4 py-2.5 rounded-xl text-sm outline-none" style={inputStyle} />
             </Field>
-            <Field label="Método de pago">
+            <Field label="Método de pago" hint="¿Cómo te paga el cliente a ti?">
               <select value={form.metodoPago} onChange={e => set('metodoPago', e.target.value)} className="w-full px-4 py-2.5 rounded-xl text-sm outline-none" style={inputStyle}>
                 {METODOS_PAGO.map(m => <option key={m} value={m} style={{ background: '#0A1628' }}>{m}</option>)}
               </select>
             </Field>
+            <Field label="Pasarela de pago" hint="¿Cuál usa en su tienda?">
+              <select value={form.pasarelaPago} onChange={e => set('pasarelaPago', e.target.value)} className="w-full px-4 py-2.5 rounded-xl text-sm outline-none" style={inputStyle}>
+                {PASARELAS_PAGO.map(p => <option key={p} value={p} style={{ background: '#0A1628' }}>{p}</option>)}
+              </select>
+            </Field>
           </div>
-          {PROCESADORES_CON_ID.includes(form.metodoPago) && (
-            <Field label={PROCESADOR_LABEL[form.metodoPago] ?? 'ID del procesador'}>
-              <input value={form.stripeCustomerId} onChange={e => set('stripeCustomerId', e.target.value)} className="w-full px-4 py-2.5 rounded-xl text-sm outline-none" style={inputStyle} placeholder="ID del cliente en el procesador" />
+          {PASARELA_CON_ID.includes(form.pasarelaPago) && (
+            <Field label={PASARELA_LABEL[form.pasarelaPago] ?? 'ID en la pasarela'}>
+              <input value={form.stripeCustomerId} onChange={e => set('stripeCustomerId', e.target.value)} className="w-full px-4 py-2.5 rounded-xl text-sm outline-none" style={inputStyle} placeholder="ID del cliente en la pasarela" />
             </Field>
           )}
         </section>

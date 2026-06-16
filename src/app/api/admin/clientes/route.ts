@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
       fechaCobro: body.fechaCobro,
       estado: body.estado,
       metodoPago: body.metodoPago,
+      pasarelaPago: body.pasarelaPago || '',
       stripeCustomerId: body.stripeCustomerId || '',
       notas: body.notas || '',
       empresaDescripcion: body.empresaDescripcion || '',

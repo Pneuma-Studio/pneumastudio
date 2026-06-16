@@ -872,9 +872,10 @@ function FacturasSection({ clienteId, moneda, clientName }: { clienteId: string;
 
 const PAQUETES = ['Starter', 'Esencial', 'Profesional', 'Premium', 'Enterprise', 'Personalizado'];
 const ADDONS_LIST = ['WhatsApp Avanzado', 'Mercado Libre', 'SEO Avanzado', 'Soporte Priority'];
-const METODOS_PAGO = ['Stripe', 'Conekta', 'Mercado Pago', 'Clip', 'Transferencia SPEI', 'Efectivo', 'Otro'];
-const PROCESADORES_CON_ID = ['Stripe', 'Conekta', 'Mercado Pago', 'Clip'];
-const PROCESADOR_LABEL: Record<string, string> = {
+const METODOS_PAGO = ['Transferencia SPEI', 'Efectivo', 'Stripe', 'Otro'];
+const PASARELAS_PAGO = ['Stripe', 'Conekta', 'Mercado Pago', 'Clip', 'Otra', 'No aplica'];
+const PASARELA_CON_ID = ['Stripe', 'Conekta', 'Mercado Pago', 'Clip'];
+const PASARELA_LABEL: Record<string, string> = {
   'Stripe': 'Stripe Customer ID',
   'Conekta': 'Conekta Customer ID',
   'Mercado Pago': 'Mercado Pago Customer ID',
@@ -898,6 +899,7 @@ function EditClienteModal({ cliente, onClose }: { cliente: Cliente; onClose: () 
     fechaCobro: cliente.fechaCobro,
     estado: cliente.estado,
     metodoPago: cliente.metodoPago,
+    pasarelaPago: cliente.pasarelaPago || 'No aplica',
     stripeCustomerId: cliente.stripeCustomerId,
     notas: cliente.notas,
     empresaDescripcion: cliente.empresaDescripcion,
@@ -1048,16 +1050,22 @@ function EditClienteModal({ cliente, onClose }: { cliente: Cliente; onClose: () 
                 <input type="date" value={form.fechaInicio} onChange={e => setF('fechaInicio', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} />
               </div>
               <div>
-                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Método de pago</label>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Método de pago <span style={{ color: 'rgba(138,155,181,0.5)', fontWeight: 400 }}>(cómo te paga)</span></label>
                 <select value={form.metodoPago} onChange={e => setF('metodoPago', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle}>
                   {METODOS_PAGO.map(m => <option key={m} value={m} style={{ background: '#0A1628' }}>{m}</option>)}
                 </select>
               </div>
-            </div>
-            {PROCESADORES_CON_ID.includes(form.metodoPago) && (
               <div>
-                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>{PROCESADOR_LABEL[form.metodoPago] ?? 'ID del procesador'}</label>
-                <input value={form.stripeCustomerId} onChange={e => setF('stripeCustomerId', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} placeholder="ID del cliente en el procesador" />
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>Pasarela de pago <span style={{ color: 'rgba(138,155,181,0.5)', fontWeight: 400 }}>(en su tienda)</span></label>
+                <select value={form.pasarelaPago} onChange={e => setF('pasarelaPago', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle}>
+                  {PASARELAS_PAGO.map(p => <option key={p} value={p} style={{ background: '#0A1628' }}>{p}</option>)}
+                </select>
+              </div>
+            </div>
+            {PASARELA_CON_ID.includes(form.pasarelaPago) && (
+              <div>
+                <label className="block text-xs mb-1" style={{ color: '#8A9BB5' }}>{PASARELA_LABEL[form.pasarelaPago] ?? 'ID en la pasarela'}</label>
+                <input value={form.stripeCustomerId} onChange={e => setF('stripeCustomerId', e.target.value)} className="w-full px-3 py-2 rounded-xl text-sm outline-none" style={iStyle} placeholder="ID del cliente en la pasarela" />
               </div>
             )}
           </div>
@@ -1343,9 +1351,10 @@ export default function ClienteDetailClient({ cliente, pagos: initialPagos }: { 
             { label: 'Email', value: cliente.email },
             { label: 'WhatsApp', value: cliente.whatsapp },
             { label: 'Método de pago', value: cliente.metodoPago },
+            { label: 'Pasarela de pago', value: cliente.pasarelaPago || '—' },
             { label: 'Fecha de inicio', value: fmtDate(cliente.fechaInicio) },
             { label: 'Día de cobro', value: `Día ${cliente.fechaCobro}` },
-            { label: 'Stripe ID', value: cliente.stripeCustomerId || '—' },
+            ...(cliente.stripeCustomerId ? [{ label: PASARELA_LABEL[cliente.pasarelaPago] ?? 'ID pasarela', value: cliente.stripeCustomerId }] : []),
           ].map(item => (
             <div key={item.label}>
               <div className="text-xs mb-0.5" style={{ color: '#8A9BB5' }}>{item.label}</div>

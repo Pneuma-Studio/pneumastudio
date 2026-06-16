@@ -137,6 +137,7 @@ export interface Cliente {
   fechaCobro: ClienteFechaCobro;
   estado: ClienteEstado;
   metodoPago: ClienteMetodoPago;
+  pasarelaPago: string;
   stripeCustomerId: string;
   notas: string;
   empresaDescripcion: string;
@@ -178,6 +179,7 @@ export interface ClienteInput {
   fechaCobro: ClienteFechaCobro;
   estado: ClienteEstado;
   metodoPago: ClienteMetodoPago;
+  pasarelaPago?: string;
   stripeCustomerId?: string;
   notas?: string;
   empresaDescripcion?: string;
@@ -250,6 +252,7 @@ function mapCliente(page: any): Cliente {
     fechaCobro: extractSelect(p['Fecha de Cobro']) as ClienteFechaCobro,
     estado: extractSelect(p['Estado']) as ClienteEstado,
     metodoPago: extractSelect(p['Método de Pago']) as ClienteMetodoPago,
+    pasarelaPago: extractSelect(p['Pasarela de Pago']),
     stripeCustomerId: extractText(p['Stripe Customer ID']),
     notas: extractText(p['Notas']),
     empresaDescripcion: extractText(p['Descripción']),
@@ -331,6 +334,7 @@ export async function createCliente(data: ClienteInput): Promise<Cliente> {
       'Fecha de Cobro': { select: { name: data.fechaCobro } },
       'Estado': { select: { name: data.estado } },
       'Método de Pago': { select: { name: data.metodoPago } },
+      ...(data.pasarelaPago ? { 'Pasarela de Pago': { select: { name: data.pasarelaPago } } } : {}),
       'Stripe Customer ID': { rich_text: [{ text: { content: data.stripeCustomerId ?? '' } }] },
       'Notas': { rich_text: [{ text: { content: data.notas ?? '' } }] },
       'Descripción': { rich_text: [{ text: { content: data.empresaDescripcion ?? '' } }] },
@@ -356,6 +360,7 @@ export async function updateCliente(id: string, data: Partial<ClienteInput>): Pr
   if (data.fechaCobro !== undefined) props['Fecha de Cobro'] = { select: { name: data.fechaCobro } };
   if (data.estado !== undefined) props['Estado'] = { select: { name: data.estado } };
   if (data.metodoPago !== undefined) props['Método de Pago'] = { select: { name: data.metodoPago } };
+  if (data.pasarelaPago !== undefined && data.pasarelaPago) props['Pasarela de Pago'] = { select: { name: data.pasarelaPago } };
   if (data.stripeCustomerId !== undefined) props['Stripe Customer ID'] = { rich_text: [{ text: { content: data.stripeCustomerId } }] };
   if (data.notas !== undefined) props['Notas'] = { rich_text: [{ text: { content: data.notas } }] };
   if (data.empresaDescripcion !== undefined) props['Descripción'] = { rich_text: [{ text: { content: data.empresaDescripcion } }] };
