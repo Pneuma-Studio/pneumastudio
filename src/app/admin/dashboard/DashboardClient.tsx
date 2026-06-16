@@ -4,8 +4,6 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import type { Cliente, Pago } from '@/lib/notion';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function fmt(n: number) {
   return n.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
@@ -67,10 +65,16 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 
-function KPICard({ title, subtitle, value, value2, accent, icon, sparkData }: {
+function KPICard({ title, subtitle, value, value2, accent, icon, sparkData, delta }: {
   title: string; subtitle: string; value: string; value2?: string;
   accent: string; icon: React.ReactNode; sparkData?: number[];
+  delta?: number; // % change, positive = up, negative = down
 }) {
+  const deltaColor = delta !== undefined ? (delta >= 0 ? '#22C55E' : '#EF4444') : undefined;
+  const deltaLabel = delta !== undefined
+    ? `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}% vs mes ant.`
+    : undefined;
+
   return (
     <div
       className="rounded-2xl p-5 flex flex-col gap-3 relative overflow-hidden"
@@ -81,7 +85,6 @@ function KPICard({ title, subtitle, value, value2, accent, icon, sparkData }: {
         WebkitBackdropFilter: 'blur(12px)',
       }}
     >
-      {/* Inner top-right glow */}
       <div
         className="absolute -top-12 -right-12 w-32 h-32 rounded-full pointer-events-none"
         style={{ background: `radial-gradient(circle, ${accent}18 0%, transparent 70%)` }}
@@ -100,7 +103,14 @@ function KPICard({ title, subtitle, value, value2, accent, icon, sparkData }: {
       </div>
 
       <div className="flex items-end justify-between relative z-10">
-        <div className="text-xs" style={{ color: '#8A9BB5' }}>{subtitle}</div>
+        <div className="flex flex-col gap-1">
+          <div className="text-xs" style={{ color: '#8A9BB5' }}>{subtitle}</div>
+          {deltaLabel && (
+            <div className="text-xs font-medium" style={{ color: deltaColor }}>
+              {delta! >= 0 ? '↑' : '↓'} {deltaLabel}
+            </div>
+          )}
+        </div>
         {sparkData && sparkData.length >= 2 && <Sparkline data={sparkData} color={accent} />}
       </div>
     </div>
@@ -125,15 +135,9 @@ function MiniCalendar({ year, month, clientes }: { year: number; month: number; 
   return (
     <div
       className="rounded-2xl p-5"
-      style={{
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        backdropFilter: 'blur(12px)',
-      }}
+      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
     >
-      <div className="text-sm font-semibold text-white mb-4">
-        {MESES[month - 1]} {year}
-      </div>
+      <div className="text-sm font-semibold text-white mb-4">{MESES[month - 1]} {year}</div>
       <div className="grid grid-cols-7 gap-1 text-center mb-2">
         {['D','L','M','X','J','V','S'].map(d => (
           <div key={d} className="text-xs font-medium" style={{ color: '#8A9BB5' }}>{d}</div>
@@ -156,9 +160,7 @@ function MiniCalendar({ year, month, clientes }: { year: number; month: number; 
               title={hasBilling ? billingDays[day].map(c => `${c.nombre} — $${fmt(c.mensualidad)} ${c.moneda}`).join('\n') : ''}
             >
               {day}
-              {hasBilling && (
-                <div className="w-1 h-1 rounded-full mt-0.5" style={{ background: '#00C4A0' }} />
-              )}
+              {hasBilling && <div className="w-1 h-1 rounded-full mt-0.5" style={{ background: '#00C4A0' }} />}
             </div>
           );
         })}
@@ -175,9 +177,13 @@ interface Props {
   mrr: { mxn: number; usd: number };
   cobradoMXN: number;
   cobradoUSD: number;
+  cobradoLastMXN: number;
   pendienteMXN: number;
   pendienteUSD: number;
   activosCount: number;
+  morosoCount: number;
+  pausadoCount: number;
+  vencidoCount: number;
   enStripe: number;
   porTransferencia: number;
   currentYear: number;
@@ -185,9 +191,9 @@ interface Props {
 }
 
 export default function DashboardClient({
-  clientes, pagosThisMonth, mrr, cobradoMXN, cobradoUSD,
-  pendienteMXN, pendienteUSD, activosCount, enStripe, porTransferencia,
-  currentYear, currentMonth,
+  clientes, pagosThisMonth, mrr, cobradoMXN, cobradoUSD, cobradoLastMXN,
+  pendienteMXN, pendienteUSD, activosCount, morosoCount, pausadoCount,
+  vencidoCount, enStripe, porTransferencia, currentYear, currentMonth,
 }: Props) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'Todos' | 'Activos' | 'Morosos' | 'Pausados'>('Todos');
@@ -195,17 +201,15 @@ export default function DashboardClient({
 
   const mesNombre = MESES[currentMonth - 1];
 
-  const lastPaymentMap = useMemo(() => {
-    const map: Record<string, Pago> = {};
-    pagosThisMonth.forEach(p => {
-      if (!map[p.clienteId] || p.fechaCobro > map[p.clienteId].fechaCobro) {
-        map[p.clienteId] = p;
-      }
-    });
-    return map;
-  }, [pagosThisMonth]);
+  // % change vs last month
+  const cobradoDelta = cobradoLastMXN > 0
+    ? ((cobradoMXN - cobradoLastMXN) / cobradoLastMXN) * 100
+    : cobradoMXN > 0 ? 100 : undefined;
 
-  // Build sparkline data: daily cobrado for the month (7-day buckets)
+  // Collection rate
+  const totalBillable = cobradoMXN + pendienteMXN;
+  const collectionRate = totalBillable > 0 ? Math.round((cobradoMXN / totalBillable) * 100) : 0;
+
   const cobradoSpark = useMemo(() => {
     const buckets = Array(7).fill(0);
     const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
@@ -279,11 +283,45 @@ export default function DashboardClient({
           style={{ background: '#00C4A0', color: '#050D1A', boxShadow: '0 0 20px rgba(0,196,160,0.3)' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
           Nuevo cliente
         </Link>
       </div>
+
+      {/* Alert banners */}
+      {(morosoCount > 0 || vencidoCount > 0) && (
+        <div className="flex flex-col gap-2">
+          {morosoCount > 0 && (
+            <div
+              className="flex items-center gap-3 px-4 py-3 rounded-xl"
+              style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}
+            >
+              <div className="w-2 h-2 rounded-full animate-pulse flex-shrink-0" style={{ background: '#EF4444' }} />
+              <p className="text-sm" style={{ color: '#EF4444' }}>
+                <strong>{morosoCount} cliente{morosoCount !== 1 ? 's' : ''} moroso{morosoCount !== 1 ? 's' : ''}</strong>
+                {' '}— con pagos vencidos hace más de 30 días.{' '}
+                <button onClick={() => setFilter('Morosos')} className="underline font-medium">Ver clientes</button>
+              </p>
+            </div>
+          )}
+          {vencidoCount > 0 && (
+            <div
+              className="flex items-center gap-3 px-4 py-3 rounded-xl"
+              style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" className="flex-shrink-0">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <p className="text-sm" style={{ color: '#F59E0B' }}>
+                <strong>{vencidoCount} pago{vencidoCount !== 1 ? 's' : ''} vencido{vencidoCount !== 1 ? 's' : ''}</strong>
+                {' '}este mes sin cobrar.{' '}
+                <Link href="/admin/pagos" className="underline font-medium">Ver pagos</Link>
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -302,6 +340,7 @@ export default function DashboardClient({
           value2={cobradoUSD > 0 ? `+ $${fmt(cobradoUSD)} USD` : undefined}
           accent="#22C55E"
           sparkData={cobradoSpark}
+          delta={cobradoDelta}
           icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>}
         />
         <KPICard
@@ -322,11 +361,50 @@ export default function DashboardClient({
         />
       </div>
 
+      {/* Secondary metrics */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          {
+            label: 'Tasa de cobro',
+            value: `${collectionRate}%`,
+            color: collectionRate >= 80 ? '#22C55E' : collectionRate >= 50 ? '#F59E0B' : '#EF4444',
+            hint: `${fmt(cobradoMXN)} / ${fmt(totalBillable)} MXN`,
+          },
+          {
+            label: 'Pagos vencidos',
+            value: String(vencidoCount),
+            color: vencidoCount === 0 ? '#22C55E' : '#EF4444',
+            hint: vencidoCount === 0 ? 'Todo al día' : 'Requieren atención',
+          },
+          {
+            label: 'Morosos',
+            value: String(morosoCount),
+            color: morosoCount === 0 ? '#22C55E' : '#EF4444',
+            hint: morosoCount === 0 ? 'Sin clientes morosos' : `+30 días sin pago`,
+          },
+          {
+            label: 'Pausados',
+            value: String(pausadoCount),
+            color: pausadoCount === 0 ? '#8A9BB5' : '#F59E0B',
+            hint: pausadoCount === 0 ? 'Ninguno pausado' : 'Sin cobros activos',
+          },
+        ].map(m => (
+          <div
+            key={m.label}
+            className="rounded-xl px-4 py-3"
+            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+          >
+            <p className="text-xs mb-1" style={{ color: '#8A9BB5' }}>{m.label}</p>
+            <p className="text-xl font-bold" style={{ color: m.color }}>{m.value}</p>
+            <p className="text-xs mt-0.5" style={{ color: '#4A5568' }}>{m.hint}</p>
+          </div>
+        ))}
+      </div>
+
       {/* Main grid */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
         {/* Client table */}
         <div className="xl:col-span-3 space-y-4">
-          {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#8A9BB5' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -337,12 +415,8 @@ export default function DashboardClient({
                 placeholder="Buscar cliente..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-white outline-none transition-all focus:ring-1"
-                style={{
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  outline: 'none',
-                }}
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-white outline-none"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
                 onFocus={e => e.currentTarget.style.borderColor = 'rgba(0,196,160,0.4)'}
                 onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
               />
@@ -353,10 +427,7 @@ export default function DashboardClient({
                   key={f}
                   onClick={() => setFilter(f)}
                   className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                  style={{
-                    background: filter === f ? 'rgba(0,196,160,0.15)' : 'transparent',
-                    color: filter === f ? '#00C4A0' : '#8A9BB5',
-                  }}
+                  style={{ background: filter === f ? 'rgba(0,196,160,0.15)' : 'transparent', color: filter === f ? '#00C4A0' : '#8A9BB5' }}
                 >
                   {f}
                 </button>
@@ -374,7 +445,6 @@ export default function DashboardClient({
             </select>
           </div>
 
-          {/* Table */}
           {filtered.length === 0 ? (
             <div
               className="rounded-2xl p-12 flex flex-col items-center justify-center text-center"
@@ -411,8 +481,7 @@ export default function DashboardClient({
                       return (
                         <tr
                           key={c.id}
-                          className="table-row-hover group"
-                          style={{ borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', position: 'relative' }}
+                          style={{ borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
                         >
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
@@ -445,14 +514,14 @@ export default function DashboardClient({
                             ) : c.metodoPago === 'Transferencia SPEI' ? (
                               <span className="text-xs font-medium" style={{ color: '#3B82F6' }}>SPEI</span>
                             ) : (
-                              <span className="text-xs" style={{ color: '#8A9BB5' }}>Otro</span>
+                              <span className="text-xs" style={{ color: '#8A9BB5' }}>{c.metodoPago}</span>
                             )}
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
-                              <Link href={`/admin/clientes/${c.id}`} className="text-xs font-medium transition-colors hover:opacity-80" style={{ color: '#00C4A0' }}>Ver</Link>
+                              <Link href={`/admin/clientes/${c.id}`} className="text-xs font-medium" style={{ color: '#00C4A0' }}>Ver</Link>
                               <span style={{ color: '#8A9BB5' }}>·</span>
-                              <Link href={`/admin/clientes/${c.id}#pagos`} className="text-xs transition-colors hover:text-white" style={{ color: '#8A9BB5' }}>Pagos</Link>
+                              <Link href={`/admin/clientes/${c.id}#pagos`} className="text-xs" style={{ color: '#8A9BB5' }}>Pagos</Link>
                             </div>
                           </td>
                         </tr>

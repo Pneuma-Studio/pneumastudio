@@ -3,6 +3,10 @@
     {
       "path": "/api/admin/cron/pagos-vencidos",
       "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/api/admin/cron/generar-pagos",
+      "schedule": "0 9 1 * *"
     }
   ]
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/admin-auth';
-import { getAllPagos, getClienteById } from '@/lib/notion';
+import { getAllPagos, getClienteById, updatePagoStatus, updateCliente } from '@/lib/notion';
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -18,20 +18,59 @@ function fmt(n: number) {
   return n.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
+function daysAgo(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().split('T')[0];
+}
+
 async function run() {
   const today = new Date().toISOString().split('T')[0];
+  const sevenDaysAgo = daysAgo(7);
+  const thirtyDaysAgo = daysAgo(30);
 
-  // Fetch all pagos and filter overdue ones
   const allPagos = await getAllPagos();
+
+  // Pendiente pagos that are overdue (for reminders)
   const vencidos = allPagos.filter(
     p => p.estado === 'Pendiente' && p.fechaCobro && p.fechaCobro < today
   );
 
-  if (vencidos.length === 0) {
-    return { ok: true, enviados: 0, resultados: [], mensaje: 'Sin pagos vencidos' };
+  // Auto-mark as Vencido if > 7 days overdue
+  const toMarkVencido = vencidos.filter(p => p.fechaCobro < sevenDaysAgo);
+  let marcadosVencido = 0;
+  for (const p of toMarkVencido) {
+    try {
+      await updatePagoStatus(p.id, 'Vencido');
+      marcadosVencido++;
+    } catch {
+      // continue
+    }
   }
 
-  // Group by clienteId
+  // Auto-mark clients as Moroso if any pago > 30 days overdue (Pendiente or Vencido)
+  const pagosMuyVencidos = allPagos.filter(
+    p => (p.estado === 'Pendiente' || p.estado === 'Vencido') && p.fechaCobro && p.fechaCobro < thirtyDaysAgo
+  );
+  const clientesMorosos = new Set(pagosMuyVencidos.map(p => p.clienteId).filter(Boolean));
+  let marcadosMorosos = 0;
+  for (const clienteId of clientesMorosos) {
+    try {
+      const cliente = await getClienteById(clienteId);
+      if (cliente && cliente.estado !== 'Moroso' && cliente.estado !== 'Cancelado') {
+        await updateCliente(clienteId, { estado: 'Moroso' });
+        marcadosMorosos++;
+      }
+    } catch {
+      // continue
+    }
+  }
+
+  // Send reminder emails for all overdue Pendiente pagos
+  if (vencidos.length === 0) {
+    return { ok: true, enviados: 0, resultados: [], marcadosVencido, marcadosMorosos, mensaje: 'Sin pagos vencidos' };
+  }
+
   const byCliente: Record<string, typeof vencidos> = {};
   for (const p of vencidos) {
     if (!byCliente[p.clienteId]) byCliente[p.clienteId] = [];
@@ -44,7 +83,7 @@ async function run() {
   for (const [clienteId, pagos] of Object.entries(byCliente)) {
     const cliente = await getClienteById(clienteId);
     const email = cliente?.email;
-    const nombre = cliente?.nombre ?? pagos[0].clienteNombre ?? 'Cliente';
+    const nombre = cliente?.nombre ?? 'Cliente';
 
     if (!email) {
       resultados.push({ cliente: nombre, email: '', pagos: pagos.length, ok: false, error: 'Sin email' });
@@ -80,7 +119,6 @@ async function run() {
       <div style="padding:28px 32px;">
         <p style="margin:0 0 20px;color:#8A9BB5;">Hola <strong style="color:#fff;">${nombre}</strong>,</p>
         <p style="margin:0 0 24px;color:#8A9BB5;line-height:1.6;">Tenemos registrado${pagos.length > 1 ? 's' : ''} ${pagos.length} pago${pagos.length > 1 ? 's' : ''} pendiente${pagos.length > 1 ? 's' : ''} en tu cuenta. Si ya realizaste el pago, por favor ignora este mensaje.</p>
-
         <table style="width:100%;border-collapse:collapse;background:rgba(255,255,255,0.03);border-radius:10px;overflow:hidden;margin-bottom:24px;">
           <thead>
             <tr style="background:rgba(255,255,255,0.05);">
@@ -89,17 +127,12 @@ async function run() {
               <th style="padding:10px 12px;text-align:left;font-size:11px;color:#8A9BB5;font-weight:500;">Monto</th>
             </tr>
           </thead>
-          <tbody style="color:#E2E8F0;font-size:13px;">
-            ${pagosList}
-          </tbody>
-          ${pagos.length > 1 ? `<tfoot>
-            <tr style="background:rgba(0,196,160,0.07);">
-              <td colspan="2" style="padding:10px 12px;font-size:13px;color:#8A9BB5;">Total</td>
-              <td style="padding:10px 12px;font-size:14px;font-weight:700;color:#00C4A0;">$${fmt(total)} ${moneda}</td>
-            </tr>
-          </tfoot>` : ''}
+          <tbody style="color:#E2E8F0;font-size:13px;">${pagosList}</tbody>
+          ${pagos.length > 1 ? `<tfoot><tr style="background:rgba(0,196,160,0.07);">
+            <td colspan="2" style="padding:10px 12px;font-size:13px;color:#8A9BB5;">Total</td>
+            <td style="padding:10px 12px;font-size:14px;font-weight:700;color:#00C4A0;">$${fmt(total)} ${moneda}</td>
+          </tr></tfoot>` : ''}
         </table>
-
         <p style="margin:0 0 8px;color:#8A9BB5;font-size:13px;">Para realizar tu pago o si tienes alguna duda, contáctanos:</p>
         <a href="https://wa.me/528112803360" style="display:inline-block;background:rgba(0,196,160,0.15);color:#00C4A0;padding:10px 20px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:600;border:1px solid rgba(0,196,160,0.3);">
           Contactar por WhatsApp
@@ -120,7 +153,7 @@ async function run() {
     }
   }
 
-  // Admin summary email
+  // Admin summary
   const summaryRows = resultados
     .map(r => `<tr>
       <td style="padding:8px 12px;border-bottom:1px solid #1a2a40;">${r.cliente}</td>
@@ -147,7 +180,7 @@ async function run() {
         <p style="font-size:12px;color:#8A9BB5;margin:4px 0 0;">${new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
       </div>
       <div style="padding:24px 28px;">
-        <div style="display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;">
+        <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
           <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px 20px;">
             <div style="font-size:22px;font-weight:700;color:#EF4444;">${vencidos.length}</div>
             <div style="font-size:11px;color:#8A9BB5;margin-top:2px;">Pagos vencidos</div>
@@ -156,12 +189,15 @@ async function run() {
             <div style="font-size:22px;font-weight:700;color:#00C4A0;">${enviados}</div>
             <div style="font-size:11px;color:#8A9BB5;margin-top:2px;">Emails enviados</div>
           </div>
-          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 20px;">
-            <div style="font-size:22px;font-weight:700;color:#fff;">${Object.keys(byCliente).length}</div>
-            <div style="font-size:11px;color:#8A9BB5;margin-top:2px;">Clientes afectados</div>
-          </div>
+          ${marcadosVencido > 0 ? `<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:14px 20px;">
+            <div style="font-size:22px;font-weight:700;color:#F59E0B;">${marcadosVencido}</div>
+            <div style="font-size:11px;color:#8A9BB5;margin-top:2px;">Marcados como Vencido</div>
+          </div>` : ''}
+          ${marcadosMorosos > 0 ? `<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px 20px;">
+            <div style="font-size:22px;font-weight:700;color:#EF4444;">${marcadosMorosos}</div>
+            <div style="font-size:11px;color:#8A9BB5;margin-top:2px;">Clientes → Moroso</div>
+          </div>` : ''}
         </div>
-
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
           <thead>
             <tr style="background:rgba(255,255,255,0.04);">
@@ -171,9 +207,7 @@ async function run() {
               <th style="padding:10px 12px;text-align:left;font-size:11px;color:#8A9BB5;font-weight:500;">Estado</th>
             </tr>
           </thead>
-          <tbody>
-            ${summaryRows}
-          </tbody>
+          <tbody>${summaryRows}</tbody>
         </table>
       </div>
     </div>
@@ -185,7 +219,7 @@ async function run() {
     // Admin email failure is non-fatal
   }
 
-  return { ok: true, enviados, resultados };
+  return { ok: true, enviados, resultados, marcadosVencido, marcadosMorosos };
 }
 
 async function authorize(req: NextRequest): Promise<boolean> {
@@ -194,17 +228,13 @@ async function authorize(req: NextRequest): Promise<boolean> {
     const authHeader = req.headers.get('authorization');
     if (authHeader === `Bearer ${cronSecret}`) return true;
   }
-  const session = await getAdminSession();
-  return !!session;
+  return !!(await getAdminSession());
 }
 
 export async function GET(req: NextRequest) {
-  if (!(await authorize(req))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (!(await authorize(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
-    const result = await run();
-    return NextResponse.json(result);
+    return NextResponse.json(await run());
   } catch (err: any) {
     console.error('[cron/pagos-vencidos]', err?.message);
     return NextResponse.json({ error: err?.message }, { status: 500 });
@@ -212,12 +242,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await authorize(req))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (!(await authorize(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
-    const result = await run();
-    return NextResponse.json(result);
+    return NextResponse.json(await run());
   } catch (err: any) {
     console.error('[cron/pagos-vencidos]', err?.message);
     return NextResponse.json({ error: err?.message }, { status: 500 });

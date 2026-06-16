@@ -34,7 +34,9 @@ export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkLoading, setBulkLoading] = useState(false);
   const [reminderLoading, setReminderLoading] = useState(false);
-  const [reminderResult, setReminderResult] = useState<{ enviados: number; total: number } | null>(null);
+  const [reminderResult, setReminderResult] = useState<{ enviados: number; marcadosVencido?: number; marcadosMorosos?: number } | null>(null);
+  const [generarLoading, setGenerarLoading] = useState(false);
+  const [generarResult, setGenerarResult] = useState<{ created: number; mensaje: string } | null>(null);
 
   const filtered = useMemo(() => {
     const monthStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
@@ -85,6 +87,31 @@ export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
     }
   }
 
+  function downloadCSV() {
+    const headers = ['Fecha','Cliente','Tipo','Monto','Moneda','Estado','Método','Referencia','Factura'];
+    const rows = filtered.map(p => [
+      p.fechaCobro,
+      p.clienteNombre,
+      p.tipo,
+      p.monto,
+      p.moneda,
+      p.estado,
+      p.metodo,
+      p.referencia || '',
+      p.factura ? 'Sí' : 'No',
+    ]);
+    const csv = [headers, ...rows]
+      .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pagos-${selectedYear}-${String(selectedMonth).padStart(2,'0')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   const years = Array.from({ length: 3 }, (_, i) => now.getFullYear() - i);
 
   async function handleSendReminders() {
@@ -95,12 +122,31 @@ export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
       const res = await fetch('/api/admin/cron/pagos-vencidos', { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
-        setReminderResult({ enviados: data.enviados, total: data.resultados?.length ?? 0 });
+        setReminderResult({ enviados: data.enviados, marcadosVencido: data.marcadosVencido, marcadosMorosos: data.marcadosMorosos });
       }
     } catch {
       // silent
     } finally {
       setReminderLoading(false);
+    }
+  }
+
+  async function handleGenerarMensualidades() {
+    if (!confirm(`¿Generar mensualidades de ${MESES[selectedMonth - 1]} ${selectedYear} para todos los clientes activos sin mensualidad este mes?`)) return;
+    setGenerarLoading(true);
+    setGenerarResult(null);
+    try {
+      const res = await fetch('/api/admin/cron/generar-pagos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ year: selectedYear, month: selectedMonth }),
+      });
+      const data = await res.json();
+      if (res.ok) setGenerarResult({ created: data.created, mensaje: data.mensaje });
+    } catch {
+      // silent
+    } finally {
+      setGenerarLoading(false);
     }
   }
 
@@ -112,11 +158,53 @@ export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
           <p className="text-sm mt-1" style={{ color: '#8A9BB5' }}>Todos los pagos registrados</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Feedback chips */}
           {reminderResult && (
             <span className="text-xs px-3 py-2 rounded-xl" style={{ background: 'rgba(0,196,160,0.1)', color: '#00C4A0', border: '1px solid rgba(0,196,160,0.2)' }}>
               ✓ {reminderResult.enviados} recordatorio{reminderResult.enviados !== 1 ? 's' : ''} enviado{reminderResult.enviados !== 1 ? 's' : ''}
+              {reminderResult.marcadosVencido ? ` · ${reminderResult.marcadosVencido} marcados vencido` : ''}
+              {reminderResult.marcadosMorosos ? ` · ${reminderResult.marcadosMorosos} → moroso` : ''}
             </span>
           )}
+          {generarResult && (
+            <span className="text-xs px-3 py-2 rounded-xl" style={{ background: 'rgba(59,130,246,0.1)', color: '#3B82F6', border: '1px solid rgba(59,130,246,0.2)' }}>
+              ✓ {generarResult.mensaje}
+            </span>
+          )}
+
+          {/* CSV export */}
+          <button
+            onClick={downloadCSV}
+            disabled={filtered.length === 0}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium disabled:opacity-40"
+            style={{ background: 'rgba(255,255,255,0.05)', color: '#8A9BB5', border: '1px solid rgba(255,255,255,0.08)' }}
+            title="Exportar a CSV"
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+              <path d="M8 1v9M4 7l4 4 4-4M2 13h12" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            CSV
+          </button>
+
+          {/* Generar mensualidades */}
+          <button
+            onClick={handleGenerarMensualidades}
+            disabled={generarLoading}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
+            style={{ background: 'rgba(59,130,246,0.1)', color: '#3B82F6', border: '1px solid rgba(59,130,246,0.2)' }}
+          >
+            {generarLoading ? (
+              <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#3B82F6' }} />
+            ) : (
+              <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                <path d="M2 8a6 6 0 1 0 6-6" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round"/>
+                <path d="M2 4v4h4" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+            {generarLoading ? 'Generando...' : 'Generar mensualidades'}
+          </button>
+
+          {/* Send reminders */}
           <button
             onClick={handleSendReminders}
             disabled={reminderLoading}
@@ -133,6 +221,7 @@ export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
             )}
             {reminderLoading ? 'Enviando...' : 'Enviar recordatorios'}
           </button>
+
           <Link href="/admin/pagos/nuevo" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold" style={{ background: '#00C4A0', color: '#050D1A' }}>
             + Registrar pago
           </Link>
@@ -145,7 +234,6 @@ export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
         style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
       >
         <div className="flex flex-wrap gap-3">
-          {/* Month/Year */}
           <div className="flex gap-2">
             <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))} className="px-3 py-2 rounded-xl text-sm outline-none" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#FFFFFF' }}>
               {MESES.map((m, i) => <option key={i} value={i + 1} style={{ background: '#0A1628' }}>{m}</option>)}
@@ -155,7 +243,6 @@ export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
             </select>
           </div>
 
-          {/* Estado */}
           <div className="flex gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
             {['Todos','Pagados','Pendientes','Vencidos','Fallidos'].map(f => (
               <button key={f} onClick={() => setEstadoFilter(f === 'Todos' ? 'Todos' : f.replace(/s$/, ''))} className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all" style={{ background: estadoFilter === (f === 'Todos' ? 'Todos' : f.replace(/s$/, '')) ? 'rgba(0,196,160,0.15)' : 'transparent', color: estadoFilter === (f === 'Todos' ? 'Todos' : f.replace(/s$/, '')) ? '#00C4A0' : '#8A9BB5' }}>
@@ -164,7 +251,6 @@ export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
             ))}
           </div>
 
-          {/* Moneda */}
           <div className="flex gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
             {['Todos','MXN','USD'].map(f => (
               <button key={f} onClick={() => setMonedaFilter(f)} className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all" style={{ background: monedaFilter === f ? 'rgba(0,196,160,0.15)' : 'transparent', color: monedaFilter === f ? '#00C4A0' : '#8A9BB5' }}>
@@ -173,17 +259,16 @@ export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
             ))}
           </div>
 
-          {/* Tipo */}
           <select value={tipoFilter} onChange={e => setTipoFilter(e.target.value)} className="px-3 py-2 rounded-xl text-sm outline-none" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#8A9BB5' }}>
             {['Todos','Anticipo','Mensualidad','Mantenimiento','Add-on','Saldo Final'].map(t => <option key={t} value={t} style={{ background: '#0A1628' }}>{t}</option>)}
           </select>
         </div>
 
-        {/* Summary row */}
         <div className="flex flex-wrap gap-4 text-sm pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <span><span style={{ color: '#22C55E' }}>Pagado:</span> <strong className="text-white">${fmt(summary.pagadoMXN)} MXN{summary.pagadoUSD > 0 ? ` · $${fmt(summary.pagadoUSD)} USD` : ''}</strong></span>
           <span><span style={{ color: '#F59E0B' }}>Pendiente:</span> <strong className="text-white">${fmt(summary.pendienteMXN)} MXN</strong></span>
           <span><span style={{ color: '#EF4444' }}>Vencido:</span> <strong className="text-white">${fmt(summary.vencidoMXN)} MXN</strong></span>
+          <span className="ml-auto text-xs" style={{ color: '#4A5568' }}>{filtered.length} pagos</span>
         </div>
       </div>
 
@@ -205,7 +290,6 @@ export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
         </div>
       ) : (
         <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-          {/* Desktop */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -254,7 +338,6 @@ export default function PagosClient({ pagos: allPagos }: { pagos: Pago[] }) {
             </table>
           </div>
 
-          {/* Mobile */}
           <div className="lg:hidden divide-y" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
             {filtered.map(p => {
               const estadoStyle = ESTADO_COLORS[p.estado] ?? { bg: 'rgba(107,114,128,0.15)', text: '#6B7280' };
