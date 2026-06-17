@@ -868,6 +868,128 @@ function FacturasSection({ clienteId, moneda, clientName }: { clienteId: string;
   );
 }
 
+// ─── Notas CRM Section ───────────────────────────────────────────────────────
+
+interface ClientNote {
+  id: string;
+  notion_client_id: string;
+  content: string;
+  created_at: string;
+}
+
+function timeAgo(iso: string) {
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return 'Hace un momento';
+  const m = Math.floor(s / 60);
+  if (m < 60) return `Hace ${m} min`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `Hace ${h} h`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `Hace ${d} día${d > 1 ? 's' : ''}`;
+  return new Date(iso).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function NotasSection({ clienteId }: { clienteId: string }) {
+  const [notes, setNotes] = useState<ClientNote[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [text, setText] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch(`/api/admin/clientes/${clienteId}/notas`)
+      .then(r => r.ok ? r.json() : [])
+      .then(setNotes)
+      .finally(() => setLoading(false));
+  }, [clienteId]);
+
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault();
+    if (!text.trim()) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/clientes/${clienteId}/notas`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: text }),
+      });
+      if (res.ok) {
+        const created: ClientNote = await res.json();
+        setNotes(prev => [created, ...prev]);
+        setText('');
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    setNotes(prev => prev.filter(n => n.id !== id));
+    await fetch(`/api/admin/clientes/${clienteId}/notas`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+  }
+
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <h2 className="text-sm font-semibold text-white">Notas internas</h2>
+        <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', color: '#8A9BB5' }}>
+          {loading ? '…' : notes.length}
+        </span>
+      </div>
+      <div className="p-5 space-y-4">
+        <form onSubmit={handleAdd} className="flex gap-2">
+          <textarea
+            value={text}
+            onChange={e => setText(e.target.value)}
+            placeholder="Añadir nota interna..."
+            rows={2}
+            className="flex-1 px-3 py-2 rounded-xl text-sm outline-none resize-none"
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF' }}
+            onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleAdd(e as any); }}
+          />
+          <button
+            type="submit"
+            disabled={saving || !text.trim()}
+            className="px-3 py-2 rounded-xl text-sm font-semibold disabled:opacity-40 self-start"
+            style={{ background: '#00C4A0', color: '#050D1A' }}
+          >
+            {saving ? '…' : 'Añadir'}
+          </button>
+        </form>
+
+        {loading ? (
+          <div className="flex justify-center py-4">
+            <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#00C4A0' }} />
+          </div>
+        ) : notes.length === 0 ? (
+          <p className="text-xs text-center py-2" style={{ color: '#8A9BB5' }}>Sin notas registradas</p>
+        ) : (
+          <div className="space-y-2">
+            {notes.map(n => (
+              <div key={n.id} className="rounded-xl px-4 py-3 group relative" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-sm text-white" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{n.content}</p>
+                  <button
+                    onClick={() => handleDelete(n.id)}
+                    className="shrink-0 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ color: '#8A9BB5' }}
+                  >
+                    Eliminar
+                  </button>
+                </div>
+                <p className="text-xs mt-1.5" style={{ color: 'rgba(138,155,181,0.5)' }}>{timeAgo(n.created_at)}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Edit Cliente Modal ───────────────────────────────────────────────────────
 
 const PAQUETES = ['Starter', 'Esencial', 'Profesional', 'Premium', 'Enterprise', 'Personalizado'];
@@ -1339,6 +1461,9 @@ export default function ClienteDetailClient({ cliente, pagos: initialPagos }: { 
 
       {/* Portales */}
       <PortalesSection clienteId={cliente.id} />
+
+      {/* Notas CRM */}
+      <NotasSection clienteId={cliente.id} />
 
       {/* Empresa info */}
       <EmpresaSection cliente={cliente} />

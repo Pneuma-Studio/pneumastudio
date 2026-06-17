@@ -19,6 +19,24 @@ const ESTADO_COLORS: Record<string, { bg: string; text: string }> = {
   Cancelado: { bg: 'rgba(107,114,128,0.15)', text: '#6B7280' },
 };
 
+function exportCSV(list: Cliente[]) {
+  const BOM = '﻿';
+  const headers = ['Nombre', 'Empresa', 'Email', 'WhatsApp', 'Paquete', 'Estado', 'Mensualidad', 'Moneda', 'Método de pago', 'Fecha inicio', 'Día cobro'];
+  const rows = list.map(c => [
+    c.nombre, c.empresa, c.email, c.whatsapp, c.paquete, c.estado,
+    String(c.mensualidad), c.moneda, c.metodoPago, c.fechaInicio, c.fechaCobro,
+  ]);
+  const csv = BOM + [headers, ...rows]
+    .map(r => r.map(v => `"${(v || '').replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `clientes-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function ClientesListClient({ clientes }: { clientes: Cliente[] }) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<string>('Todos');
@@ -37,9 +55,24 @@ export default function ClientesListClient({ clientes }: { clientes: Cliente[] }
           <h1 className="text-2xl font-bold text-white">Clientes</h1>
           <p className="text-sm mt-1" style={{ color: '#8A9BB5' }}>{clientes.length} clientes registrados</p>
         </div>
-        <Link href="/admin/clientes/nuevo" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold" style={{ background: '#00C4A0', color: '#050D1A' }}>
-          + Nuevo cliente
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => exportCSV(filtered)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
+            style={{ background: 'rgba(255,255,255,0.06)', color: '#8A9BB5', border: '1px solid rgba(255,255,255,0.08)' }}
+            title="Exportar CSV"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            CSV
+          </button>
+          <Link href="/admin/clientes/nuevo" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold" style={{ background: '#00C4A0', color: '#050D1A' }}>
+            + Nuevo cliente
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">

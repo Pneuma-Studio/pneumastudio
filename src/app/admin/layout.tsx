@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import CommandPalette from '@/components/admin/CommandPalette';
+import NotificationBell from '@/components/admin/NotificationBell';
 
 interface NavItem {
   label: string;
@@ -305,19 +306,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </svg>
             <span className="text-sm font-600 text-white">{pageTitle}</span>
           </div>
-          <button
-            onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all"
-            style={{ color: '#8A9BB5', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,196,160,0.3)'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.08)'}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            Buscar
-            <kbd style={{ background: 'rgba(255,255,255,0.06)', padding: '1px 5px', borderRadius: 4, fontFamily: 'monospace', color: '#6B7280', marginLeft: 4 }}>⌘K</kbd>
-          </button>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all"
+              style={{ color: '#8A9BB5', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,196,160,0.3)'}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.08)'}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Buscar
+              <kbd style={{ background: 'rgba(255,255,255,0.06)', padding: '1px 5px', borderRadius: 4, fontFamily: 'monospace', color: '#6B7280', marginLeft: 4 }}>⌘K</kbd>
+            </button>
+          </div>
         </header>
 
         {/* Mobile header */}

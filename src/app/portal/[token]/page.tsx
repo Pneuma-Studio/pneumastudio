@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +36,25 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
   if (error || !portal) notFound();
 
   const currentStageIndex = STAGES.findIndex((s) => s.key === portal.stage);
+
+  // Fetch facturas for this client
+  interface PortalFactura { id: string; numero_factura: string; monto: number; moneda: string; fecha_factura: string; original_name: string; signedUrl: string | null }
+  let facturas: PortalFactura[] = [];
+  if (portal.notion_client_id) {
+    const adminSupabase = createAdminClient();
+    const { data: facturaRows } = await adminSupabase
+      .from('facturas')
+      .select('id, numero_factura, monto, moneda, fecha_factura, original_name, path')
+      .eq('notion_client_id', portal.notion_client_id)
+      .order('created_at', { ascending: false });
+
+    if (facturaRows?.length) {
+      facturas = await Promise.all(facturaRows.map(async f => {
+        const { data: urlData } = await adminSupabase.storage.from('facturas').createSignedUrl(f.path, 3600);
+        return { ...f, signedUrl: urlData?.signedUrl ?? null };
+      }));
+    }
+  }
 
   return (
     <div className="min-h-screen" style={{ background: '#050D1A' }}>
@@ -155,6 +175,50 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                 </svg>
               </a>
               <p className="text-xs mt-3" style={{ color: 'rgba(138,155,181,0.5)' }}>{portal.preview_url}</p>
+            </div>
+          )}
+
+          {/* Facturas */}
+          {facturas.length > 0 && (
+            <div
+              className="rounded-2xl mb-6"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+            >
+              <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <p className="label-tag text-muted-foreground">FACTURAS</p>
+              </div>
+              <div className="p-5 space-y-2">
+                {facturas.map(f => (
+                  <div
+                    key={f.id}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                  >
+                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="none" style={{ color: '#8A9BB5' }}>
+                      <path d="M11 2H5a1 1 0 00-1 1v14a1 1 0 001 1h10a1 1 0 001-1V7l-5-5z" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round" />
+                      <path d="M11 2v5h5" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" />
+                    </svg>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-white">{f.numero_factura}</div>
+                      <div className="text-xs" style={{ color: '#8A9BB5' }}>
+                        {f.monto > 0 && `$${f.monto.toLocaleString('es-MX')} ${f.moneda}`}
+                        {f.fecha_factura && ` · ${new Date(f.fecha_factura).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}`}
+                      </div>
+                    </div>
+                    {f.signedUrl && (
+                      <a
+                        href={f.signedUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-semibold shrink-0"
+                        style={{ color: '#00C4A0' }}
+                      >
+                        Descargar
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

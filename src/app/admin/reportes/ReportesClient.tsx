@@ -99,6 +99,42 @@ export default function ReportesClient({ clientes, pagos }: { clientes: Cliente[
     .filter(p => p.estado === 'Vencido')
     .reduce((s, p) => s + p.monto, 0);
 
+  // Retention metrics
+  const avgLTV = useMemo(() => {
+    const active = clientes.filter(c => c.estado === 'Activo' && c.fechaInicio);
+    if (!active.length) return 0;
+    const sum = active.reduce((s, c) => {
+      const months = Math.max(1, Math.round((now.getTime() - new Date(c.fechaInicio).getTime()) / (1000 * 60 * 60 * 24 * 30)));
+      return s + c.mensualidad * months;
+    }, 0);
+    return sum / active.length;
+  }, [clientes]);
+
+  const avgTenure = useMemo(() => {
+    const active = clientes.filter(c => c.estado === 'Activo' && c.fechaInicio);
+    if (!active.length) return 0;
+    return active.reduce((s, c) => {
+      return s + Math.max(1, Math.round((now.getTime() - new Date(c.fechaInicio).getTime()) / (1000 * 60 * 60 * 24 * 30)));
+    }, 0) / active.length;
+  }, [clientes]);
+
+  const churnRate = useMemo(() => {
+    const relevant = clientes.filter(c => c.estado !== 'Pausado').length;
+    const canceled = clientes.filter(c => c.estado === 'Cancelado').length;
+    return relevant > 0 ? (canceled / relevant) * 100 : 0;
+  }, [clientes]);
+
+  const growthData = useMemo(() => {
+    const months = Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+      return { year: d.getFullYear(), month: d.getMonth() + 1, label: MESES_SHORT[d.getMonth()] };
+    });
+    return months.map(({ year, month, label }) => {
+      const ms = `${year}-${String(month).padStart(2, '0')}`;
+      return { label, Nuevos: clientes.filter(c => c.fechaInicio?.startsWith(ms)).length };
+    });
+  }, [clientes]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -193,6 +229,48 @@ export default function ReportesClient({ clientes, pagos }: { clientes: Cliente[
             </table>
           </div>
         )}
+      </div>
+
+      {/* Retention metrics */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[
+          { label: 'LTV promedio', value: `$${fmt(avgLTV)} MXN`, sub: 'mensualidad × meses activos', color: '#8B5CF6' },
+          { label: 'Churn rate', value: `${churnRate.toFixed(1)}%`, sub: 'clientes cancelados / total', color: '#EF4444' },
+          { label: 'Permanencia promedio', value: `${Math.round(avgTenure)} meses`, sub: 'clientes activos', color: '#00C4A0' },
+          { label: 'Total clientes', value: String(clientes.length), sub: `${clientesByValue.length} activos`, color: '#3B82F6' },
+        ].map(m => (
+          <div key={m.label} className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="text-xs mb-2" style={{ color: '#8A9BB5' }}>{m.label}</div>
+            <div className="text-xl font-bold" style={{ color: m.color }}>{m.value}</div>
+            <div className="text-xs mt-1" style={{ color: 'rgba(138,155,181,0.6)' }}>{m.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Client growth chart */}
+      <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <h2 className="text-sm font-semibold text-white mb-4">Nuevos clientes — últimos 6 meses</h2>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={growthData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+            <XAxis dataKey="label" tick={{ fill: '#8A9BB5', fontSize: 11 }} axisLine={false} tickLine={false} />
+            <YAxis allowDecimals={false} tick={{ fill: '#8A9BB5', fontSize: 11 }} axisLine={false} tickLine={false} />
+            <Tooltip content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+              return (
+                <div className="rounded-xl p-3 text-sm" style={{ background: '#0A1628', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div className="font-semibold text-white mb-1">{label}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ background: '#00C4A0' }} />
+                    <span style={{ color: '#8A9BB5' }}>Nuevos:</span>
+                    <span className="text-white font-medium">{payload[0].value}</span>
+                  </div>
+                </div>
+              );
+            }} />
+            <Bar dataKey="Nuevos" fill="#00C4A0" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       {/* Morosos */}
