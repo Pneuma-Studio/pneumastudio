@@ -29,6 +29,16 @@ export default function DisponibilidadClient() {
   const [newName, setNewName] = useState('');
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const calLink = process.env.NEXT_PUBLIC_CAL_COM_LINK ?? 'https://cal.com/pneuma-studio/15min';
+
+  function copyCalLink() {
+    navigator.clipboard.writeText(calLink).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
 
   const monthLabel = `${MONTHS_ES[viewMonth]} ${viewYear}`;
   const isCurrentMonth = viewMonth === today.getMonth() && viewYear === today.getFullYear();
@@ -138,11 +148,39 @@ export default function DisponibilidadClient() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white mb-1">Disponibilidad</h1>
-        <p className="text-sm" style={{ color: '#8A9BB5' }}>
-          Agenda proyectos en el calendario. La barra pública se actualiza sola.
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-1">Disponibilidad</h1>
+          <p className="text-sm" style={{ color: '#8A9BB5' }}>
+            Agenda proyectos en el calendario. La barra pública se actualiza sola.
+          </p>
+        </div>
+        <button
+          onClick={copyCalLink}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all shrink-0"
+          style={{
+            background: copied ? 'rgba(0,196,160,0.15)' : 'rgba(255,255,255,0.06)',
+            border: copied ? '1px solid rgba(0,196,160,0.4)' : '1px solid rgba(255,255,255,0.1)',
+            color: copied ? '#00C4A0' : '#CBD5E1',
+          }}
+        >
+          {copied ? (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M20 6L9 17l-5-5" stroke="#00C4A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              ¡Copiado!
+            </>
+          ) : (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Copiar link de Cal.com
+            </>
+          )}
+        </button>
       </div>
 
       {/* Availability bar */}
