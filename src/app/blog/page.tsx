@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppFloat from '@/components/WhatsAppFloat';
 import { getPublishedPosts } from '@/lib/notion';
+import { getTagStyle } from '@/lib/blogTags';
 
 export const revalidate = 3600; // revalidate every hour
 
@@ -63,7 +64,7 @@ export default async function BlogPage() {
                     <div className="p-6">
                       <div className="flex items-center gap-3 mb-3">
                         {post.tags.slice(0, 2).map((tag) => (
-                          <span key={tag} className="text-xs font-600 px-2.5 py-1 rounded-full" style={{ background: 'rgba(0,196,160,0.1)', color: '#00C4A0', border: '1px solid rgba(0,196,160,0.2)' }}>{tag}</span>
+                          <span key={tag} className="text-xs font-600 px-2.5 py-1 rounded-full" style={getTagStyle(tag)}>{tag}</span>
                         ))}
                         <span className="text-xs ml-auto" style={{ color: '#8A9BB5' }}>{post.tiempoLectura} min</span>
                       </div>

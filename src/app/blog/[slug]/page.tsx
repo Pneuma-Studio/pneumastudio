@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppFloat from '@/components/WhatsAppFloat';
 import { getPostBySlug, getPostBlocks, BlogBlock } from '@/lib/notion';
+import { getTagStyle } from '@/lib/blogTags';
 
 export const dynamic = 'force-dynamic';
 
@@ -117,7 +118,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </Link>
             <div className="flex flex-wrap gap-2 mb-5">
               {post.tags.map((tag) => (
-                <span key={tag} className="text-xs font-600 px-2.5 py-1 rounded-full" style={{ background: 'rgba(0,196,160,0.1)', color: '#00C4A0', border: '1px solid rgba(0,196,160,0.2)' }}>{tag}</span>
+                <span key={tag} className="text-xs font-600 px-2.5 py-1 rounded-full" style={getTagStyle(tag)}>{tag}</span>
               ))}
             </div>
             <h1 className="text-3xl sm:text-4xl font-800 text-white mb-4" style={{ letterSpacing: '-0.025em', lineHeight: 1.15 }}>{post.titulo}</h1>
