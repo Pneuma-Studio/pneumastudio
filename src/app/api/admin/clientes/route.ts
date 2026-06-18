@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createCliente, createPago } from '@/lib/notion';
+import { createCliente, createPago, getAllClientes } from '@/lib/notion';
 import { getAdminSession } from '@/lib/admin-auth';
 import { logAudit } from '@/lib/supabase/audit';
 import { Resend } from 'resend';
 import type { PagoTipo } from '@/lib/notion';
+
+export async function GET() {
+  const session = await getAdminSession();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const clientes = await getAllClientes().catch(() => []);
+  return NextResponse.json(
+    clientes.map(c => ({ id: c.id, nombre: c.nombre, empresa: c.empresa }))
+  );
+}
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = 'Pneuma Studio <studio@pneumastudio.mx>';

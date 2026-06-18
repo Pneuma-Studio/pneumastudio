@@ -1,9 +1,87 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import type { DocumentoForm, ScopeSection, InversionConcepto } from '@/lib/pdf/types';
 import { parseMXN, formatMXN } from '@/lib/pdf/types';
+
+interface ClienteOption { id: string; nombre: string; empresa: string; }
+
+function ClienteCombobox({ value, onChange }: { value: string; onChange: (nombre: string) => void }) {
+  const [query, setQuery] = useState(value);
+  const [clientes, setClientes] = useState<ClienteOption[]>([]);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch('/api/admin/clientes')
+      .then(r => r.json())
+      .then(data => Array.isArray(data) && setClientes(data))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => { setQuery(value); }, [value]);
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const filtered = query.trim()
+    ? clientes.filter(c =>
+        c.nombre.toLowerCase().includes(query.toLowerCase()) ||
+        c.empresa.toLowerCase().includes(query.toLowerCase())
+      )
+    : clientes;
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <label style={LABEL_STYLE}>NOMBRE DEL CLIENTE</label>
+      <input
+        value={query}
+        onChange={e => { setQuery(e.target.value); onChange(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        placeholder="Busca por nombre o empresa..."
+        style={INPUT_STYLE}
+        autoComplete="off"
+        onFocus={e => { setOpen(true); (e.target as HTMLInputElement).style.borderColor = 'rgba(0,196,160,0.5)'; }}
+        onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
+      />
+      {open && filtered.length > 0 && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, marginTop: 4,
+          background: '#0A1628', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
+          maxHeight: 240, overflowY: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+        }}>
+          {filtered.map(c => (
+            <button
+              key={c.id}
+              type="button"
+              onMouseDown={e => {
+                e.preventDefault();
+                setQuery(c.nombre);
+                onChange(c.nombre);
+                setOpen(false);
+              }}
+              style={{
+                width: '100%', textAlign: 'left', padding: '10px 14px', background: 'transparent',
+                border: 'none', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.05)',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,196,160,0.08)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            >
+              <span style={{ fontSize: 13, color: '#FFF', display: 'block' }}>{c.nombre}</span>
+              {c.empresa && <span style={{ fontSize: 11, color: '#8A9BB5' }}>{c.empresa}</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const PDFButtons = dynamic(() => import('./PDFButtons'), {
   ssr: false,
@@ -171,7 +249,7 @@ export default function DocumentosClient() {
       {/* Cliente */}
       <SectionCard title="Información del Cliente">
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-          <Field label="NOMBRE DEL CLIENTE" value={form.clienteNombre} onChange={v => set('clienteNombre', v)} placeholder="Ej: Yajaira Martínez" />
+          <ClienteCombobox value={form.clienteNombre} onChange={v => set('clienteNombre', v)} />
           <Field label="CIUDAD" value={form.clienteCiudad} onChange={v => set('clienteCiudad', v)} placeholder="Monterrey, Nuevo León" />
         </div>
         {form.tipo === 'contrato' && (
