@@ -1,14 +1,12 @@
 import React from 'react';
 import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, Inter } from 'next/font/google';
-import dynamic from 'next/dynamic';
 import '../styles/tailwind.css';
 import { LanguageProvider } from '@/context/LanguageContext';
 import CookieBanner from '@/components/CookieBanner';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import ChatWidgetLoader from '@/components/ChatWidgetLoader';
 import { Suspense } from 'react';
-
-const ChatWidget = dynamic(() => import('@/components/ChatWidget'), { ssr: false });
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -308,7 +306,7 @@ export default function RootLayout({
         <LanguageProvider>
           {children}
           <CookieBanner />
-          <ChatWidget />
+          <ChatWidgetLoader />
         </LanguageProvider>
         {gaId && gaId !== 'your-google-analytics-id-here' && (
           <Suspense fallback={null}>
