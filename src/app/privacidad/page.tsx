@@ -112,7 +112,7 @@ export default function PrivacidadPage() {
                 </svg>
                 <span style={{ color: '#A8BDD4' }}>
                   Contacto de privacidad:{' '}
-                  <a href="mailto:pneumastudiomx@gmail.com" style={{ color: '#00C4A0' }} className="font-600">pneumastudiomx@gmail.com</a>
+                  <a href="mailto:studio@pneumastudio.mx" style={{ color: '#00C4A0' }} className="font-600">studio@pneumastudio.mx</a>
                 </span>
               </div>
             </SectionCard>
@@ -161,7 +161,7 @@ export default function PrivacidadPage() {
                   </div>
                   <p className="mt-3" style={{ color: '#8A9BB5' }}>
                     Para oponerse, envíe un correo a{' '}
-                    <a href="mailto:pneumastudiomx@gmail.com" style={{ color: '#00C4A0' }}>pneumastudiomx@gmail.com</a>{' '}
+                    <a href="mailto:studio@pneumastudio.mx" style={{ color: '#00C4A0' }}>studio@pneumastudio.mx</a>{' '}
                     con el asunto <span className="text-white font-600">"Oposición finalidades secundarias"</span>.
                   </p>
                 </div>
@@ -237,7 +237,7 @@ export default function PrivacidadPage() {
               </div>
               <div className="mt-4 space-y-2">
                 <p className="text-xs font-700 uppercase tracking-wider" style={{ color: '#8A9BB5' }}>Para ejercerlos:</p>
-                <DataItem>Envíe un correo a <a href="mailto:pneumastudiomx@gmail.com" style={{ color: '#00C4A0' }}>pneumastudiomx@gmail.com</a> con el asunto <span className="text-white font-600">"Derechos ARCO"</span></DataItem>
+                <DataItem>Envíe un correo a <a href="mailto:studio@pneumastudio.mx" style={{ color: '#00C4A0' }}>studio@pneumastudio.mx</a> con el asunto <span className="text-white font-600">"Derechos ARCO"</span></DataItem>
                 <DataItem>Incluya su nombre completo, datos de contacto y descripción de la solicitud</DataItem>
                 <DataItem>Responderemos en un plazo máximo de <span className="text-white font-600">20 días hábiles</span></DataItem>
               </div>
@@ -262,11 +262,11 @@ export default function PrivacidadPage() {
               </div>
               <div className="flex flex-wrap gap-2 shrink-0">
                 <a
-                  href="mailto:pneumastudiomx@gmail.com"
+                  href="mailto:studio@pneumastudio.mx"
                   className="text-xs font-600 px-4 py-2 rounded-lg transition-all duration-200"
                   style={{ background: 'rgba(0,196,160,0.1)', color: '#00C4A0', border: '1px solid rgba(0,196,160,0.25)' }}
                 >
-                  pneumastudiomx@gmail.com
+                  studio@pneumastudio.mx
                 </a>
                 <a
                   href="https://wa.me/528112803360"

@@ -4,8 +4,8 @@ import { getAllPagos, getClienteById, updatePagoStatus, updateCliente } from '@/
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = 'Pneuma Studio <hola@pneumastudio.mx>';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'hola@pneumastudio.mx';
+const FROM = 'Pneuma Studio <studio@pneumastudio.mx>';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'studio@pneumastudio.mx';
 
 function fmtDate(d: string) {
   if (!d) return d;

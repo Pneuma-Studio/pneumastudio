@@ -282,8 +282,8 @@ function ConfirmationContent() {
         {/* Response time note */}
         <p className="text-xs text-muted-foreground text-center">
           {lang === 'es'
-            ? '✓ Respondemos en menos de 24 horas · pneumastudiomx@gmail.com'
-            : '✓ We respond within 24 hours · pneumastudiomx@gmail.com'}
+            ? '✓ Respondemos en menos de 24 horas · studio@pneumastudio.mx'
+            : '✓ We respond within 24 hours · studio@pneumastudio.mx'}
         </p>
       </div>
     </main>

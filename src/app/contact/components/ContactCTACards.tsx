@@ -49,10 +49,10 @@ export default function ContactCTACards() {
             <div>
               <p className="label-tag text-primary mb-2">EMAIL</p>
               <a
-                href="mailto:pneumastudiomx@gmail.com"
+                href="mailto:studio@pneumastudio.mx"
                 className="text-white font-600 hover:text-primary transition-colors"
               >
-                pneumastudiomx@gmail.com
+                studio@pneumastudio.mx
               </a>
             </div>
             <div>

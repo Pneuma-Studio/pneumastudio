@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
   const resend = new Resend(apiKey);
   const from = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-  const adminTo = process.env.ADMIN_NOTIFY_EMAIL || 'pneumastudiomx@gmail.com';
+  const adminTo = process.env.ADMIN_NOTIFY_EMAIL || 'studio@pneumastudio.mx';
 
   const errors: string[] = [];
 

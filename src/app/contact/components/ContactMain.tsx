@@ -95,12 +95,12 @@ export default function ContactMain() {
       value: '+52 811 280 3360',
     },
     {
-      href: 'mailto:pneumastudiomx@gmail.com',
+      href: 'mailto:studio@pneumastudio.mx',
       target: undefined,
       icon: <EnvelopeIcon className="w-5 h-5" style={{ color: '#00C4A0' }} />,
       iconBg: 'rgba(0,196,160,0.1)',
       label: 'Email',
-      value: 'pneumastudiomx@gmail.com',
+      value: 'studio@pneumastudio.mx',
     },
     {
       href: 'tel:+528112803360',

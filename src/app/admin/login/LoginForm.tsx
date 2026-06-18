@@ -73,7 +73,7 @@ function LoginFormInner({ loginAction }: LoginFormProps) {
                 name="email"
                 required
                 autoComplete="email"
-                placeholder="pneumastudiomx@gmail.com"
+                placeholder="studio@pneumastudio.mx"
                 className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-600 outline-none transition-all"
                 style={{
                   background: 'rgba(255,255,255,0.06)',

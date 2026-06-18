@@ -35,7 +35,7 @@ const localBusinessSchema = {
         'Agencia de desarrollo web, ecommerce y automatización digital en Monterrey, Nuevo León. Creamos plataformas de comercio electrónico, automatización por WhatsApp y sistemas empresariales a medida.',
       url: siteUrl,
       telephone: '+52-811-280-3360',
-      email: 'pneumastudiomx@gmail.com',
+      email: 'studio@pneumastudio.mx',
       priceRange: '$$$',
       currenciesAccepted: 'MXN, USD',
       address: {

@@ -6,7 +6,7 @@ import { Resend } from 'resend';
 import type { PagoTipo } from '@/lib/notion';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = 'Pneuma Studio <hola@pneumastudio.mx>';
+const FROM = 'Pneuma Studio <studio@pneumastudio.mx>';
 
 interface PlanItem {
   tipo: PagoTipo;

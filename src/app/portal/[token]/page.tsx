@@ -240,11 +240,11 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
                 WhatsApp
               </a>
               <a
-                href="mailto:pneumastudiomx@gmail.com"
+                href="mailto:studio@pneumastudio.mx"
                 className="text-sm font-500 px-4 py-2 rounded-lg transition-colors"
                 style={{ color: '#8A9BB5', border: '1px solid rgba(255,255,255,0.08)' }}
               >
-                pneumastudiomx@gmail.com
+                studio@pneumastudio.mx
               </a>
             </div>
           </div>

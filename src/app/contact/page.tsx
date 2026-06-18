@@ -14,7 +14,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pneumastudio.mx';
 export const metadata = {
   title: 'Contacto — Inicia Tu Proyecto Digital en Monterrey',
   description:
-    'Habla con Pneuma Studio hoy. Respondemos en menos de 24 horas. WhatsApp: +52 811 280 3360 · Email: pneumastudiomx@gmail.com. Monterrey, Nuevo León, México.',
+    'Habla con Pneuma Studio hoy. Respondemos en menos de 24 horas. WhatsApp: +52 811 280 3360 · Email: studio@pneumastudio.mx. Monterrey, Nuevo León, México.',
   keywords: [
     'contacto agencia digital Monterrey',
     'contratar desarrollo web Monterrey',

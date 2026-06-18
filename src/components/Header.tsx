@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -165,7 +165,7 @@ export default function Header() {
           <div className="px-6 pb-8">
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#00C4A0' }} />
-              <p className="label-tag" style={{ color: 'rgba(0,196,160,0.7)' }}>pneumastudiomx@gmail.com</p>
+              <p className="label-tag" style={{ color: 'rgba(0,196,160,0.7)' }}>studio@pneumastudio.mx</p>
             </div>
           </div>
         </div>
