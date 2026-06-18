@@ -10,6 +10,7 @@ import NotificationBell from '@/components/admin/NotificationBell';
 interface NavItem {
   label: string;
   href: string;
+  group: string[];
   icon: React.ReactNode;
 }
 
@@ -17,6 +18,7 @@ const navItems: NavItem[] = [
   {
     label: 'Overview',
     href: '/admin/dashboard',
+    group: ['/admin/dashboard'],
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <rect x="3" y="3" width="7" height="7" rx="1.5" />
@@ -27,8 +29,9 @@ const navItems: NavItem[] = [
     ),
   },
   {
-    label: 'Clientes',
+    label: 'CRM',
     href: '/admin/clientes',
+    group: ['/admin/clientes', '/admin/leads'],
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -39,8 +42,9 @@ const navItems: NavItem[] = [
     ),
   },
   {
-    label: 'Pagos',
+    label: 'Finanzas',
     href: '/admin/pagos',
+    group: ['/admin/pagos', '/admin/facturas'],
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <rect x="1" y="4" width="22" height="16" rx="2" />
@@ -49,30 +53,9 @@ const navItems: NavItem[] = [
     ),
   },
   {
-    label: 'Disponibilidad',
-    href: '/admin/disponibilidad',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <rect x="3" y="4" width="18" height="18" rx="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
-        <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Leads',
-    href: '/admin/leads',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M22 12h-4l-3 9L9 3l-3 9H2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
     label: 'Portales',
     href: '/admin/portales',
+    group: ['/admin/portales'],
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
@@ -81,21 +64,21 @@ const navItems: NavItem[] = [
     ),
   },
   {
-    label: 'Facturas',
-    href: '/admin/facturas',
+    label: 'Operaciones',
+    href: '/admin/disponibilidad',
+    group: ['/admin/disponibilidad', '/admin/documentos'],
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-        <line x1="16" y1="13" x2="8" y2="13" />
-        <line x1="16" y1="17" x2="8" y2="17" />
-        <polyline points="10 9 9 9 8 9" />
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+        <path d="M4.93 4.93a10 10 0 0 0 0 14.14" />
       </svg>
     ),
   },
   {
-    label: 'Reportes',
+    label: 'Analytics',
     href: '/admin/reportes',
+    group: ['/admin/reportes', '/admin/actividad'],
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <line x1="18" y1="20" x2="18" y2="10" />
@@ -104,43 +87,57 @@ const navItems: NavItem[] = [
       </svg>
     ),
   },
-  {
-    label: 'Actividad',
-    href: '/admin/actividad',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Documentos',
-    href: '/admin/documentos',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-        <line x1="9" y1="13" x2="15" y2="13" />
-        <line x1="9" y1="17" x2="13" y2="17" />
-        <polyline points="9 9 10 9" />
-      </svg>
-    ),
-  },
 ];
+
+// Sub-tabs shown within grouped sections
+const SUB_NAV: Record<string, { label: string; href: string }[]> = {
+  '/admin/clientes': [
+    { label: 'Clientes', href: '/admin/clientes' },
+    { label: 'Leads', href: '/admin/leads' },
+  ],
+  '/admin/leads': [
+    { label: 'Clientes', href: '/admin/clientes' },
+    { label: 'Leads', href: '/admin/leads' },
+  ],
+  '/admin/pagos': [
+    { label: 'Pagos', href: '/admin/pagos' },
+    { label: 'Facturas', href: '/admin/facturas' },
+  ],
+  '/admin/facturas': [
+    { label: 'Pagos', href: '/admin/pagos' },
+    { label: 'Facturas', href: '/admin/facturas' },
+  ],
+  '/admin/disponibilidad': [
+    { label: 'Disponibilidad', href: '/admin/disponibilidad' },
+    { label: 'Documentos', href: '/admin/documentos' },
+  ],
+  '/admin/documentos': [
+    { label: 'Disponibilidad', href: '/admin/disponibilidad' },
+    { label: 'Documentos', href: '/admin/documentos' },
+  ],
+  '/admin/reportes': [
+    { label: 'Reportes', href: '/admin/reportes' },
+    { label: 'Actividad', href: '/admin/actividad' },
+  ],
+  '/admin/actividad': [
+    { label: 'Reportes', href: '/admin/reportes' },
+    { label: 'Actividad', href: '/admin/actividad' },
+  ],
+};
 
 const PAGE_TITLES: Record<string, string> = {
   '/admin/dashboard': 'Overview',
-  '/admin/clientes': 'Clientes',
+  '/admin/clientes': 'CRM',
   '/admin/clientes/nuevo': 'Nuevo Cliente',
-  '/admin/pagos': 'Pagos',
+  '/admin/pagos': 'Finanzas',
   '/admin/pagos/nuevo': 'Registrar Pago',
-  '/admin/disponibilidad': 'Disponibilidad',
-  '/admin/leads': 'Pipeline de Leads',
-  '/admin/portales': 'Portales de Cliente',
-  '/admin/facturas': 'Facturas',
-  '/admin/reportes': 'Reportes',
-  '/admin/actividad': 'Historial de actividad',
-  '/admin/documentos': 'Generador de Documentos',
+  '/admin/disponibilidad': 'Operaciones',
+  '/admin/leads': 'CRM',
+  '/admin/portales': 'Portales',
+  '/admin/facturas': 'Finanzas',
+  '/admin/reportes': 'Analytics',
+  '/admin/actividad': 'Analytics',
+  '/admin/documentos': 'Operaciones',
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -148,13 +145,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [pathname]);
+  useEffect(() => { setSidebarOpen(false); }, [pathname]);
 
-  if (pathname === '/admin/login') {
-    return <>{children}</>;
-  }
+  if (pathname === '/admin/login') return <>{children}</>;
 
   async function handleSignOut() {
     await fetch('/api/admin/signout', { method: 'POST' });
@@ -162,7 +155,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.refresh();
   }
 
-  const pageTitle = PAGE_TITLES[pathname] ?? (pathname.includes('/clientes/') ? 'Detalle Cliente' : 'Admin');
+  const pageTitle = PAGE_TITLES[pathname] ?? (pathname.includes('/clientes/') ? 'CRM' : 'Admin');
+  const subTabs = SUB_NAV[pathname] ?? null;
 
   return (
     <div className="min-h-screen flex" style={{ background: '#060E1C', color: '#FFFFFF', fontFamily: "var(--font-inter, 'Inter', sans-serif)" }}>
@@ -185,10 +179,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* ── Sidebar ── */}
       <aside
-        className={`fixed top-0 left-0 h-full z-30 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto`}
+        className="fixed top-0 left-0 h-full z-30 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto"
         style={{
-          width: '260px',
-          minWidth: '260px',
+          width: '220px', minWidth: '220px',
           transform: sidebarOpen ? 'translateX(0)' : undefined,
           background: 'rgba(8,18,34,0.98)',
           borderRight: '1px solid rgba(255,255,255,0.06)',
@@ -205,20 +198,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-5 flex flex-col gap-1 overflow-y-auto">
-          {/* Label */}
+        <nav className="flex-1 px-3 py-5 flex flex-col gap-0.5 overflow-y-auto">
           <p className="text-xs font-600 px-3 mb-2 tracking-widest" style={{ color: 'rgba(138,155,181,0.5)' }}>
             MENÚ
           </p>
 
           {navItems.map(item => {
-            const isActive = pathname === item.href || (item.href !== '/admin/dashboard' && pathname.startsWith(item.href));
+            const isActive = item.group.some(route =>
+              pathname === route || pathname.startsWith(route + '/')
+            );
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 prefetch={false}
-                className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-500 transition-all duration-150 relative group"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-500 transition-all duration-150 relative"
                 style={{
                   color: isActive ? '#FFFFFF' : '#8A9BB5',
                   background: isActive ? 'rgba(0,196,160,0.12)' : 'transparent',
@@ -226,16 +220,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
                 onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
               >
-                {/* Left accent bar */}
                 {isActive && (
-                  <div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full"
-                    style={{ background: '#00C4A0' }}
-                  />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full" style={{ background: '#00C4A0' }} />
                 )}
-                <span style={{ color: isActive ? '#00C4A0' : 'inherit' }}>
-                  {item.icon}
-                </span>
+                <span style={{ color: isActive ? '#00C4A0' : 'inherit' }}>{item.icon}</span>
                 <span className="font-500">{item.label}</span>
               </Link>
             );
@@ -255,13 +243,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               border: '1px solid rgba(0,196,160,0.1)',
             }}
           >
-            <div
-              className="w-5 h-5 rounded-md flex items-center justify-center shrink-0"
-              style={{ background: 'rgba(0,196,160,0.15)' }}
-            >
+            <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0" style={{ background: 'rgba(0,196,160,0.15)' }}>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#00C4A0" strokeWidth="2.5">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
               </svg>
             </div>
             Nuevo cliente
@@ -271,13 +255,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Bottom — sign out */}
         <div className="px-3 pb-5 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
           <div className="flex items-center gap-3 px-3 py-2 mb-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }}>
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: 'rgba(0,196,160,0.1)', border: '1px solid rgba(0,196,160,0.2)' }}
-            >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(0,196,160,0.1)', border: '1px solid rgba(0,196,160,0.2)' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00C4A0" strokeWidth="1.8">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
               </svg>
             </div>
             <div className="min-w-0">
@@ -293,9 +273,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#8A9BB5'; (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
             </svg>
             Cerrar sesión
           </button>
@@ -307,11 +285,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Desktop top bar */}
         <header
           className="hidden lg:flex items-center justify-between px-6 py-3.5"
-          style={{
-            borderBottom: '1px solid rgba(255,255,255,0.05)',
-            background: 'rgba(6,14,28,0.8)',
-            backdropFilter: 'blur(12px)',
-          }}
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(6,14,28,0.8)', backdropFilter: 'blur(12px)' }}
         >
           <div className="flex items-center gap-2">
             <span className="text-xs" style={{ color: '#8A9BB5' }}>Admin</span>
@@ -330,7 +304,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.08)'}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               Buscar
               <kbd style={{ background: 'rgba(255,255,255,0.06)', padding: '1px 5px', borderRadius: 4, fontFamily: 'monospace', color: '#6B7280', marginLeft: 4 }}>⌘K</kbd>
@@ -341,26 +315,44 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Mobile header */}
         <header
           className="flex items-center justify-between px-4 py-3.5 lg:hidden"
-          style={{
-            borderBottom: '1px solid rgba(255,255,255,0.05)',
-            background: 'rgba(8,18,34,0.98)',
-            backdropFilter: 'blur(12px)',
-          }}
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(8,18,34,0.98)', backdropFilter: 'blur(12px)' }}
         >
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-lg"
-            style={{ color: '#8A9BB5', background: 'rgba(255,255,255,0.04)' }}
-          >
+          <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-lg" style={{ color: '#8A9BB5', background: 'rgba(255,255,255,0.04)' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
+              <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
           <span className="text-sm font-700 text-white">{pageTitle}</span>
           <div className="w-8" />
         </header>
+
+        {/* Sub-nav tabs (shown only on grouped pages) */}
+        {subTabs && (
+          <div
+            className="flex items-center gap-1 px-6 py-0"
+            style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(6,14,28,0.6)', backdropFilter: 'blur(12px)' }}
+          >
+            {subTabs.map(tab => {
+              const active = pathname === tab.href;
+              return (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  prefetch={false}
+                  className="relative px-4 py-3 text-sm font-500 transition-colors"
+                  style={{ color: active ? '#FFF' : '#8A9BB5' }}
+                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.color = '#CBD5E1'; }}
+                  onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.color = '#8A9BB5'; }}
+                >
+                  {tab.label}
+                  {active && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full" style={{ background: '#00C4A0' }} />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        )}
 
         <main className="flex-1 overflow-auto p-5 lg:p-7">
           {children}
@@ -375,8 +367,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         style={{ background: '#00C4A0', color: '#050D1A', boxShadow: '0 0 24px rgba(0,196,160,0.4)' }}
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
+          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
         </svg>
       </Link>
     </div>
