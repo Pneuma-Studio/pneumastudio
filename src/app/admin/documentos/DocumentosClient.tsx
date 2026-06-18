@@ -5,12 +5,14 @@ import dynamic from 'next/dynamic';
 import type { DocumentoForm, ScopeSection, InversionConcepto } from '@/lib/pdf/types';
 import { parseMXN, formatMXN } from '@/lib/pdf/types';
 
-const PDFDownloadLink = dynamic(
-  () => import('@react-pdf/renderer').then(m => ({ default: m.PDFDownloadLink })),
-  { ssr: false }
-);
-const PropuestaPDF = dynamic(() => import('@/lib/pdf/PropuestaPDF'), { ssr: false });
-const ContratoPDF = dynamic(() => import('@/lib/pdf/ContratoPDF'), { ssr: false });
+const PDFButtons = dynamic(() => import('./PDFButtons'), {
+  ssr: false,
+  loading: () => (
+    <button disabled style={{ padding: '10px 24px', borderRadius: 12, fontSize: 13, fontWeight: 700, background: 'rgba(0,196,160,0.3)', color: '#050D1A', border: 'none', cursor: 'not-allowed' }}>
+      Cargando generador...
+    </button>
+  ),
+});
 
 const DEFAULT_SCOPE: ScopeSection[] = [
   {
@@ -314,35 +316,7 @@ export default function DocumentosClient() {
           El PDF se genera en tu navegador con todos los datos del formulario.
           {!form.clienteNombre && <span style={{ color: '#F59E0B' }}> — Ingresa el nombre del cliente primero.</span>}
         </p>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          {form.tipo === 'propuesta' ? (
-            // @ts-ignore — PDFDownloadLink is dynamically imported
-            <PDFDownloadLink document={<PropuestaPDF data={form} />} fileName={fileName}>
-              {({ loading }: { loading: boolean }) => (
-                <button disabled={loading || !form.clienteNombre}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 24px', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: !form.clienteNombre || loading ? 'not-allowed' : 'pointer', background: '#00C4A0', color: '#050D1A', border: 'none', opacity: !form.clienteNombre ? 0.5 : 1 }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  {loading ? 'Generando...' : 'Descargar Propuesta PDF'}
-                </button>
-              )}
-            </PDFDownloadLink>
-          ) : (
-            // @ts-ignore
-            <PDFDownloadLink document={<ContratoPDF data={form} />} fileName={fileName}>
-              {({ loading }: { loading: boolean }) => (
-                <button disabled={loading || !form.clienteNombre}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 24px', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: !form.clienteNombre || loading ? 'not-allowed' : 'pointer', background: '#00C4A0', color: '#050D1A', border: 'none', opacity: !form.clienteNombre ? 0.5 : 1 }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  {loading ? 'Generando...' : 'Descargar Contrato PDF'}
-                </button>
-              )}
-            </PDFDownloadLink>
-          )}
-        </div>
+        <PDFButtons form={form} fileName={fileName} />
       </div>
 
       <div style={{ height: 40 }} />
