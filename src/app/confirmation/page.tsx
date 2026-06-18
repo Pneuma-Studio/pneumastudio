@@ -254,6 +254,54 @@ function ConfirmationContent() {
           </div>
         )}
 
+        {/* Cal.com booking CTA — contact flow only */}
+        {!isPartner && (
+          <a
+            href={process.env.NEXT_PUBLIC_CAL_COM_LINK ?? 'https://cal.com/pneuma-studio/15min'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block rounded-2xl p-6 transition-all duration-200 group"
+            style={{
+              background: 'rgba(0,196,160,0.05)',
+              border: '1px solid rgba(0,196,160,0.2)',
+              backdropFilter: 'blur(12px)',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(0,196,160,0.09)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,196,160,0.35)'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(0,196,160,0.05)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,196,160,0.2)'; }}
+          >
+            <div className="flex items-center gap-4">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: 'rgba(0,196,160,0.12)', border: '1px solid rgba(0,196,160,0.25)' }}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00C4A0" strokeWidth="1.8">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                  <path d="M8 14h.01M12 14h.01M8 18h.01M12 18h.01" strokeLinecap="round" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-700 text-white mb-0.5">
+                  {lang === 'es' ? '¿Quieres asegurar tu lugar ahora?' : 'Want to lock in your spot now?'}
+                </p>
+                <p className="text-xs leading-relaxed" style={{ color: '#8A9BB5' }}>
+                  {lang === 'es'
+                    ? 'Agenda una llamada de 15 min con nosotros. Sin compromiso — solo revisamos tu proyecto juntos.'
+                    : 'Book a 15-min call with us. No commitment — we just walk through your project together.'}
+                </p>
+              </div>
+              <svg
+                width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00C4A0" strokeWidth="2"
+                className="shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+          </a>
+        )}
+
         {/* CTA row */}
         <div className="flex flex-col sm:flex-row gap-3">
           <a
