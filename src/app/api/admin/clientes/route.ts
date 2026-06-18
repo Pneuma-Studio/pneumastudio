@@ -54,7 +54,7 @@ async function sendWelcomeEmail(nombre: string, email: string, empresa: string, 
           En los próximos días te contactaremos para coordinar el inicio de tu proyecto. Mientras tanto, si tienes alguna pregunta no dudes en escribirnos.
         </p>
 
-        <a href="https://wa.me/528112803360" style="display:inline-block;background:#00C4A0;color:#050D1A;padding:12px 24px;border-radius:10px;text-decoration:none;font-size:14px;font-weight:700;margin-bottom:8px;">
+        <a href="https://wa.me/5218116333559" style="display:inline-block;background:#00C4A0;color:#050D1A;padding:12px 24px;border-radius:10px;text-decoration:none;font-size:14px;font-weight:700;margin-bottom:8px;">
           Contáctanos por WhatsApp
         </a>
       </div>

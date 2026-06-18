@@ -1,11 +1,14 @@
 import React from 'react';
 import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, Inter } from 'next/font/google';
+import dynamic from 'next/dynamic';
 import '../styles/tailwind.css';
 import { LanguageProvider } from '@/context/LanguageContext';
 import CookieBanner from '@/components/CookieBanner';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { Suspense } from 'react';
+
+const ChatWidget = dynamic(() => import('@/components/ChatWidget'), { ssr: false });
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -32,9 +35,9 @@ const localBusinessSchema = {
       name: 'Pneuma Studio',
       alternateName: 'Pneuma Studio MX',
       description:
-        'Agencia de desarrollo web, ecommerce y automatización digital en Monterrey, Nuevo León. Creamos plataformas de comercio electrónico, automatización por WhatsApp y sistemas empresariales a medida.',
+        'Agencia de desarrollo web y plataformas digitales en Monterrey, Nuevo León. Creamos ecommerce, marketplaces, CRM, automatización, integraciones API, sistemas de citas, analytics y paneles a medida.',
       url: siteUrl,
-      telephone: '+52-811-280-3360',
+      telephone: '+52-18116333559',
       email: 'studio@pneumastudio.mx',
       priceRange: '$$$',
       currenciesAccepted: 'MXN, USD',
@@ -123,11 +126,43 @@ const localBusinessSchema = {
               description: 'Automatización inteligente y optimización de procesos empresariales con IA.',
             },
           },
+          {
+            '@type': 'Offer',
+            itemOffered: {
+              '@type': 'Service',
+              name: 'Paneles Administrativos a Medida',
+              description: 'Backends internos personalizados para operar el negocio desde un solo lugar.',
+            },
+          },
+          {
+            '@type': 'Offer',
+            itemOffered: {
+              '@type': 'Service',
+              name: 'Integraciones API',
+              description: 'Conexión entre plataformas, ERP, pasarelas de pago, logística y servicios externos.',
+            },
+          },
+          {
+            '@type': 'Offer',
+            itemOffered: {
+              '@type': 'Service',
+              name: 'Integración Mercado Libre',
+              description: 'Sincronización de catálogo, órdenes e inventario con Mercado Libre en tiempo real.',
+            },
+          },
+          {
+            '@type': 'Offer',
+            itemOffered: {
+              '@type': 'Service',
+              name: 'Sistemas Multi-sucursal',
+              description: 'Control centralizado de inventario, ventas y operaciones en múltiples ubicaciones.',
+            },
+          },
         ],
       },
       sameAs: [
         'https://www.instagram.com/pneumastudiomx',
-        'https://wa.me/528112803360',
+        'https://wa.me/5218116333559',
       ],
       foundingDate: '2024',
       knowsLanguage: ['es', 'en'],
@@ -137,7 +172,7 @@ const localBusinessSchema = {
       '@id': `${siteUrl}/#website`,
       url: siteUrl,
       name: 'Pneuma Studio',
-      description: 'Agencia digital en Monterrey — ecommerce, automatización WhatsApp y sistemas empresariales.',
+      description: 'Agencia digital en Monterrey — ecommerce, marketplaces, automatización, CRM, integraciones y sistemas empresariales a medida.',
       publisher: { '@id': `${siteUrl}/#organization` },
       inLanguage: 'es-MX',
     },
@@ -156,7 +191,7 @@ export const metadata: Metadata = {
     template: '%s | Pneuma Studio — Monterrey, MX',
   },
   description:
-    'Pneuma Studio: agencia de ecommerce, automatización WhatsApp y sistemas empresariales en Monterrey, Nuevo León. Plataformas digitales construidas para escalar en México y EE.UU.',
+    'Pneuma Studio: agencia digital en Monterrey, Nuevo León. Ecommerce, marketplaces, CRM, automatización, integraciones API, analytics y sistemas empresariales a medida para negocios en México y EE.UU.',
   keywords: [
     // Local — Monterrey / Nuevo León
     'agencia digital Monterrey',
@@ -226,7 +261,7 @@ export const metadata: Metadata = {
     siteName: 'Pneuma Studio',
     title: 'Pneuma Studio | Agencia Digital en Monterrey, México',
     description:
-      'Ecommerce, automatización WhatsApp y sistemas empresariales construidos en Monterrey para negocios en México y EE.UU. Entrega en 3–5 semanas.',
+      'Ecommerce, marketplaces, automatización, CRM, integraciones API y sistemas empresariales construidos en Monterrey. Para negocios en México y EE.UU. Entrega en 3–5 semanas.',
     images: [
       {
         url: '/assets/images/pneuma-studio-logo.png',
@@ -240,7 +275,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Pneuma Studio | Agencia Digital en Monterrey',
     description:
-      'Ecommerce, automatización WhatsApp y sistemas empresariales — Monterrey, Nuevo León, México',
+      'Ecommerce, marketplaces, automatización, CRM e integraciones — Monterrey, Nuevo León, México',
     images: ['/assets/images/pneuma-studio-logo.png'],
     creator: '@pneumastudiomx',
   },
@@ -273,6 +308,7 @@ export default function RootLayout({
         <LanguageProvider>
           {children}
           <CookieBanner />
+          <ChatWidget />
         </LanguageProvider>
         {gaId && gaId !== 'your-google-analytics-id-here' && (
           <Suspense fallback={null}>

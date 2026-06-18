@@ -83,7 +83,7 @@ export default function ContactMain() {
 
   const contactCards = [
     {
-      href: 'https://wa.me/528112803360?text=Hola%20Nazre%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20Pneuma%20Studio',
+      href: 'https://wa.me/5218116333559?text=Hola%20Nazre%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20Pneuma%20Studio',
       target: '_blank',
       icon: (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366" aria-hidden="true">
@@ -92,7 +92,7 @@ export default function ContactMain() {
       ),
       iconBg: 'rgba(37,211,102,0.1)',
       label: 'WhatsApp',
-      value: '+52 811 280 3360',
+      value: '+52 1 81 1633 3559',
     },
     {
       href: 'mailto:studio@pneumastudio.mx',
@@ -103,12 +103,12 @@ export default function ContactMain() {
       value: 'studio@pneumastudio.mx',
     },
     {
-      href: 'tel:+528112803360',
+      href: 'tel:+5218116333559',
       target: undefined,
       icon: <PhoneIcon className="w-5 h-5" style={{ color: '#00C4A0' }} />,
       iconBg: 'rgba(0,196,160,0.1)',
       label: lang === 'es' ? 'Teléfono' : 'Phone',
-      value: '+52 811 280 3360',
+      value: '+52 1 81 1633 3559',
     },
     {
       href: 'https://instagram.com/pneumastudiomx',
@@ -191,7 +191,7 @@ export default function ContactMain() {
 
               {/* CTA button */}
               <a
-                href={process.env.NEXT_PUBLIC_CAL_COM_LINK || 'https://wa.me/528112803360?text=Hola%20Nazre%2C%20me%20gustar%C3%ADa%20agendar%20una%20llamada%20de%2030%20minutos%20con%20Pneuma%20Studio'}
+                href={process.env.NEXT_PUBLIC_CAL_COM_LINK || 'https://wa.me/5218116333559?text=Hola%20Nazre%2C%20me%20gustar%C3%ADa%20agendar%20una%20llamada%20de%2030%20minutos%20con%20Pneuma%20Studio'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary w-full justify-center py-3.5 mt-2 inline-flex items-center gap-2"
@@ -212,13 +212,13 @@ export default function ContactMain() {
                   {
                     iconPath: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
                     title: lang === 'es' ? 'Agendar Reunión' : 'Schedule Meeting',
-                    href: 'https://wa.me/528112803360?text=Hola%2C%20me%20gustar%C3%ADa%20agendar%20una%20reuni%C3%B3n%20con%20Pneuma%20Studio',
+                    href: 'https://wa.me/5218116333559?text=Hola%2C%20me%20gustar%C3%ADa%20agendar%20una%20reuni%C3%B3n%20con%20Pneuma%20Studio',
                     external: true,
                   },
                   {
                     iconPath: 'M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z',
                     title: lang === 'es' ? 'Ser Agencia Socia' : 'Become Partner',
-                    href: 'https://wa.me/528112803360?text=Hola%2C%20me%20interesa%20ser%20agencia%20socia%20de%20Pneuma%20Studio',
+                    href: 'https://wa.me/5218116333559?text=Hola%2C%20me%20interesa%20ser%20agencia%20socia%20de%20Pneuma%20Studio',
                     external: true,
                   },
                   {

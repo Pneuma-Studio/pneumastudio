@@ -17,7 +17,7 @@ export default function WhatsAppFloat() {
     return 'Hola, me interesa saber más sobre Pneuma Studio';
   };
 
-  const waUrl = `https://wa.me/528112803360?text=${encodeURIComponent(getMessage())}`;
+  const waUrl = `https://wa.me/5218116333559?text=${encodeURIComponent(getMessage())}`;
 
   return (
     <a
