@@ -58,7 +58,7 @@ export default function ChatWidget() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: 'Hubo un error de conexión. Escríbenos al +52 1 81 1633 3559.' },
+        { role: 'assistant', content: 'Hubo un error de conexión. Escríbenos al +52 81 1633 3559.' },
       ]);
     } finally {
       setIsLoading(false);

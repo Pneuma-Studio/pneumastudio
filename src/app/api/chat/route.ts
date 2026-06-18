@@ -44,7 +44,7 @@ Soporte Prioritario          — $2,500/mes
 
 Todos los precios en MXN. También disponibles en USD (ver página de precios para tipo de cambio).
 
-Contacto directo: WhatsApp +52 1 81 1633 3559 · studio@pneumastudio.mx`;
+Contacto directo: WhatsApp +52 81 1633 3559 · studio@pneumastudio.mx`;
 
 const tools: Anthropic.Tool[] = [
   {

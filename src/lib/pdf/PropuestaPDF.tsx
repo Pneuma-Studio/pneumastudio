@@ -129,7 +129,7 @@ export default function PropuestaPDF({ data }: { data: DocumentoForm }) {
         <Text style={s.headerLogo}>PNEUMA</Text>
         <Text style={s.headerStudio}>STUDIO</Text>
         <Text style={s.headerTagline}>PREMIUM DIGITAL COMMERCE & AUTOMATION STUDIO</Text>
-        <Text style={s.headerContact}>studio@pneumastudio.mx  |  +52 1 81 1633 3559  |  @pneumastudiomx</Text>
+        <Text style={s.headerContact}>studio@pneumastudio.mx  |  +52 81 1633 3559  |  @pneumastudiomx</Text>
         <View style={s.headerDivider} />
 
         {/* Title */}

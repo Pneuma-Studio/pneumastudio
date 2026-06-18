@@ -32,7 +32,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       url: `${siteUrl}/blog/${post.slug}`,
       type: 'article',
       publishedTime: post.fechaPublicacion,
-      ...(post.imagen ? { images: [{ url: post.imagen, width: 1200, height: 630, alt: post.titulo }] } : {}),
+      images: [
+        post.imagen
+          ? { url: post.imagen, width: 1200, height: 630, alt: post.titulo }
+          : { url: `${siteUrl}/assets/images/pneuma-studio-logo.png`, width: 1200, height: 630, alt: 'Pneuma Studio' },
+      ],
     },
   };
 }
@@ -84,6 +88,37 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   if (!post) notFound();
 
+  const pageSchema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BlogPosting',
+        '@id': `${siteUrl}/blog/${post.slug}#article`,
+        headline: post.titulo,
+        description: post.extracto,
+        url: `${siteUrl}/blog/${post.slug}`,
+        datePublished: post.fechaPublicacion,
+        dateModified: post.fechaPublicacion,
+        author: { '@type': 'Person', name: post.autor },
+        publisher: { '@type': 'Organization', name: 'Pneuma Studio', url: siteUrl },
+        inLanguage: 'es-MX',
+        mainEntityOfPage: { '@type': 'WebPage', '@id': `${siteUrl}/blog/${post.slug}` },
+        image: post.imagen
+          ? { '@type': 'ImageObject', url: post.imagen, width: 1200, height: 630 }
+          : { '@type': 'ImageObject', url: `${siteUrl}/assets/images/pneuma-studio-logo.png`, width: 1200, height: 630 },
+        ...(post.tags?.length ? { keywords: post.tags.join(', ') } : {}),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Inicio', item: siteUrl },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: `${siteUrl}/blog` },
+          { '@type': 'ListItem', position: 3, name: post.titulo, item: `${siteUrl}/blog/${post.slug}` },
+        ],
+      },
+    ],
+  };
+
   // Group list items
   const rendered: React.ReactNode[] = [];
   let ulItems: BlogBlock[] = [];
@@ -107,6 +142,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pageSchema) }} />
       <Header />
       <main className="pt-16">
         {/* Header */}

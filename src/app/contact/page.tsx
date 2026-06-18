@@ -14,7 +14,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pneumastudio.mx';
 export const metadata = {
   title: 'Contacto — Inicia Tu Proyecto Digital en Monterrey',
   description:
-    'Habla con Pneuma Studio hoy. Respondemos en menos de 24 horas. WhatsApp: +52 1 81 1633 3559 · Email: studio@pneumastudio.mx. Monterrey, Nuevo León, México.',
+    'Habla con Pneuma Studio hoy. Respondemos en menos de 24 horas. WhatsApp: +52 81 1633 3559 · Email: studio@pneumastudio.mx. Monterrey, Nuevo León, México.',
   keywords: [
     'contacto agencia digital Monterrey',
     'contratar desarrollo web Monterrey',
@@ -26,7 +26,7 @@ export const metadata = {
   openGraph: {
     title: 'Contacto — Inicia Tu Proyecto | Pneuma Studio',
     description:
-      'Respuesta en menos de 24 horas. WhatsApp +52 1 81 1633 3559. Monterrey, Nuevo León, México.',
+      'Respuesta en menos de 24 horas. WhatsApp +52 81 1633 3559. Monterrey, Nuevo León, México.',
     url: `${siteUrl}/contact`,
   },
 };

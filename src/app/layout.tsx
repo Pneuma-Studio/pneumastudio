@@ -35,7 +35,7 @@ const localBusinessSchema = {
       description:
         'Agencia de desarrollo web y plataformas digitales en Monterrey, Nuevo León. Creamos ecommerce, marketplaces, CRM, automatización, integraciones API, sistemas de citas, analytics y paneles a medida.',
       url: siteUrl,
-      telephone: '+52-18116333559',
+      telephone: '+52-8116333559',
       email: 'studio@pneumastudio.mx',
       priceRange: '$$$',
       currenciesAccepted: 'MXN, USD',
@@ -160,7 +160,7 @@ const localBusinessSchema = {
       },
       sameAs: [
         'https://www.instagram.com/pneumastudiomx',
-        'https://wa.me/5218116333559',
+        'https://wa.me/528116333559',
       ],
       foundingDate: '2024',
       knowsLanguage: ['es', 'en'],

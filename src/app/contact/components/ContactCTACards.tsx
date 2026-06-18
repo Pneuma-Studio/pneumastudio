@@ -12,13 +12,13 @@ export default function ContactCTACards() {
     {
       iconPath: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
       title: lang === 'es' ? 'Agendar Reunión' : 'Schedule Meeting',
-      href: 'https://wa.me/5218116333559?text=Hola%2C%20me%20gustar%C3%ADa%20agendar%20una%20reuni%C3%B3n%20con%20Pneuma%20Studio',
+      href: 'https://wa.me/528116333559?text=Hola%2C%20me%20gustar%C3%ADa%20agendar%20una%20reuni%C3%B3n%20con%20Pneuma%20Studio',
       external: true,
     },
     {
       iconPath: 'M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z',
       title: lang === 'es' ? 'Ser Agencia Socia' : 'Become a Partner',
-      href: 'https://wa.me/5218116333559?text=Hola%2C%20me%20interesa%20ser%20agencia%20socia%20de%20Pneuma%20Studio',
+      href: 'https://wa.me/528116333559?text=Hola%2C%20me%20interesa%20ser%20agencia%20socia%20de%20Pneuma%20Studio',
       external: true,
     },
     {
@@ -38,12 +38,12 @@ export default function ContactCTACards() {
             <div>
               <p className="label-tag text-primary mb-2">WHATSAPP</p>
               <a
-                href="https://wa.me/5218116333559"
+                href="https://wa.me/528116333559"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white font-600 hover:text-primary transition-colors"
               >
-                +52 1 81 1633 3559
+                +52 81 1633 3559
               </a>
             </div>
             <div>

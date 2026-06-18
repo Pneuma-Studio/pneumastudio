@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #050D1A; color: #fff; border-radius: 12px; padding: 32px;">
           <h2 style="color: #00C4A0; margin-top: 0;">Hola, ${name.split(' ')[0]} 👋</h2>
           <p style="color: #C8D5E8; line-height: 1.7;">Recibimos tu mensaje y te responderemos en <strong style="color: #fff;">menos de 24 horas</strong>. Mientras tanto, si tienes alguna pregunta urgente puedes escribirnos directamente por WhatsApp.</p>
-          <a href="https://wa.me/5218116333559?text=Hola%20Nazre%2C%20acabo%20de%20llenar%20el%20formulario%20de%20contacto%20en%20pneumastudio.mx" style="display: inline-block; margin-top: 16px; background: #25D366; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700;">Escribir por WhatsApp</a>
+          <a href="https://wa.me/528116333559?text=Hola%20Nazre%2C%20acabo%20de%20llenar%20el%20formulario%20de%20contacto%20en%20pneumastudio.mx" style="display: inline-block; margin-top: 16px; background: #25D366; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700;">Escribir por WhatsApp</a>
           <p style="color: rgba(138,155,181,0.6); font-size: 12px; margin-top: 32px;">Pneuma Studio · Monterrey, Nuevo León, México</p>
         </div>
       `,

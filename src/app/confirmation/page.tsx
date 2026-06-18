@@ -305,7 +305,7 @@ function ConfirmationContent() {
         {/* CTA row */}
         <div className="flex flex-col sm:flex-row gap-3">
           <a
-            href="https://wa.me/5218116333559?text=Hola%20Nazre%2C%20acabo%20de%20enviar%20un%20formulario%20en%20Pneuma%20Studio"
+            href="https://wa.me/528116333559?text=Hola%20Nazre%2C%20acabo%20de%20enviar%20un%20formulario%20en%20Pneuma%20Studio"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary flex-1 py-3.5 text-sm font-700 flex items-center justify-center gap-2"

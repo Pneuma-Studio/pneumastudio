@@ -190,7 +190,7 @@ export default function PricingCalculator() {
     ? 'Hola, me interesa cotizar una plataforma con Pneuma Studio.'
     : `Hola, me interesa cotizar con Pneuma Studio:\n\n${waLines}\n\nInversión inicial estimada: ${fmt(totalSetup)}${pkg.priceFrom ? '+' : ''}\nMensualidad estimada: ${pkg.monthlyFrom ? 'desde ' : ''}${fmt(totalMonthly)}/mes`;
 
-  const waHref = `https://wa.me/5218116333559?text=${encodeURIComponent(waMessage)}`;
+  const waHref = `https://wa.me/528116333559?text=${encodeURIComponent(waMessage)}`;
 
   return (
     <section className="section-padding" style={{ background: '#050D1A' }}>
@@ -341,7 +341,7 @@ export default function PricingCalculator() {
 
                       {isCotizar ? (
                         <a
-                          href={`https://wa.me/5218116333559?text=${encodeURIComponent(`Hola, me interesa cotizar un Sistema de Citas con Pneuma Studio.`)}`}
+                          href={`https://wa.me/528116333559?text=${encodeURIComponent(`Hola, me interesa cotizar un Sistema de Citas con Pneuma Studio.`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={e => e.stopPropagation()}

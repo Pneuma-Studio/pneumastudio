@@ -269,7 +269,7 @@ export default function PrivacidadPage() {
                   studio@pneumastudio.mx
                 </a>
                 <a
-                  href="https://wa.me/5218116333559"
+                  href="https://wa.me/528116333559"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs font-600 px-4 py-2 rounded-lg transition-all duration-200"

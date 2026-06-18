@@ -231,7 +231,7 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
             <p className="text-sm mb-4" style={{ color: '#8A9BB5' }}>Estamos disponibles por WhatsApp o correo.</p>
             <div className="flex flex-wrap gap-3">
               <a
-                href="https://wa.me/5218116333559"
+                href="https://wa.me/528116333559"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-600 px-4 py-2 rounded-lg transition-all duration-200"

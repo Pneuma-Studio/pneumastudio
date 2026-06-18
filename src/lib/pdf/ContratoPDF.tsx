@@ -58,7 +58,7 @@ function Header() {
       <Text style={s.headerLogo}>PNEUMA</Text>
       <Text style={s.headerStudio}>STUDIO</Text>
       <Text style={s.headerTagline}>PREMIUM DIGITAL COMMERCE & AUTOMATION STUDIO</Text>
-      <Text style={s.headerContact}>studio@pneumastudio.mx  |  +52 1 81 1633 3559  |  @pneumastudiomx</Text>
+      <Text style={s.headerContact}>studio@pneumastudio.mx  |  +52 81 1633 3559  |  @pneumastudiomx</Text>
       <View style={s.headerDivider} />
     </>
   );
@@ -132,7 +132,7 @@ export default function ContratoPDF({ data }: { data: DocumentoForm }) {
                 Representante: Nazre Hassam Miguel Assad Morales{'\n'}
                 Monterrey, Nuevo León, México{'\n'}
                 studio@pneumastudio.mx{'\n'}
-                +52 1 81 1633 3559
+                +52 81 1633 3559
               </Text>
             </View>
             <View style={s.partesColLast}>

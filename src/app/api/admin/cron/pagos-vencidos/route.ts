@@ -134,7 +134,7 @@ async function run() {
           </tr></tfoot>` : ''}
         </table>
         <p style="margin:0 0 8px;color:#8A9BB5;font-size:13px;">Para realizar tu pago o si tienes alguna duda, contáctanos:</p>
-        <a href="https://wa.me/5218116333559" style="display:inline-block;background:rgba(0,196,160,0.15);color:#00C4A0;padding:10px 20px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:600;border:1px solid rgba(0,196,160,0.3);">
+        <a href="https://wa.me/528116333559" style="display:inline-block;background:rgba(0,196,160,0.15);color:#00C4A0;padding:10px 20px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:600;border:1px solid rgba(0,196,160,0.3);">
           Contactar por WhatsApp
         </a>
       </div>
